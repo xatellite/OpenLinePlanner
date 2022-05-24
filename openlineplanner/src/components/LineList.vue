@@ -10,11 +10,7 @@
       v-for="line in linesStore.lines"
       :key="`${line.name}-list-entry`"
     >
-      <div class="line-list__item__row">
-        <button><IconLine :color="line.color" /></button>
-        <span class="grow">{{ line.name }}</span>
-        <button><BusStopIcon /></button>
-      </div>
+      <LineElement :line="line"/>
       <hr />
     </div>
     <div class="line-list__item__row">
@@ -29,19 +25,18 @@
 
 <script>
 import PlusIcon from "vue-material-design-icons/Plus.vue";
-import BusStopIcon from "vue-material-design-icons/BusStop.vue";
-import IconLine from "./icons/IconLine.vue";
+
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
 import ActionToolbar from "./ActionToolbar.vue";
+import LineElement from "./LineElement.vue";
 
 export default {
   components: {
     PlusIcon,
-    IconLine,
-    BusStopIcon,
     ActionToolbar,
-  },
+    LineElement,
+},
   data() {
     return {
       linesStore: useLinesStore(),

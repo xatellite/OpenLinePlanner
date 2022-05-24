@@ -42,7 +42,7 @@ export default class TransportLine {
   }
 
   addPoint(lng, lat, index=-1) {
-    const newPoint = new LinePoint(lng, lat, this);
+    const newPoint = new LinePoint(lng, lat, this.id);
     // ToDo Add point at position:
     if (index != -1) {
       this.points.splice(index, 0, newPoint);

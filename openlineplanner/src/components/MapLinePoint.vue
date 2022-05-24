@@ -3,7 +3,9 @@
     <div
       :class="point.type"
       :style="
-        point.type == 'line' ? `background-color: ${point.lines[0].color}` : ''
+        point.type == 'line'
+          ? `background-color: ${linesStore.getLineById(point.lines[0]).color}`
+          : ''
       "
     />
     <MapAddStationPopup
@@ -20,10 +22,13 @@
 import MapAddStationPopup from "./MapAddStationPopup.vue";
 import MapStationPopup from "./MapStationPopup.vue";
 import { useEditStore } from "../stores/editing";
+import { useLinesStore } from "../stores/lines";
+
 export default {
   data() {
     return {
       editStore: useEditStore(),
+      linesStore: useLinesStore(),
     };
   },
   props: {
