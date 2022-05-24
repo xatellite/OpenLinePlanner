@@ -1,0 +1,57 @@
+$space-elg: 64px;
+$space-slg: 48px;
+$space-lg: 32px;
+$space-md: 24px;
+$space-sm: 12px;
+$space-ssm: 8px;
+
+$font-md: 16px;
+$font-ssm: $space-ssm;
+
+$c-text-primary: #303030;
+$c-text-inverted: #ffffff;
+$c-accent-one: #FEC80B;
+$c-accent-two: #CB2727;
+$c-box: #ffffff;
+
+$br-md: 10px;
+
+$bs-md: 0px 4px 24px 0px rgba($c-text-primary, 0.4);
+
+h1 {
+  font-size: $space-lg;
+}
+
+html {
+  font-family: 'Roboto';
+  color: $c-text-primary;
+  box-sizing: border-box;
+  font-size: $font-md;
+}
+
+.box {
+  background-color: $c-box;
+  box-shadow: $bs-md;
+  border-radius: $br-md;
+  box-sizing: border-box;
+}
+
+button {
+  border: 1px solid #d6d6d6;
+  background-color: darken($c-box, 2);
+  border-radius: $br-md;
+  height: 2.5rem;
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 $space-ssm;
+
+  &:hover {
+    background-color: darken($c-box, 4);
+  }
+
+  &:active {
+    background-color: darken($c-box, 8);
+  }
+}
