@@ -2,11 +2,19 @@
   <div class="line-element">
     <button><IconLine :color="line.color" /></button>
     <span class="grow">{{ line.name }}</span>
-    <button v-if="editStore.isEditing == line.id"><BusStopIcon /></button>
-    <button v-if="editStore.isEditing != line.id" class="line-element__edit" @click="toggleEditing">
+    <button v-if="editStore.isEditing == line"><BusStopIcon /></button>
+    <button
+      v-if="editStore.isEditing != line"
+      class="line-element__edit"
+      @click="toggleEditing"
+    >
       <PencilOutlineIcon />
     </button>
-    <button v-if="editStore.isEditing == line.id" class="line-element__remove" @click="removeLine">
+    <button
+      v-if="editStore.isEditing == line"
+      class="line-element__remove"
+      @click="removeLine"
+    >
       <TrashCanOutlineIcon />
     </button>
   </div>
@@ -38,9 +46,12 @@ export default {
   },
   methods: {
     toggleEditing() {
-      this.editStore.isAdding = null;
+      this.editStore.isEditing = this.line;
+      if (this.line.pointIds.length === 0) {
+        this.editStore.isExtending = this.line;
+        return;
+      }
       this.editStore.isExtending = null;
-      this.editStore.isEditing = this.line.id;
     },
     findNewStation() {},
     removeLine() {},

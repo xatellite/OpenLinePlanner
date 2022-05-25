@@ -8,7 +8,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useEditStore } from "@/stores/editing";
 import { useLinesStore } from "@/stores/lines";
 import MapLinePoint from "./MapLinePoint.vue";
-import { createApp, nextTick } from "vue";
+import { createApp, nextTick, watch } from "vue";
 import { calculateMidPoint } from "@/helpers/geometry";
 
 export default {
@@ -25,6 +25,8 @@ export default {
     return {
       map: null,
       referenceMarkers: [],
+      pointMarkers: {},
+      lines: {},
     };
   },
   mounted() {
@@ -37,126 +39,137 @@ export default {
       zoom: 12,
     });
     this.map.on("load", () => {
-      // TODO: Here we want to load a layer
-      // TODO: Here we want to load/setup the popup
+      this.loadState();
     });
-    // map.on('mousemove', (e) => {
-    //   console.log()
-    // });
     this.map.on("mousedown", (e) => {
       if (e.originalEvent.target == this.map.getCanvas()) {
-        this.addLinePoint(e);
+        const { lng, lat } = e.lngLat;
+        if (this.editStore.isExtending) {
+          this.linesStore.addPoint(lat, lng, this.editStore.isExtending, -1);
+        }
       }
     });
 
-    window.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        this.editStore.isExtending = null;
+    // Subscribe both stores
+    this.linesStore.$onAction(({ name, after }) => {
+      if (name === "addPoint") {
+        after((result) => {
+          this.addPoint(result);
+          const line = this.linesStore.getLineById(result.lines[0]);
+          this.updateLine(line);
+        });
       }
+      if (name === "addLine") {
+        after((result) => {
+          this.addLine(result);
+        });
+      }
+      if (name === "loadState") {
+        after(() => {
+          this.loadState();
+        });
+      }
+      // Remove Line
+      // Remove Point
     });
 
-    // ToDo: Add outline shape
+    watch(
+      () => this.editStore.isEditing,
+      () => {
+        this.drawReferencePoints();
+      }
+    );
   },
   methods: {
-    addLinePoint(e) {
-      const { lng, lat } = e.lngLat;
-      let pointRef;
-      let lineRef;
-      let currentLine;
-      if (this.editStore.isAdding) {
-        lineRef = this.editStore.isAdding;
-        currentLine = this.linesStore.getLineById(lineRef);
-        pointRef = currentLine.addPoint(lat, lng);
-        this.editStore.isAdding = null;
-        this.editStore.isExtending = lineRef;
-
-        this.map.addSource(currentLine.getLineLongId(), {
-          type: "geojson",
-          data: currentLine.toLineString(),
-        });
-        this.map.addLayer({
-          id: currentLine.getLineLongId(),
-          type: "line",
-          source: currentLine.getLineLongId(),
-          layout: {
-            "line-join": "round",
-            "line-cap": "round",
-          },
-          paint: {
-            "line-color": currentLine.color,
-            "line-width": 5,
-          },
-        });
-      } else if (this.editStore.isExtending) {
-        lineRef = this.editStore.isExtending;
-        currentLine = this.linesStore.getLineById(lineRef);
-        pointRef = currentLine.addPoint(lat, lng);
-        this.map
-          .getSource(currentLine.getLineLongId())
-          .setData(currentLine.toLineString());
-        // ToDo: Add Reference Point
-        this.drawReferencePoints();
-      } else {
-        return;
-      }
-
-      const currentPoint = currentLine.getPointById(pointRef);
+    loadState() {
+      Object.values(this.lines).forEach((line) => this.removeLine(line));
+      Object.values(this.pointMarkers).forEach((pointMarker) => pointMarker.remove());
+      this.pointMarkers = {};
+      Object.values(this.linesStore.lines).forEach((line) =>
+        this.addLine(line)
+      );
+      Object.values(this.linesStore.points).forEach((point) =>
+        this.addPoint(point)
+      );
+    },
+    addLine(line) {
+      this.map.addSource(line.getLineLongId(), {
+        type: "geojson",
+        data: this.linesStore.getLineString(line.id),
+      });
+      this.map.addLayer({
+        id: line.getLineLongId(),
+        type: "line",
+        source: line.getLineLongId(),
+        layout: {
+          "line-join": "round",
+          "line-cap": "round",
+        },
+        paint: {
+          "line-color": line.color,
+          "line-width": 5,
+        },
+      });
+      this.lines[line.id] = line;
+    },
+    updateLine(line) {
+      this.map
+        .getSource(line.getLineLongId())
+        .setData(this.linesStore.getLineString(line.id));
+      this.drawReferencePoints();
+    },
+    removeLine(line) {
+      this.map.removeLayer(line.id);
+      this.map.removeSource(line.id);
+      delete this.lines[line.id];
+    },
+    addPoint(point) {
       const domContainer = document.createElement("div");
-      const mapPoint = createApp(MapLinePoint, { point: currentPoint });
+      const mapPoint = createApp(MapLinePoint, { point });
       mapPoint.use(this.store);
 
       const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
-      newMarker.pointRef = pointRef;
-      newMarker.lineRef = lineRef;
-      newMarker.setLngLat(e.lngLat).addTo(this.map);
+      newMarker.pointRef = point.id;
+      newMarker.setLngLat({ lat: point.lat, lng: point.lng }).addTo(this.map);
       newMarker.on("drag", this.onDragEnd);
 
       nextTick(() => {
         mapPoint.mount(domContainer);
       });
+      this.pointMarkers[point.id] = newMarker;
     },
+
     onDragEnd(e) {
       const marker = e.target;
-      console.log(e);
-      let line;
       if (marker.isReference) {
-        console.log("reference pressed");
-        marker._element.className = marker._element.className.split(" ").filter((name) => name != "line-reference-point").join(" ");
-        console.log(marker.lineReference);
-        line = this.linesStore.getLineById(marker.lineReference);
         const { lat, lng } = marker.getLngLat();
-        const pointRef = line.addPoint(lat, lng, marker.refIndex);
-        const currentPoint = line.getPointById(pointRef);
-        marker.pointRef = pointRef;
-        console.log("ref", marker.lineReference);
-        marker.lineRef = marker.lineReference;
-        marker.isReference = false;
-        const mapPoint = createApp(MapLinePoint, { point: currentPoint });
-        mapPoint.use(this.store);
-        nextTick(() => {
-          console.log(mapPoint);
-          mapPoint.mount(marker._element);
-          console.log("mount");
-        });
-        this.referenceMarkers = this.referenceMarkers.filter(
-          (listElement) => listElement.pointRef != marker.pointRef
+        marker.remove();
+        if (!this.editStore.isExtending) {
+          this.drawReferencePoints();
+          return;
+        }
+        this.linesStore.addPoint(
+          lat,
+          lng,
+          this.editStore.isExtending,
+          marker.refIndex
         );
-        console.log([...this.referenceMarkers]);
+        this.updateLine(this.editStore.isExtending);
       } else {
-        console.log(marker.lineRef);
-        line = this.linesStore.getLineById(marker.lineRef);
-        console.log(line);
-        console.log(marker.pointRef);
-        line.getPointById(marker.pointRef).updatePosition(marker.getLngLat());
+        const point = this.linesStore.getPointById(marker.pointRef);
+        point.updatePosition(marker.getLngLat());
+        // Update all effected lines
+        point.lines.forEach((lineRef) => {
+          const line = this.linesStore.getLineById(lineRef);
+          this.updateLine(line);
+        });
       }
-      this.map.getSource(line.getLineLongId()).setData(line.toLineString());
 
       this.drawReferencePoints();
     },
 
     addReferencePoint(pointOne, pointTwo, refIndex) {
       const lngLat = calculateMidPoint(pointOne, pointTwo);
-
       const domContainer = document.createElement("div");
       domContainer.className = "line-reference-point";
       const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
@@ -169,13 +182,17 @@ export default {
     },
 
     drawReferencePoints() {
+      this.referenceMarkers.forEach((marker) => marker.remove());
       if (this.editStore.isEditing) {
-        this.referenceMarkers.forEach((marker) => marker.remove());
         this.referenceMarkers = [];
-        const line = this.linesStore.getLineById(this.editStore.isEditing);
-        line.points.forEach((point, index) => {
+        const line = this.editStore.isEditing;
+        line.pointIds.forEach((pointRef, index) => {
           if (index != 0) {
-            this.addReferencePoint(line.points[index - 1], point, index);
+            this.addReferencePoint(
+              this.linesStore.getPointById(line.pointIds[index - 1]),
+              this.linesStore.getPointById(pointRef),
+              index
+            );
           }
         });
       }
@@ -198,7 +215,7 @@ export default {
     display: block;
     content: "";
     height: 5px;
-    width: 5px; 
+    width: 5px;
     border-radius: 100%;
     border: 2px solid $c-text-primary;
   }

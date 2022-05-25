@@ -20,7 +20,7 @@ import FolderUploadOutlineIcon from "vue-material-design-icons/FolderUploadOutli
 import PencilOffOutlineIcon from "vue-material-design-icons/PencilOffOutline.vue";
 import { useEditStore } from "../stores/editing";
 import { useLinesStore } from "../stores/lines";
-import { selectFile, downloadJSON } from "../helpers/file";
+import { selectFile, downloadJSON, readJSONFile } from "../helpers/file";
 
 export default {
   components: {
@@ -37,24 +37,29 @@ export default {
       linesStore,
     };
   },
+  mounted() {
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        this.editStore.isExtending = null;
+      }
+    });
+  },
   methods: {
     disableEditing() {
       this.editStore.isEditing = null;
-      this.editStore.isAdding = null;
       this.editStore.isExtending = null;
     },
     save() {
-      const editStore = this.editStore.$state;
       const linesStore = this.linesStore.$state;
-      // const filename = selectFile();
-      downloadJSON({ editStore, linesStore });
+      downloadJSON({ linesStore });
     },
     load() {
-      // Upload
-      // resolve
-      // fetch("test.json")
-      //   .then(response => response.json())
-      //   .then(json => console.log(json));
+      selectFile((file) => {
+        readJSONFile(file, (json) => {
+          console.log(json);
+          this.linesStore.loadState(json.linesStore);
+        });
+      });
     },
   },
 };

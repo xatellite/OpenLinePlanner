@@ -1,32 +1,20 @@
-import LinePoint from "./LinePoints";
-
 export default class TransportLine {
-  constructor(id, name) {
+  constructor(id, name, type = "tram", color = "#ff0000", pointIds = []) {
     this.id = id;
     this.name = name;
-    this.points = [];
-    // this.halfwayPoints = [];
-    this.type = "tram";
-    this.color = "#ff0000";
+    this.pointIds = pointIds;
+    this.type = type;
+    this.color = color;
   }
 
-  toLineString() {
-    return {
-      type: "FeatureCollection",
-      features: [
-        {
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates: this.points.map((point) => [point.lng, point.lat]),
-          },
-        },
-      ],
-    };
-  }
-
-  getPointById(id) {
-    return this.points.find((point) => point.id == id);
+  static fromObject(lineObject) {
+    return new TransportLine(
+      lineObject.id,
+      lineObject.name,
+      lineObject.type,
+      lineObject.color,
+      lineObject.pointIds
+    );
   }
 
   getLineLongId() {
@@ -37,19 +25,12 @@ export default class TransportLine {
     this.name = name;
   }
 
-  calculateHalfwayPoints() {
-    // ToDo: CalcultateHalfway points
-  }
-
-  addPoint(lng, lat, index=-1) {
-    const newPoint = new LinePoint(lng, lat, this.id);
-    // ToDo Add point at position:
+  addPoint(pointId, index = -1) {
     if (index != -1) {
-      this.points.splice(index, 0, newPoint);
+      this.pointIds.splice(index, 0, pointId);
     } else {
-      this.points = [...this.points, newPoint];
+      this.pointIds = [...this.pointIds, pointId];
     }
-    this.calculateHalfwayPoints();
-    return newPoint.id;
+    return pointId;
   }
 }

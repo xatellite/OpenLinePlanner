@@ -1,9 +1,19 @@
-export const selectFile = () => {
-  const fileChooser = parent.settings.document.createElement("input");
+export const selectFile = (callback) => {
+  const fileChooser = document.createElement("input");
   fileChooser.type = "file";
   fileChooser.click();
-  return fileChooser.files[0];
+  fileChooser.onchange = () => {
+    callback(fileChooser.files[0]);
+  };
 };
+
+export const readJSONFile = (file, callback) => {
+  const reader = new FileReader();
+  reader.onload = () => {
+    callback(JSON.parse(reader.result));
+  };
+  reader.readAsText(file);
+}
 
 export const downloadJSON = (jsonData, filename = "Lines.save") => {
   let body = document.body;

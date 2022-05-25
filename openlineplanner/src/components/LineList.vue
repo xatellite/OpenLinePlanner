@@ -5,6 +5,7 @@
       <a class="line-list__subtitle">Check Github to Contribute</a>
     </div>
     <hr />
+    <div class="line-list__container">
     <div
       class="line-list__item"
       v-for="line in linesStore.lines"
@@ -13,6 +14,8 @@
       <LineElement :line="line"/>
       <hr />
     </div>
+    </div>
+    
     <div class="line-list__item__row">
       <button @click="addLine"><PlusIcon /></button>
       <span class="grow">Add new Line</span>
@@ -45,10 +48,9 @@ export default {
   },
   methods: {
     addLine() {
-      const lineRef = this.linesStore.addLine();
-      this.editStore.isEditing = lineRef;
-      this.editStore.isAdding = lineRef;
-      this.editStore.isExtending = lineRef;
+      const line = this.linesStore.addLine();
+      this.editStore.isEditing = line;
+      this.editStore.isExtending = line;
     },
   },
 };
@@ -65,6 +67,11 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+  }
+
+  &__container {
+    max-height: 500px;
+    overflow: auto;
   }
 
   &__item {
