@@ -10,15 +10,19 @@ import { useLinesStore } from "@/stores/lines";
 import MapLinePoint from "./MapLinePoint.vue";
 import { createApp, nextTick, watch } from "vue";
 import { calculateMidPoint } from "@/helpers/geometry";
+import VueApexCharts from "vue3-apexcharts";
+import { usePaxStore } from '../stores/pax';
 
 export default {
   setup() {
     const editStore = useEditStore();
     const linesStore = useLinesStore();
+    const paxStore = usePaxStore();
 
     return {
       editStore,
       linesStore,
+      paxStore,
     };
   },
   data() {
@@ -51,7 +55,7 @@ export default {
     });
 
     // Subscribe both stores
-    this.linesStore.$onAction(({ name, after }) => {
+    this.linesStore.$onAction(({ name, after, args }) => {
       if (name === "addPoint") {
         after((result) => {
           this.addPoint(result);
@@ -69,8 +73,28 @@ export default {
           this.loadState();
         });
       }
-      // Remove Line
-      // Remove Point
+      if (name === "removePoint") {
+        const pointRef = args[0];
+        this.pointMarkers[pointRef].vue.unmount();
+        this.pointMarkers[pointRef].remove();
+        after((linesToBeUpdated) => {
+          linesToBeUpdated.forEach((lineRef) => {
+            const line = this.linesStore.lines[lineRef];
+            this.updateLine(line);
+          });
+        });
+      }
+      if (name === "removeLine") {
+        const line = args[0];
+        this.removeLine(line);
+        after((pointsToBeRemoved) => {
+          pointsToBeRemoved.forEach((pointRef) => {
+            this.pointMarkers[pointRef].vue.unmount();
+            this.pointMarkers[pointRef].remove();
+          });
+          this.drawReferencePoints();
+        });
+      }
     });
 
     watch(
@@ -83,7 +107,10 @@ export default {
   methods: {
     loadState() {
       Object.values(this.lines).forEach((line) => this.removeLine(line));
-      Object.values(this.pointMarkers).forEach((pointMarker) => pointMarker.remove());
+      Object.values(this.pointMarkers).forEach((pointMarker) => {
+        pointMarker.vue.unmount();
+        pointMarker.remove();
+      });
       this.pointMarkers = {};
       Object.values(this.linesStore.lines).forEach((line) =>
         this.addLine(line)
@@ -119,19 +146,21 @@ export default {
       this.drawReferencePoints();
     },
     removeLine(line) {
-      this.map.removeLayer(line.id);
-      this.map.removeSource(line.id);
+      this.map.removeLayer(line.getLineLongId());
+      this.map.removeSource(line.getLineLongId());
       delete this.lines[line.id];
     },
     addPoint(point) {
       const domContainer = document.createElement("div");
-      const mapPoint = createApp(MapLinePoint, { point });
+      const mapPoint = createApp(MapLinePoint, { pointRef: point.id });
       mapPoint.use(this.store);
+      mapPoint.use(VueApexCharts);
 
       const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
       newMarker.pointRef = point.id;
       newMarker.setLngLat({ lat: point.lat, lng: point.lng }).addTo(this.map);
       newMarker.on("drag", this.onDragEnd);
+      newMarker.vue = mapPoint;
 
       nextTick(() => {
         mapPoint.mount(domContainer);
@@ -144,25 +173,35 @@ export default {
       if (marker.isReference) {
         const { lat, lng } = marker.getLngLat();
         marker.remove();
-        if (!this.editStore.isExtending) {
+        if (!this.editStore.isEditing) {
           this.drawReferencePoints();
           return;
         }
         this.linesStore.addPoint(
           lat,
           lng,
-          this.editStore.isExtending,
+          this.editStore.isEditing,
           marker.refIndex
         );
-        this.updateLine(this.editStore.isExtending);
+        this.updateLine(this.editStore.isEditing);
       } else {
         const point = this.linesStore.getPointById(marker.pointRef);
+        if (
+          !this.editStore.isEditing ||
+          !point.lines.includes(this.editStore.isEditing.id)
+        ) {
+          this.editStore.isEditing = this.linesStore.lines[point.lines[0]];
+        }
         point.updatePosition(marker.getLngLat());
         // Update all effected lines
         point.lines.forEach((lineRef) => {
           const line = this.linesStore.getLineById(lineRef);
           this.updateLine(line);
         });
+
+        if (point.type === "station") {
+          this.paxStore.isCurrent = false;
+        }
       }
 
       this.drawReferencePoints();

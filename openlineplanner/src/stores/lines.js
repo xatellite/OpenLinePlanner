@@ -57,6 +57,31 @@ export const useLinesStore = defineStore({
       this.getPointById(pointRef).lines.push(lineRef);
       this.getLineById(lineRef).addPoint(pointRef, index);
     },
+    removePoint(pointRef) {
+      const linesToBeUpdated = this.points[pointRef].lines;
+      linesToBeUpdated.forEach((lineRef) => {
+        const line = this.lines[lineRef];
+        line.pointIds = line.pointIds.filter((point) => point != pointRef);
+      });
+      delete this.points[pointRef];
+      return linesToBeUpdated;
+    },
+    removeLine(line) {
+      const pointsToBeUpdated = line.pointIds;
+      const pointsRemoved = [];
+      pointsToBeUpdated.forEach((pointRef) => {
+        const point = this.points[pointRef];
+        if (point.lines.includes(line.id)) {
+          point.lines = point.lines.filter((lineRef) => lineRef != line.id);
+        }
+        if (point.lines.length === 0) {
+          pointsRemoved.push(point.id);
+          delete this.points[point.id];
+        }
+      });
+      delete this.lines[line.id];
+      return pointsRemoved;
+    },
     loadState(state) {
       Object.values(state.lines).forEach((line) => {
         this.lines[line.id] = TransportLine.fromObject(line);

@@ -25,6 +25,14 @@ export default class LinePoint {
     );
   }
 
+  copy() {
+    const copied = Object.assign(
+      Object.create(Object.getPrototypeOf(this)),
+      this
+    );
+    return copied;
+  }
+
   updatePosition(position) {
     this.lat = position.lat;
     this.lng = position.lng;

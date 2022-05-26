@@ -8,13 +8,15 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "apexcharts": "^3.35.3",
     "mapbox-gl": "^2.8.2",
     "pinia": "^2.0.13",
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
     "vue": "^3.2.33",
     "vue-material-design-icons": "^5.0.0",
-    "vue-router": "^4.0.14"
+    "vue-router": "^4.0.14",
+    "vue3-apexcharts": "^1.4.1"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.0",

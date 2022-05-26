@@ -54,7 +54,11 @@ export default {
       this.editStore.isExtending = null;
     },
     findNewStation() {},
-    removeLine() {},
+    removeLine() {
+      this.editStore.isEditing = null;
+      this.editStore.isExtending = null;
+      this.linesStore.removeLine(this.line);
+    },
   },
 };
 </script>
