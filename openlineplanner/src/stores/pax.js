@@ -21,7 +21,7 @@ export const usePaxStore = defineStore({
           })),
       };
       this.stationData = await (
-        await fetch("http://127.0.0.1:8000/station-info", {
+        await fetch("https://api.openlineplanner.xatellite.io/station-info", {
           method: "POST",
           body: JSON.stringify(stations),
           headers: {

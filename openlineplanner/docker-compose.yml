@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  openlineplanner_xat_io:
+    image: "openlineplanner_xat_io:latest"
+    build: .
+    container_name: "openlineplanner_xat_io"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openlineplanner_xat_io.rule=Host(`openlineplanner.xatellite.io`)"
+      - "traefik.http.routers.openlineplanner_xat_io.entrypoints=websecure"
+      - "traefik.http.routers.openlineplanner_xat_io.tls=true"
+      - "traefik.http.routers.openlineplanner_xat_io.tls.certResolver=lets_encrypt"

@@ -1,0 +1,29 @@
+name: Backend build + deploy
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup ssh
+        uses: kielabokkie/ssh-key-and-known-hosts-action@v1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-host: ${{secrets.SSH_HOST}}
+
+      - uses: actions/checkout@v2
+
+      - name: Install Docker Compose
+        run: |
+          cd /tmp 
+          wget https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64 -O docker-compose
+          chmod 700 docker-compose
+
+      - name: Deploy to Docker Host
+        run: |
+          cd ./openlineplanner_backend
+          /tmp/docker-compose -H ssh://${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} up --build -d
