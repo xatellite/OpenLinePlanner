@@ -1,7 +1,7 @@
 <template>
   <div class="footer">
     <span>This tool was created as part of the interdisciplinary project  of the master class Rail Technology and Management of Railway Systems @FH-St.Pölten</span>
-    <span>V0.1</span>
+    <span>V0.2</span>
     <span>Designed and Built by @TheNewCivilian</span>
   </div>
 </template>

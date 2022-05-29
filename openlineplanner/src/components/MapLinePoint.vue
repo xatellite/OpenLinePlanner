@@ -1,5 +1,12 @@
 <template>
-  <div @click="selectPoint" :class="editStore.pointSelected === point.id ? 'map-marker map-marker--selected':'map-marker'">
+  <div
+    @click="selectPoint"
+    :class="
+      editStore.pointSelected === point.id
+        ? 'map-marker map-marker--selected'
+        : 'map-marker'
+    "
+  >
     <div
       :class="point.type"
       :style="
@@ -39,7 +46,7 @@ export default {
       () => this.linesStore.points[this.pointRef],
       () => {
         this.point = this.linesStore.getPointById(this.pointRef);
-      },
+      }
     );
     window.addEventListener("click", this.handleClickOutside);
   },
@@ -52,12 +59,41 @@ export default {
   },
   methods: {
     handleClickOutside(e) {
-      if (e.target != this.$el && this.editStore.pointSelected === this.point.id) {
+      if (
+        e.target != this.$el &&
+        this.editStore.pointSelected === this.point.id
+      ) {
         this.editStore.pointSelected = null;
+        this.editStore.isMerging = null;
       }
     },
     selectPoint(e) {
       e.stopPropagation();
+      if (this.editStore.isMerging && this.point.type === "station") {
+        const oldStation = this.editStore.isMerging;
+        // Check old station has no line in common
+        if (
+          oldStation.lines.find((lineRef) => this.point.lines.includes(lineRef))
+        ) {
+          console.log("Merge not possible - same line detected");
+          return;
+        }
+        oldStation.lines.forEach((lineRef) => {
+          const line = this.linesStore.getLineById(lineRef);
+          // Find position of old station in line
+          const indexInLine = line.pointIds.findIndex(
+            (pointRef) => pointRef === oldStation.id
+          );
+          // Add current Station as replacement
+          line.pointIds.splice(indexInLine, 0, this.point.id);
+          // Add old line to new Station
+          this.point.lines = [...this.point.lines, lineRef];
+        });
+        // Remove old station
+        this.linesStore.removePoint(oldStation.id);
+        this.editStore.isMerging = null;
+        return;
+      }
       this.editStore.pointSelected = this.point.id;
       this.editStore.isExtending = null;
     },

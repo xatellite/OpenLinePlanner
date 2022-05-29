@@ -157,7 +157,7 @@ export default {
     },
     addPoint(point) {
       let domContainer;
-      if (point.refMarker !== null) {
+      if (point.refMarker && point.refMarker !== null) {
         domContainer = point.refMarker.getElement();
       } else {
         domContainer = document.createElement("div");
@@ -167,7 +167,7 @@ export default {
       mapPoint.use(VueApexCharts);
 
       let newMarker;
-      if (point.refMarker !== null) {
+      if (point.refMarker && point.refMarker !== null) {
         newMarker = point.refMarker;
       } else {
         newMarker = new mapboxgl.Marker(domContainer, { draggable: true });

@@ -2,7 +2,7 @@
   <div class="line-element">
     <button><IconLine :color="line.color" /></button>
     <span class="grow">{{ line.name }}</span>
-    <button v-if="editStore.isEditing == line"><BusStopIcon /></button>
+    <!-- <button v-if="editStore.isEditing == line"><BusStopIcon /></button> -->
     <button
       v-if="editStore.isEditing != line"
       class="line-element__edit"

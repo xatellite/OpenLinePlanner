@@ -3,6 +3,8 @@
     <div class="station-popup__title-container">
       <span class="station-popup__title">Station</span>
       <div class="station-popup__actions">
+        <span v-if="editStore.isMerging">Merging active! Select other station to merge</span>
+        <button @click="toggleMerge"><TransitConnectionHorizontalIcon /></button>
         <button v-if="isLast()" @click="extendLine"><PlusIcon /></button>
         <button class="trash" @click="removePoint">
           <TrashCanOutlineIcon />
@@ -37,6 +39,7 @@ import { useLinesStore } from "../stores/lines";
 import { usePaxStore } from "../stores/pax";
 import PlusIcon from "vue-material-design-icons/Plus.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
+import TransitConnectionHorizontalIcon from "vue-material-design-icons/TransitConnectionHorizontal.vue";
 import { useEditStore } from "../stores/editing";
 
 export default {
@@ -46,6 +49,7 @@ export default {
   components: {
     PlusIcon,
     TrashCanOutlineIcon,
+    TransitConnectionHorizontalIcon,
   },
   data() {
     return {
@@ -97,6 +101,15 @@ export default {
     });
   },
   methods: {
+    toggleMerge(e) {
+      e.stopPropagation();
+      if (this.editStore.isMerging) {
+        this.editStore.isMerging = null;
+        return;
+      }
+      this.editStore.isMerging = this.point;
+      console.log(this.point.id);
+    },
     loadInformation() {
       this.paxStore
         .getPaxForStation(this.point.id, this.linesStore)
@@ -181,6 +194,7 @@ export default {
 
   &__actions {
     display: flex;
+    align-items: center;
   }
 }
 

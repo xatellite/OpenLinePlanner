@@ -56,7 +56,6 @@ export default {
     load() {
       selectFile((file) => {
         readJSONFile(file, (json) => {
-          console.log(json);
           this.linesStore.loadState(json.linesStore);
         });
       });
