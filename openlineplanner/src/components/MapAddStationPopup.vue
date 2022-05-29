@@ -1,6 +1,6 @@
 <template>
   <div class="box add-station">
-    <button v-if="isLast" @click="addStation"><PlusIcon /></button>
+    <button v-if="isLast()" @click="extendLine"><PlusIcon /></button>
     <button @click="addStation"><BusStopIcon /></button>
     <button class="trash" @click="removePoint"><TrashCanOutlineIcon /></button>
   </div>
@@ -11,7 +11,8 @@ import PlusIcon from "vue-material-design-icons/Plus.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import { useLinesStore } from "../stores/lines";
-import { usePaxStore } from '../stores/pax';
+import { usePaxStore } from "../stores/pax";
+import { useEditStore } from '../stores/editing';
 
 export default {
   props: {
@@ -25,8 +26,9 @@ export default {
   data() {
     return {
       linesStore: useLinesStore(),
+      editStore: useEditStore(),
       paxStore: usePaxStore(),
-      isLast: false,
+      lineExtendIndex: -1,
     };
   },
   methods: {
@@ -39,6 +41,26 @@ export default {
     },
     removePoint() {
       this.linesStore.removePoint(this.point.id);
+    },
+    extendLine(e) {
+      e.stopPropagation();
+      this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
+      this.editStore.isExtending = this.lineExtendIndex;
+      this.editStore.pointSelected = null;
+    },
+    isLast() {
+      let lineEndPointRef = false;
+      this.point.lines.forEach((lineRef) => {
+        const linePoints = this.linesStore.getLineById(lineRef).pointIds;
+        if (linePoints[0] === this.point.id) {
+          lineEndPointRef = lineRef;
+          this.lineExtendIndex = 0;
+        } else if (linePoints[linePoints.length - 1] === this.point.id) {
+          lineEndPointRef = lineRef;
+          this.lineExtendIndex = -1;
+        }
+      });
+      return lineEndPointRef;
     },
   },
 };

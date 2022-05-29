@@ -47,9 +47,11 @@ export const useLinesStore = defineStore({
       this.lines[lineId] = newLine;
       return newLine;
     },
-    addPoint(lat, lng, line, index = -5) {
+    // domElement given for InteractiveMap
+    addPoint(lat, lng, line, index = -1, refMarker = null) {
       const point = new LinePoint(lat, lng, line.id);
       this.lines[line.id].addPoint(point.id, index);
+      point.refMarker = refMarker;
       this.points[point.id] = point;
       return point;
     },

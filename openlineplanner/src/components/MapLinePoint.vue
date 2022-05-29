@@ -57,7 +57,6 @@ export default {
       }
     },
     selectPoint(e) {
-      console.log(e);
       e.stopPropagation();
       this.editStore.pointSelected = this.point.id;
       this.editStore.isExtending = null;

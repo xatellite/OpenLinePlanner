@@ -48,7 +48,7 @@ export default {
     toggleEditing() {
       this.editStore.isEditing = this.line;
       if (this.line.pointIds.length === 0) {
-        this.editStore.isExtending = this.line;
+        this.editStore.isExtending = -1;
         return;
       }
       this.editStore.isExtending = null;

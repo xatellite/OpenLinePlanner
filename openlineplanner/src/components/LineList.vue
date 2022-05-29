@@ -50,7 +50,7 @@ export default {
     addLine() {
       const line = this.linesStore.addLine();
       this.editStore.isEditing = line;
-      this.editStore.isExtending = line;
+      this.editStore.isExtending = -1;
     },
   },
 };

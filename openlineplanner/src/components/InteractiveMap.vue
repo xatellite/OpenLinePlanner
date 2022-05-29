@@ -48,8 +48,13 @@ export default {
     this.map.on("mousedown", (e) => {
       if (e.originalEvent.target == this.map.getCanvas()) {
         const { lng, lat } = e.lngLat;
-        if (this.editStore.isExtending) {
-          this.linesStore.addPoint(lat, lng, this.editStore.isExtending, -1);
+        if (this.editStore.isExtending !== null) {
+          this.linesStore.addPoint(
+            lat,
+            lng,
+            this.editStore.isEditing,
+            this.editStore.isExtending
+          );
         }
       }
     });
@@ -151,17 +156,26 @@ export default {
       delete this.lines[line.id];
     },
     addPoint(point) {
-      const domContainer = document.createElement("div");
+      let domContainer;
+      if (point.refMarker !== null) {
+        domContainer = point.refMarker.getElement();
+      } else {
+        domContainer = document.createElement("div");
+      }
       const mapPoint = createApp(MapLinePoint, { pointRef: point.id });
       mapPoint.use(this.store);
       mapPoint.use(VueApexCharts);
 
-      const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
+      let newMarker;
+      if (point.refMarker !== null) {
+        newMarker = point.refMarker;
+      } else {
+        newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
+        newMarker.setLngLat({ lat: point.lat, lng: point.lng }).addTo(this.map);
+      }
       newMarker.pointRef = point.id;
-      newMarker.setLngLat({ lat: point.lat, lng: point.lng }).addTo(this.map);
-      newMarker.on("drag", this.onDragEnd);
       newMarker.vue = mapPoint;
-
+      newMarker.on("drag", this.onDragEnd);
       nextTick(() => {
         mapPoint.mount(domContainer);
       });
@@ -172,18 +186,20 @@ export default {
       const marker = e.target;
       if (marker.isReference) {
         const { lat, lng } = marker.getLngLat();
-        marker.remove();
-        if (!this.editStore.isEditing) {
-          this.drawReferencePoints();
-          return;
-        }
+        console.log(this.referenceMarkers);
+        console.log(marker.refIndex);
+        marker.isReference = false;
+        marker.on("drag", () => {});
+        this.referenceMarkers = this.referenceMarkers.filter((markerInList) => marker.refIndex !== markerInList.refIndex);
         this.linesStore.addPoint(
           lat,
           lng,
           this.editStore.isEditing,
-          marker.refIndex
+          marker.refIndex,
+          marker
         );
         this.updateLine(this.editStore.isEditing);
+        this.drawReferencePoints();
       } else {
         const point = this.linesStore.getPointById(marker.pointRef);
         if (
@@ -253,10 +269,10 @@ export default {
   &::before {
     display: block;
     content: "";
-    height: 5px;
-    width: 5px;
+    height: 8px;
+    width: 8px;
     border-radius: 100%;
-    border: 2px solid $c-text-primary;
+    background-color: rgba($c-box, 0.5);
   }
 }
 </style>
