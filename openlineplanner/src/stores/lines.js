@@ -56,8 +56,9 @@ export const useLinesStore = defineStore({
       return point;
     },
     addPointToLine(pointRef, lineRef, index) {
-      this.getPointById(pointRef).lines.push(lineRef);
-      this.getLineById(lineRef).addPoint(pointRef, index);
+      this.points[pointRef].lines.push(lineRef);
+      this.lines[lineRef].addPoint(pointRef, index);
+      return this.lines[lineRef];
     },
     removePoint(pointRef) {
       const linesToBeUpdated = this.points[pointRef].lines;

@@ -99,6 +99,18 @@ export default {
         this.linesStore.removePoint(oldStation.id);
         this.editStore.isMerging = null;
         return;
+      } else if (
+        !this.point.lines.includes(this.editStore.isEditing.id) &&
+        this.editStore.isEditing &&
+        this.editStore.isExtending &&
+        this.point.type === "station"
+      ) {
+        this.linesStore.addPointToLine(
+          this.point.id,
+          this.editStore.isEditing.id,
+          -1
+        );
+        return;
       }
       this.editStore.pointSelected = this.point.id;
       this.editStore.isExtending = null;

@@ -195,7 +195,6 @@ export default {
     font-size: $font-lg;
     padding: $space-ssm;
     font-weight: bold;
-    flex-grow: 1;
     padding: auto 0;
     pointer-events: auto;
     border: 0;

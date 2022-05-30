@@ -2,7 +2,6 @@ version: '3'
 
 services:
   openlineplanner_xat_io_api:
-    image: "openlineplanner_xat_io_api:latest"
     build: .
     container_name: "openlineplanner_xat_io_api"
     labels:

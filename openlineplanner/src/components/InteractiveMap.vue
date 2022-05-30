@@ -73,6 +73,11 @@ export default {
           this.addLine(result);
         });
       }
+      if (name === "addPointToLine") {
+        after((result) => {
+          this.updateLine(result);
+        });
+      }
       if (name === "loadState") {
         after(() => {
           this.loadState();
