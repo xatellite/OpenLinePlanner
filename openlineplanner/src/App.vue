@@ -4,11 +4,12 @@ import { RouterView } from "vue-router";
 
 <template>
   <header></header>
-
   <RouterView />
 </template>
 
-<style>
+<style lang="scss">
+@import '../node_modules/typeface-roboto/index.css';
+
 body {
   margin: 0;
 }
