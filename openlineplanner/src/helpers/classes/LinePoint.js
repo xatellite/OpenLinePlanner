@@ -5,13 +5,15 @@ export default class LinePoint {
     line,
     type = "line",
     id = crypto.randomUUID(),
-    lines = [line]
+    lines = [line],
+    name = ""
   ) {
     this.id = id;
     this.lat = lat;
     this.lng = lng;
     this.type = type;
     this.lines = lines;
+    this.name = name;
   }
 
   static fromObject(pointObject) {
@@ -21,7 +23,8 @@ export default class LinePoint {
       pointObject.line,
       pointObject.type,
       pointObject.id,
-      pointObject.lines
+      pointObject.lines,
+      pointObject.name
     );
   }
 

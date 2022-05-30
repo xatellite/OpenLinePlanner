@@ -59,6 +59,9 @@ export default {
   },
   methods: {
     handleClickOutside(e) {
+      if (e.target.className === "station-popup__title") {
+        return;
+      }
       if (
         e.target != this.$el &&
         this.editStore.pointSelected === this.point.id
@@ -68,6 +71,9 @@ export default {
       }
     },
     selectPoint(e) {
+      if (e.target.className === "station-popup__title") {
+        return;
+      }
       e.stopPropagation();
       if (this.editStore.isMerging && this.point.type === "station") {
         const oldStation = this.editStore.isMerging;

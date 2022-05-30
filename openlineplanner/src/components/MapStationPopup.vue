@@ -1,7 +1,13 @@
 <template>
   <div class="box station-popup">
     <div class="station-popup__title-container">
-      <span class="station-popup__title">Station</span>
+      <input
+        type="text"
+        class="station-popup__title"
+        :value="point.name || 'Station'"
+        @change="editName"
+        @mousedown="handleMouseDown"
+      />
       <div class="station-popup__actions">
         <span v-if="editStore.isMerging">Merging active! Select other station to merge</span>
         <button @click="toggleMerge"><TransitConnectionHorizontalIcon /></button>
@@ -101,6 +107,12 @@ export default {
     });
   },
   methods: {
+    handleMouseDown(e) {
+      e.stopPropagation();
+    },
+    editName(e) {
+      this.linesStore.getPointById(this.point.id).name = e.srcElement.value;
+    },
     toggleMerge(e) {
       e.stopPropagation();
       if (this.editStore.isMerging) {
@@ -184,6 +196,10 @@ export default {
     padding: $space-ssm;
     font-weight: bold;
     flex-grow: 1;
+    padding: auto 0;
+    pointer-events: auto;
+    border: 0;
+    background-color: transparent;
   }
 
   &__title-container {

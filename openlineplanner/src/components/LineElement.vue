@@ -1,7 +1,14 @@
 <template>
   <div class="line-element">
     <button><IconLine :color="line.color" /></button>
-    <span class="grow">{{ line.name }}</span>
+    <input
+      v-if="editStore.isEditing == line"
+      type="text"
+      class="line-element__name-input grow"
+      :value="line.name"
+      @change="editName"
+    />
+    <span v-else class="grow">{{ line.name }}</span>
     <!-- <button v-if="editStore.isEditing == line"><BusStopIcon /></button> -->
     <button
       v-if="editStore.isEditing != line"
@@ -45,6 +52,9 @@ export default {
     };
   },
   methods: {
+    editName(e) {
+      this.linesStore.getLineById(this.line.id).name = e.srcElement.value;
+    },
     toggleEditing() {
       this.editStore.isEditing = this.line;
       if (this.line.pointIds.length === 0) {
@@ -69,6 +79,13 @@ export default {
   display: flex;
   align-items: center;
   padding: $space-ssm $space-sm;
+
+  &__name-input {
+    border: none;
+    background-color: transparent;
+    text-decoration: underline;
+    font-size: $font-md;
+  }
 
   .grow {
     flex-grow: 1;
