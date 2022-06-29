@@ -1,5 +1,5 @@
 import falcon
-from main import calculate_passengers_to_stations, find_optimal_station_spot_on_route
+from main import calculate_passengers_to_stations, find_optimal_station_spot_on_route, get_residence_geo_json, get_school_geo_json, get_jobs_geo_json
 import json
 import numpy as np
 
@@ -38,9 +38,27 @@ class StopFinder:
 
         resp.media = { "optimalStation": station_info};
 
-app = falcon.App(middleware=falcon.CORSMiddleware(
+class GetOverlay:
+    def on_post(self, req, resp):
+        obj = req.get_media()
+
+        # ToDo Sanity check
+        layer_name = obj.get('layer')
+        layer_data = {}
+        if layer_name == "residence":
+           layer_data = get_residence_geo_json()
+        elif layer_name == "schools":
+           layer_data = get_school_geo_json()
+        elif layer_name == "jobs":
+           layer_data = get_jobs_geo_json()
+
+        resp.media = { "layerGeoJson": layer_data};
+
+
+application = app = falcon.App(middleware=falcon.CORSMiddleware(
     allow_origins='*',
     allow_credentials='*',
 ))
 app.add_route('/station-info', PassengerResource())
 app.add_route('/find-station', StopFinder())
+app.add_route('/overlay', GetOverlay())

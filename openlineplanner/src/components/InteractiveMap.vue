@@ -11,18 +11,21 @@ import MapLinePoint from "./MapLinePoint.vue";
 import { createApp, nextTick, watch } from "vue";
 import { calculateMidPoint } from "@/helpers/geometry";
 import VueApexCharts from "vue3-apexcharts";
-import { usePaxStore } from '../stores/pax';
+import { usePaxStore } from "../stores/pax";
+import { useOverlayStore } from "../stores/overlay";
 
 export default {
   setup() {
     const editStore = useEditStore();
     const linesStore = useLinesStore();
     const paxStore = usePaxStore();
+    const overlayStore = useOverlayStore();
 
     return {
       editStore,
       linesStore,
       paxStore,
+      overlayStore,
     };
   },
   data() {
@@ -113,6 +116,13 @@ export default {
         this.drawReferencePoints();
       }
     );
+
+    watch(
+      () => this.overlayStore.overlayData,
+      () => {
+        this.updateOverlay();
+      }
+    );
   },
   methods: {
     loadState() {
@@ -156,8 +166,10 @@ export default {
       this.drawReferencePoints();
     },
     removeLine(line) {
-      this.map.removeLayer(line.getLineLongId());
-      this.map.removeSource(line.getLineLongId());
+      if (this.map.getSource(line.getLineLongId())) {
+        this.map.removeLayer(line.getLineLongId());
+        this.map.removeSource(line.getLineLongId());
+      }
       delete this.lines[line.id];
     },
     addPoint(point) {
@@ -195,7 +207,9 @@ export default {
         console.log(marker.refIndex);
         marker.isReference = false;
         marker.on("drag", () => {});
-        this.referenceMarkers = this.referenceMarkers.filter((markerInList) => marker.refIndex !== markerInList.refIndex);
+        this.referenceMarkers = this.referenceMarkers.filter(
+          (markerInList) => marker.refIndex !== markerInList.refIndex
+        );
         this.linesStore.addPoint(
           lat,
           lng,
@@ -254,6 +268,63 @@ export default {
               index
             );
           }
+        });
+      }
+    },
+
+    updateOverlay() {
+      if (this.map.getSource("overlay")) {
+        this.map.removeLayer("overlay");
+        this.map.removeSource("overlay");
+      }
+      if (this.overlayStore.overlayData && this.overlayStore.overlay != "none") {
+        this.map.addSource("overlay", {
+          type: "geojson",
+          data: this.overlayStore.overlayData,
+        });
+        let weight = "pop";
+        if (this.overlayStore.overlay == "jobs") {
+          weight = "jobs";
+        } else if (this.overlayStore.overlay == "schools") {
+          weight = "kids";
+        }
+
+        const colors = {
+          "residence": ["rgba(68,44,49, 0.1)", "#7F4955", "#BD6275", "#E0B092", "#F5E5C6"],
+          "jobs": ["rgba(51,70,82, 0.1)", "#4F819E", "#4A99C6", "#92D6E0", "#C6F5DE"],
+          "schools": ["rgba(82,75,51, 0.1)", "#CC9766", "#DBA95E", "#D6E092", "#E2F5C6"],
+        }[this.overlayStore.overlay];
+
+        this.map.addLayer({
+          id: "overlay",
+          type: "heatmap",
+          source: "overlay",
+          paint: {
+            // increase weight as diameter breast height increases
+            "heatmap-weight": {
+              property: weight,
+              type: "exponential",
+              stops: [
+                [1, 0],
+                [62, 1],
+              ],
+            },
+            "heatmap-color": [
+              "interpolate",
+              ["linear"],
+              ["heatmap-density"],
+              0,
+              colors[0],
+              0.2,
+              colors[1],
+              0.4,
+              colors[2],
+              0.6,
+              colors[3],
+              0.8,
+              colors[4],
+            ],
+          },
         });
       }
     },

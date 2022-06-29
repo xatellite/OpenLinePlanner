@@ -38,7 +38,7 @@ html {
   box-sizing: border-box;
 }
 
-button {
+button, .button {
   border: 1px solid #d6d6d6;
   background-color: darken($c-box, 2);
   border-radius: $br-md;

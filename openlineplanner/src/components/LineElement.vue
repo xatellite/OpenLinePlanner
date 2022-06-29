@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import BusStopIcon from "vue-material-design-icons/BusStop.vue";
+// import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import PencilOutlineIcon from "vue-material-design-icons/PencilOutline.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import IconLine from "./icons/IconLine.vue";
@@ -41,7 +41,7 @@ export default {
   },
   components: {
     IconLine,
-    BusStopIcon,
+    // BusStopIcon,
     PencilOutlineIcon,
     TrashCanOutlineIcon,
   },

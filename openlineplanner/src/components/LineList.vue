@@ -78,7 +78,7 @@ export default {
     &__row {
       display: flex;
       align-items: center;
-      padding: $space-ssm $space-sm;
+      padding: $space-ssm $space-ssm;
 
       .grow {
         flex-grow: 1;

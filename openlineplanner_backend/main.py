@@ -23,6 +23,14 @@ gdf_school = load_gdf("./geo_data/schools")
 # ToDo: Extend jobs to include leisure + rename to businesses
 gdf_jobs = load_gdf("./geo_data/jobs")
 
+def get_residence_geo_json():
+  return gdf_residence.to_json()
+
+def get_school_geo_json():
+  return gdf_school.to_json()
+
+def get_jobs_geo_json():
+  return gdf_jobs.to_json()
 
 def calculate_passengers_to_stations(stations):
   # evaluate central station + distance to furthest neighbor

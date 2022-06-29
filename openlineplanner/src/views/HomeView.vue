@@ -3,6 +3,7 @@ import InteractiveMap from "@/components/InteractiveMap.vue";
 import Footer from "@/components/PageFooter.vue";
 import Logo from "@/components/PageLogo.vue";
 import LineList from "@/components/LineList.vue";
+import OverlaySelect from "../components/OverlaySelect.vue";
 </script>
 
 <template>
@@ -12,6 +13,7 @@ import LineList from "@/components/LineList.vue";
       <Logo />
       <LineList />
     </div>
+    <OverlaySelect />
   </main>
   <Footer />
 </template>
