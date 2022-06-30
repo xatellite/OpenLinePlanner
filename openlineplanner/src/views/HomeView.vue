@@ -1,11 +1,3 @@
-<script setup>
-import InteractiveMap from "@/components/InteractiveMap.vue";
-import Footer from "@/components/PageFooter.vue";
-import Logo from "@/components/PageLogo.vue";
-import LineList from "@/components/LineList.vue";
-import OverlaySelect from "../components/OverlaySelect.vue";
-</script>
-
 <template>
   <main>
     <InteractiveMap />
@@ -15,8 +7,31 @@ import OverlaySelect from "../components/OverlaySelect.vue";
     </div>
     <OverlaySelect />
   </main>
-  <Footer />
+  <div class="mobile">
+    <h1>OpenLinePlanner is not yet supporting mobile use!</h1>
+    <span>Please use your web browser or tablet to start planning</span>
+  </div>
+  <PageFooter />
 </template>
+
+<script>
+import InteractiveMap from "@/components/InteractiveMap.vue";
+import PageFooter from "@/components/PageFooter.vue";
+import Logo from "@/components/PageLogo.vue";
+import LineList from "@/components/LineList.vue";
+import OverlaySelect from "../components/OverlaySelect.vue";
+
+export default {
+  components: {
+    InteractiveMap,
+    PageFooter,
+    Logo,
+    LineList,
+    OverlaySelect,
+  },
+};
+</script>
+
 
 <style lang="scss">
 @import "@/assets/variables.scss";
@@ -27,5 +42,25 @@ import OverlaySelect from "../components/OverlaySelect.vue";
   margin: $space-md;
   display: flex;
   flex-direction: row;
+}
+
+main {
+  display: block;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    display: none;
+  }
+}
+
+.mobile {
+  display: none;
+  @media (max-width: 700px), (max-height: 600px) {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: $space-md;
+  }
 }
 </style>

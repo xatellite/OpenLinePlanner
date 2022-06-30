@@ -277,7 +277,10 @@ export default {
         this.map.removeLayer("overlay");
         this.map.removeSource("overlay");
       }
-      if (this.overlayStore.overlayData && this.overlayStore.overlay != "none") {
+      if (
+        this.overlayStore.overlayData &&
+        this.overlayStore.overlay != "none"
+      ) {
         this.map.addSource("overlay", {
           type: "geojson",
           data: this.overlayStore.overlayData,
@@ -290,9 +293,27 @@ export default {
         }
 
         const colors = {
-          "residence": ["rgba(68,44,49, 0.1)", "#7F4955", "#BD6275", "#E0B092", "#F5E5C6"],
-          "jobs": ["rgba(51,70,82, 0.1)", "#4F819E", "#4A99C6", "#92D6E0", "#C6F5DE"],
-          "schools": ["rgba(82,75,51, 0.1)", "#CC9766", "#DBA95E", "#D6E092", "#E2F5C6"],
+          residence: [
+            "rgba(68,44,49, 0.1)",
+            "#7F4955",
+            "#BD6275",
+            "#E0B092",
+            "#F5E5C6",
+          ],
+          jobs: [
+            "rgba(51,70,82, 0.1)",
+            "#4F819E",
+            "#4A99C6",
+            "#92D6E0",
+            "#C6F5DE",
+          ],
+          schools: [
+            "rgba(82,75,51, 0.1)",
+            "#CC9766",
+            "#DBA95E",
+            "#D6E092",
+            "#E2F5C6",
+          ],
         }[this.overlayStore.overlay];
 
         this.map.addLayer({
@@ -335,7 +356,8 @@ export default {
 <style lang="scss">
 @import "@/assets/variables.scss";
 #map {
-  height: calc(100vh - $space-md);
+  position: relative;
+  height: calc(100vh);
 }
 
 .line-reference-point {

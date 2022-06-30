@@ -1,8 +1,8 @@
 <template>
   <div class="footer">
     <span>This tool was created as part of the interdisciplinary project  of the master class Rail Technology and Management of Railway Systems @FH-St.Pölten</span>
-    <span>V0.2</span>
-    <span>Designed and Built by @TheNewCivilian</span>
+    <span class="footer__center">V0.2</span>
+    <span class="footer__right">Designed and Built by @TheNewCivilian, Map by ©Mapbox ©OpenStreetMap</span>
   </div>
 </template>
 
@@ -13,19 +13,26 @@ export default {};
 <style lang="scss">
 @import "@/assets/variables.scss";
 .footer {
+  position: absolute;
+  bottom: 0;
+  z-index: 100;
   background: $c-text-primary;
   color: $c-text-inverted;
   font-size: $space-sm;
-  height: $space-md;
   width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 $space-sm;
+  display: grid;
+  grid-template-columns: 1fr $space-lg 1fr;
+  padding: 4px $space-sm;
   box-sizing: border-box;
 
-  * > {
-    flex-grow: 1;
+  &__center {
+    font-weight: bold;
+    text-align: center;
   }
+
+  &__right {
+    text-align: right;
+  }
+
 }
 </style>
