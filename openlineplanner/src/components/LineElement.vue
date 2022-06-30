@@ -1,6 +1,7 @@
 <template>
   <div class="line-element">
-    <button><IconLine :color="line.color" /></button>
+    <button @click="openColorPick"><IconLine :color="line.color" /></button>
+    <ColorPicker v-if="selectColor == true" :handleColorChange="updateColor" :closeAction="() => selectColor = false"/>
     <input
       v-if="editStore.isEditing == line"
       type="text"
@@ -34,6 +35,7 @@ import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import IconLine from "./icons/IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
+import ColorPicker from "./ColorPicker.vue";
 
 export default {
   props: {
@@ -44,16 +46,21 @@ export default {
     // BusStopIcon,
     PencilOutlineIcon,
     TrashCanOutlineIcon,
-  },
+    ColorPicker
+},
   data() {
     return {
       linesStore: useLinesStore(),
       editStore: useEditStore(),
+      selectColor: false,
     };
   },
   methods: {
     editName(e) {
       this.linesStore.getLineById(this.line.id).name = e.srcElement.value;
+    },
+    updateColor(color) {
+      this.linesStore.updateLineColor(this.line.id, color);
     },
     toggleEditing() {
       this.editStore.isEditing = this.line;
@@ -64,6 +71,10 @@ export default {
       this.editStore.isExtending = null;
     },
     findNewStation() {},
+    openColorPick(e) {
+      e.stopPropagation();
+      this.selectColor = true;
+    },
     removeLine() {
       this.editStore.isEditing = null;
       this.editStore.isExtending = null;
@@ -78,7 +89,7 @@ export default {
 .line-element {
   display: flex;
   align-items: center;
-  padding: $space-ssm $space-sm;
+  padding: $space-ssm $space-ssm;
 
   &__name-input {
     border: none;

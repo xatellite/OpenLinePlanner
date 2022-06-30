@@ -2,7 +2,7 @@
   <div class="box line-list">
     <div class="line-list__center-box">
       <h1 class="line-list__title">Open-Line-Planner</h1>
-      <a class="line-list__subtitle">Check Github to Contribute</a>
+      <a class="line-list__subtitle" href="https://github.com/TheNewCivilian/OpenLinePlanner">Check Github to Contribute</a>
     </div>
     <hr />
     <div class="line-list__container">

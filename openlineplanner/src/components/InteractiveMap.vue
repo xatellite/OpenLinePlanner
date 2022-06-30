@@ -108,6 +108,13 @@ export default {
           this.drawReferencePoints();
         });
       }
+      if (name === "updateLineColor") {
+        const lineRef = args[0];
+        const line = this.linesStore.lines[lineRef];
+        after(() => {
+          this.updateLineStyle(line);
+        })
+      }
     });
 
     watch(
@@ -171,6 +178,9 @@ export default {
         this.map.removeSource(line.getLineLongId());
       }
       delete this.lines[line.id];
+    },
+    updateLineStyle(line) {
+      this.map.setPaintProperty(line.getLineLongId(), "line-color", line.color);
     },
     addPoint(point) {
       let domContainer;

@@ -85,6 +85,9 @@ export const useLinesStore = defineStore({
       delete this.lines[line.id];
       return pointsRemoved;
     },
+    updateLineColor(line, color) {
+      this.lines[line].color = color;
+    },
     loadState(state) {
       Object.values(state.lines).forEach((line) => {
         this.lines[line.id] = TransportLine.fromObject(line);

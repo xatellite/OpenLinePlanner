@@ -28,7 +28,7 @@ export default {
     Logo,
     LineList,
     OverlaySelect,
-  },
+},
 };
 </script>
 
