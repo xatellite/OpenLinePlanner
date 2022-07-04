@@ -15,6 +15,9 @@
           : ''
       "
     />
+    <div class="line-point__name-label" v-if="point.name">
+      <span>{{point.name}}</span>
+    </div>
     <MapAddStationPopup
       v-if="editStore.pointSelected === point.id && point.type != 'station'"
       :point="point"
@@ -128,6 +131,20 @@ export default {
 
   &--selected {
     box-shadow: $bs-md;
+  }
+}
+
+.line-point {
+  &__name-label {
+    position: absolute;
+    bottom: 110%;
+    width: fit-content;
+    padding: 1px $space-ssm;
+    font-weight: bold;
+    white-space: nowrap;
+    background-color: $c-box;
+    border: 2px solid $c-text-primary;
+    border-radius: $br-md;
   }
 }
 
