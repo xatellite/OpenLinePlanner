@@ -5,11 +5,18 @@ export const usePaxStore = defineStore({
   state: () => ({
     stationData: [],
     isCurrent: false,
+    currentRequestController: null,
   }),
   actions: {
+    setCurrent(isCurrent) {
+      this.isCurrent = isCurrent;
+      return isCurrent;
+    },
     async getPaxForStation(stationRef, linesStore) {
       if (this.isCurrent) {
-        return this.stationData.stationInfo.find((station) => station.id === stationRef);
+        return this.stationData.stationInfo.find(
+          (station) => station.id === stationRef
+        );
       }
       const stations = {
         stations: Object.values(linesStore.points)
@@ -20,17 +27,40 @@ export const usePaxStore = defineStore({
             id: station.id,
           })),
       };
-      this.stationData = await (
-        await fetch("https://api.openlineplanner.xatellite.io/station-info", {
+      if (this.currentRequestController != null) {
+        this.currentRequestController.abort();
+      }
+
+      this.currentRequestController = new AbortController();
+      const abortSignal = this.currentRequestController.signal;
+      // try {
+      const response = await fetch(
+        "https://api.openlineplanner.xatellite.io/station-info",
+        {
           method: "POST",
           body: JSON.stringify(stations),
           headers: {
             "Content-type": "application/json",
           },
-        })
-      ).json();
-      this.isCurrent = true;
-      return this.stationData.stationInfo.find((station) => station.id === stationRef);
+          signal: abortSignal,
+        }
+      );
+      if (response.ok) {
+        this.stationData = await response.json();
+        this.setCurrent(true);
+      }
+      // } catch (err) {
+      //   if (err.name == "AbortError") {
+      //     console.log("aborted");
+      //     return;
+      //   } else {
+      //     throw err;
+      //   }
+      // }
+      this.currentRequestController = null;
+      return this.stationData.stationInfo.find(
+        (station) => station.id === stationRef
+      );
     },
   },
 });

@@ -245,7 +245,7 @@ export default {
         });
 
         if (point.type === "station") {
-          this.paxStore.isCurrent = false;
+          this.paxStore.setCurrent(false);
         }
       }
 

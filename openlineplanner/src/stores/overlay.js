@@ -11,7 +11,7 @@ export const useOverlayStore = defineStore({
       this.overlay = type;
       this.overlayData = {};
       if (type != "none") {
-        fetch("http://127.0.0.1:8000/overlay", {
+        fetch("https://api.openlineplanner.xatellite.io/overlay", {
           method: "POST",
           body: JSON.stringify({ layer: type }),
           headers: {

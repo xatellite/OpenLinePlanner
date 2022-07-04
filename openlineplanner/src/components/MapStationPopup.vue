@@ -100,9 +100,13 @@ export default {
   mounted() {
     this.loadInformation();
 
-    this.paxStore.$subscribe((_, state) => {
-      if (state.isCurrent == false) {
-        this.loadInformation();
+    this.paxStore.$onAction(({ name, after }) => {
+      if (name === "setCurrent") {
+        after((isCurrent) => {
+          if (isCurrent == false) {
+            this.loadInformation();
+          }
+        });
       }
     });
   },
