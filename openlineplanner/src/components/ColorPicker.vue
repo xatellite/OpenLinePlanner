@@ -20,13 +20,14 @@ export default {
   props: {
     handleColorChange: Function,
     closeAction: Function,
+    initColor: String,
   },
   components: {
     ColorPicker,
   },
   data() {
     return {
-      color: "#59c7f9",
+      color: this.initColor,
       suckerCanvas: null,
       suckerArea: [],
       isSucking: false,

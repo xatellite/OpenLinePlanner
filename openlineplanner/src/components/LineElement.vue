@@ -1,7 +1,7 @@
 <template>
   <div class="line-element">
     <button @click="openColorPick"><IconLine :color="line.color" /></button>
-    <ColorPicker v-if="selectColor == true" :handleColorChange="updateColor" :closeAction="() => selectColor = false"/>
+    <ColorPicker v-if="selectColor == true" :initColor="line.color" :handleColorChange="updateColor" :closeAction="() => selectColor = false"/>
     <input
       v-if="editStore.isEditing == line"
       type="text"
