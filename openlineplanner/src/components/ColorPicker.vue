@@ -44,8 +44,6 @@ export default {
       this.handleColorChange(color.hex);
     },
     handleClickOutside(e) {
-      console.log(e);
-
       let refElement = e.target;
       while (refElement.parentElement != null) {
         if (refElement.id === "color-picker") {

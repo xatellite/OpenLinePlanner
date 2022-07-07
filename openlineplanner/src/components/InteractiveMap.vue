@@ -62,6 +62,12 @@ export default {
       }
     });
 
+    this.map.on("zoom", () => {
+      Object.values(this.linesStore.lines).forEach((line) => {
+        this.updateLine(line);
+      });
+    });
+
     // Subscribe both stores
     this.linesStore.$onAction(({ name, after, args }) => {
       if (name === "addPoint") {
@@ -113,7 +119,19 @@ export default {
         const line = this.linesStore.lines[lineRef];
         after(() => {
           this.updateLineStyle(line);
-        })
+        });
+      }
+      if (
+        name === "checkForParallelLine" ||
+        name === "checkParallelsStillExist"
+      ) {
+        after((linesUpdated) => {
+          if (linesUpdated) {
+            linesUpdated.forEach((lineRef) =>
+              this.updateLine(this.linesStore.getLineById(lineRef))
+            );
+          }
+        });
       }
     });
 
@@ -149,7 +167,7 @@ export default {
     addLine(line) {
       this.map.addSource(line.getLineLongId(), {
         type: "geojson",
-        data: this.linesStore.getLineString(line.id),
+        data: this.linesStore.getLineString(line.id, this.map.getZoom()),
       });
       this.map.addLayer({
         id: line.getLineLongId(),
@@ -167,9 +185,11 @@ export default {
       this.lines[line.id] = line;
     },
     updateLine(line) {
-      this.map
-        .getSource(line.getLineLongId())
-        .setData(this.linesStore.getLineString(line.id));
+      const geoJson = this.linesStore.getLineString(
+        line.id,
+        this.map.getZoom()
+      );
+      this.map.getSource(line.getLineLongId()).setData(geoJson);
       this.drawReferencePoints();
     },
     removeLine(line) {
@@ -200,22 +220,24 @@ export default {
         newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
         newMarker.setLngLat({ lat: point.lat, lng: point.lng }).addTo(this.map);
       }
+      // Reset reference Marker to avoid cyclic references.
+      point.refMarker = null;
       newMarker.pointRef = point.id;
       newMarker.vue = mapPoint;
-      newMarker.on("drag", this.onDragEnd);
+      // Change this to onDrag to get more direct feedback -> sideeffects!
+      // ToDo: Improve handle quality
+      newMarker.on("dragend", this.onDragEnd);
       nextTick(() => {
         mapPoint.mount(domContainer);
       });
       this.pointMarkers[point.id] = newMarker;
     },
-
     onDragEnd(e) {
       const marker = e.target;
       if (marker.isReference) {
         const { lat, lng } = marker.getLngLat();
-        console.log(this.referenceMarkers);
-        console.log(marker.refIndex);
         marker.isReference = false;
+        marker.getElement().classList.remove("line-reference-point");
         marker.on("drag", () => {});
         this.referenceMarkers = this.referenceMarkers.filter(
           (markerInList) => marker.refIndex !== markerInList.refIndex
@@ -258,10 +280,9 @@ export default {
       domContainer.className = "line-reference-point";
       const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
       newMarker.isReference = pointOne;
-      newMarker.lineReference = this.editStore.isEditing;
       newMarker.refIndex = refIndex;
       newMarker.setLngLat(lngLat).addTo(this.map);
-      newMarker.on("drag", this.onDragEnd);
+      newMarker.on("dragend", this.onDragEnd);
       this.referenceMarkers.push(newMarker);
     },
 

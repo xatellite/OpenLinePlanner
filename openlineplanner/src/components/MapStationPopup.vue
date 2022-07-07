@@ -124,7 +124,6 @@ export default {
         return;
       }
       this.editStore.isMerging = this.point;
-      console.log(this.point.id);
     },
     loadInformation() {
       this.paxStore
@@ -158,7 +157,6 @@ export default {
     extendLine(e) {
       e.stopPropagation();
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
-      console.log(this.editStore.isEditing);
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;
     },

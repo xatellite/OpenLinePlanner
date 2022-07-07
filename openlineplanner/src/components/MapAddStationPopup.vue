@@ -35,7 +35,6 @@ export default {
     addStation() {
       const updatedPoint = this.point.copy();
       updatedPoint.type = "station";
-      console.log(updatedPoint);
       this.linesStore.points[this.point.id] = updatedPoint;
       this.paxStore.isCurrent = false;
     },

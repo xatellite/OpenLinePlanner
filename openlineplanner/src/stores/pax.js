@@ -33,7 +33,6 @@ export const usePaxStore = defineStore({
 
       this.currentRequestController = new AbortController();
       const abortSignal = this.currentRequestController.signal;
-      // try {
       const response = await fetch(
         "https://api.openlineplanner.xatellite.io/station-info",
         {
@@ -49,14 +48,6 @@ export const usePaxStore = defineStore({
         this.stationData = await response.json();
         this.setCurrent(true);
       }
-      // } catch (err) {
-      //   if (err.name == "AbortError") {
-      //     console.log("aborted");
-      //     return;
-      //   } else {
-      //     throw err;
-      //   }
-      // }
       this.currentRequestController = null;
       return this.stationData.stationInfo.find(
         (station) => station.id === stationRef

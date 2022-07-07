@@ -15,7 +15,10 @@
           : ''
       "
     />
-    <div class="line-point__name-label" v-if="point.name">
+    <div
+      class="line-point__name-label"
+      v-if="point.name && !(editStore.pointSelected === point.id)"
+    >
       <span>{{point.name}}</span>
     </div>
     <MapAddStationPopup
@@ -100,11 +103,15 @@ export default {
         });
         // Remove old station
         this.linesStore.removePoint(oldStation.id);
+        oldStation.lines.forEach((lineRef) => {
+          this.linesStore.checkForParallelLine(this.point, this.linesStore.getLineById(lineRef));
+        });
         this.editStore.isMerging = null;
         return;
+      // Handle merge during adding.
       } else if (
-        !this.point.lines.includes(this.editStore.isEditing.id) &&
         this.editStore.isEditing &&
+        !this.point.lines.includes(this.editStore.isEditing.id) &&
         this.editStore.isExtending &&
         this.point.type === "station"
       ) {
