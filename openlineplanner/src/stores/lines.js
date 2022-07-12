@@ -7,7 +7,7 @@ export const useLinesStore = defineStore({
   id: "lines",
   state: () => ({
     lines: {},
-    parallels: [], // { enter:,  exit: , count: }
+    parallels: [], // { points:, count: }
     points: {},
     lineIdCounter: 1,
   }),
@@ -27,9 +27,9 @@ export const useLinesStore = defineStore({
             const lineIndex =
               Math.floor(div.lines.length / 2) - div.lines.indexOf(lineRef);
             const latDif =
-              this.points[div.exit].lat - this.points[div.enter].lat;
+              this.points[div.points[0]].lat - this.points[div.points[1]].lat;
             const lngDif =
-              this.points[div.exit].lng - this.points[div.enter].lng;
+              this.points[div.points[0]].lng - this.points[div.points[1]].lng;
             const lineLength =
               Math.sqrt(latDif ** 2 + lngDif ** 2) * zoomLevel ** 3 * 10;
             // Latitude / Longitude switched to get orthogonal line
@@ -44,22 +44,24 @@ export const useLinesStore = defineStore({
         line.pointIds.forEach((pointRef, index) => {
           const point = state.points[pointRef];
           // Add parallel line merge point
-          const parallelExit = this.parallels.find(
-            (parallel) =>
-              parallel.exit === pointRef &&
-              index &&
-              line.pointIds[index - 1] === parallel.enter
-          );
-          placeParallelDivergent(parallelExit, point);
+          if (index > 0) {
+            const parallelExit = this.parallels.find(
+              (parallel) =>
+                parallel.points.includes(pointRef) &&
+                parallel.points.includes(line.pointIds[index - 1])
+            );
+            placeParallelDivergent(parallelExit, point);
+          }
           coordinates.push([point.lng, point.lat]);
           // Add parallel line spread point
-          const parallelEntry = this.parallels.find(
-            (parallel) =>
-              parallel.enter === pointRef &&
-              line.pointIds.length > index + 2 &&
-              line.pointIds[index + 1] === parallel.exit
-          );
-          placeParallelDivergent(parallelEntry, point);
+          if (line.pointIds.length > index + 2) {
+            const parallelEntry = this.parallels.find(
+              (parallel) =>
+                parallel.points.includes(pointRef) &&
+                parallel.points.includes(line.pointIds[index + 1])
+            );
+            placeParallelDivergent(parallelEntry, point);
+          }
         });
         return {
           type: "FeatureCollection",
@@ -106,7 +108,14 @@ export const useLinesStore = defineStore({
       const linesToBeUpdated = this.points[pointRef].lines;
       linesToBeUpdated.forEach((lineRef) => {
         const line = this.lines[lineRef];
+        const pointIndex = line.pointIds.indexOf(pointRef);
         line.pointIds = line.pointIds.filter((point) => point != pointRef);
+        if (line.pointIds.length >= pointIndex) {
+          this.checkForParallelLine(
+            this.points[line.pointIds[pointIndex]],
+            line
+          );
+        }
       });
       delete this.points[pointRef];
       return linesToBeUpdated;
@@ -132,6 +141,11 @@ export const useLinesStore = defineStore({
       this.lines[line].color = color;
     },
     loadState(savedState) {
+      // ToDo: Remove all lines, points and parallels
+      // this.parallels = [];
+      // Object.keys(this.lines).forEach((lineRef) => {
+      //   this.removeLine(this.lines[lineRef]);
+      // });
       Object.values(savedState.lines).forEach((line) => {
         this.lines[line.id] = TransportLine.fromObject(line);
       });
@@ -149,18 +163,19 @@ export const useLinesStore = defineStore({
       if (lastPoint.lines.length > 1 && currentLine.pointIds.length > 1) {
         // get previous point added.
         const previousPointRef =
-          currentLine.pointIds[currentLine.pointIds.length - 2];
+          currentLine.pointIds[currentLine.pointIds.indexOf(lastPoint.id) - 1];
         // Check all Lines for parallels
         const parallelLineIds = lastPoint.lines
           .map((line) => {
             if (line == currentLine.id) return currentLine.id;
             const indexOfPrevious =
               this.lines[line].pointIds.indexOf(previousPointRef);
+            const indexOfCurrent = this.lines[line].pointIds.indexOf(
+              lastPoint.id
+            );
             if (
-              indexOfPrevious &&
-              this.lines[line].pointIds.indexOf(lastPoint.id) -
-                indexOfPrevious ===
-                1
+              indexOfPrevious >= 0 &&
+              Math.abs(indexOfCurrent - indexOfPrevious) === 1
             ) {
               return line;
             }
@@ -172,15 +187,14 @@ export const useLinesStore = defineStore({
           );
           this.parallels = [
             ...this.parallels.filter(
-              (prallel) =>
+              (parallel) =>
                 !(
-                  prallel.enter === previousPointRef &&
-                  prallel.exit === lastPoint.id
+                  parallel.points.includes(previousPointRef) &&
+                  parallel.points.includes(lastPoint.id)
                 )
             ),
             {
-              enter: previousPointRef,
-              exit: lastPoint.id,
+              points: [previousPointRef, lastPoint.id],
               lines: parallelLineIds,
             },
           ];
@@ -202,9 +216,12 @@ export const useLinesStore = defineStore({
           }
           const linePoints = this.lines[lineRef].pointIds;
           if (
-            linePoints.indexOf(parallel.enter) &&
-            linePoints.indexOf(parallel.enter) !=
-              linePoints.indexOf(parallel.exit) - 1
+            linePoints.indexOf(parallel.points[0]) &&
+            linePoints.indexOf(parallel.points[1]) &&
+            Math.abs(
+              linePoints.indexOf(parallel.points[0]) -
+                linePoints.indexOf(parallel.points[1])
+            ) != 1
           ) {
             return false;
           }
