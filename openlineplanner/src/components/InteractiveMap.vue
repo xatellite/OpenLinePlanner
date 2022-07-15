@@ -63,7 +63,7 @@ export default {
     });
 
     this.map.on("zoom", () => {
-      Object.values(this.linesStore.lines).forEach((line) => {
+      this.linesStore.getLines.forEach((line) => {
         this.updateLine(line);
       });
     });
@@ -105,6 +105,7 @@ export default {
       }
       if (name === "removeLine") {
         const line = args[0];
+        console.log(line);
         this.removeLine(line);
         after((pointsToBeRemoved) => {
           pointsToBeRemoved.forEach((pointRef) => {
@@ -151,18 +152,17 @@ export default {
   },
   methods: {
     loadState() {
-      Object.values(this.lines).forEach((line) => this.removeLine(line));
       Object.values(this.pointMarkers).forEach((pointMarker) => {
         pointMarker.vue.unmount();
         pointMarker.remove();
       });
       this.pointMarkers = {};
-      Object.values(this.linesStore.lines).forEach((line) =>
-        this.addLine(line)
-      );
-      Object.values(this.linesStore.points).forEach((point) =>
-        this.addPoint(point)
-      );
+      this.linesStore.getLines.forEach((line) => {
+        this.addLine(line);
+      });
+      this.linesStore.getPoints.forEach((point) => {
+        this.addPoint(point);
+      });
     },
     addLine(line) {
       this.map.addSource(line.getLineLongId(), {

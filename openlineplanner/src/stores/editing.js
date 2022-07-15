@@ -8,4 +8,12 @@ export const useEditStore = defineStore({
     isMerging: null, // Station ref
     pointSelected: null,
   }),
+  actions: {
+    stopAllInputs() {
+      this.isEditing = null;
+      this.isExtending = null;
+      this.isMerging = null;
+      this.pointSelected = null;
+    },
+  },
 });

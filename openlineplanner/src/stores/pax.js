@@ -19,7 +19,8 @@ export const usePaxStore = defineStore({
         );
       }
       const stations = {
-        stations: Object.values(linesStore.points)
+        stations: linesStore
+          .getPoints
           .filter((point) => point.type === "station")
           .map((station) => ({
             lat: station.lat,

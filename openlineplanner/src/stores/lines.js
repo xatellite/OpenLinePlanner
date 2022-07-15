@@ -12,6 +12,8 @@ export const useLinesStore = defineStore({
     lineIdCounter: 1,
   }),
   getters: {
+    getLines: (state) => Object.values(state.lines),
+    getPoints: (state) => Object.values(state.points),
     getLineById: (state) => {
       return (lineRef) => state.lines[lineRef];
     },
@@ -82,9 +84,9 @@ export const useLinesStore = defineStore({
     addLine() {
       const lineId = this.lineIdCounter;
       this.lineIdCounter++;
-      const newLine = new TransportLine(lineId, `Line ${lineId}`);
+      const newLine = new TransportLine(`Line ${lineId}`);
       newLine.color = randomColor();
-      this.lines[lineId] = newLine;
+      this.lines[newLine.id] = newLine;
       return newLine;
     },
     // domElement given for InteractiveMap to handle this action and remove Reference again.
@@ -141,17 +143,15 @@ export const useLinesStore = defineStore({
       this.lines[line].color = color;
     },
     loadState(savedState) {
-      // ToDo: Remove all lines, points and parallels
-      // this.parallels = [];
-      // Object.keys(this.lines).forEach((lineRef) => {
-      //   this.removeLine(this.lines[lineRef]);
-      // });
+      this.parallels = [];
+      Object.keys(this.lines).forEach((lineRef) => this.removeLine(this.lines[lineRef]));
       Object.values(savedState.lines).forEach((line) => {
         this.lines[line.id] = TransportLine.fromObject(line);
       });
       Object.values(savedState.points).map((point) => {
         this.points[point.id] = LinePoint.fromObject(point);
       });
+
       this.lineIdCounter = savedState.lineIdCounter;
       this.parallels = savedState.parallels;
     },
@@ -161,7 +161,7 @@ export const useLinesStore = defineStore({
      */
     checkForParallelLine(lastPoint, currentLine) {
       if (lastPoint.lines.length > 1 && currentLine.pointIds.length > 1) {
-        // get previous point added.
+        // Get previous point added.
         const previousPointRef =
           currentLine.pointIds[currentLine.pointIds.indexOf(lastPoint.id) - 1];
         // Check all Lines for parallels

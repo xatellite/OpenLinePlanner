@@ -1,5 +1,5 @@
 export default class TransportLine {
-  constructor(id, name, type = "tram", color = "#ff0000", pointIds = []) {
+  constructor(name, id=crypto.randomUUID(), type = "tram", color = "#ff0000", pointIds = []) {
     this.id = id;
     this.name = name;
     this.pointIds = pointIds;
@@ -9,8 +9,8 @@ export default class TransportLine {
 
   static fromObject(lineObject) {
     return new TransportLine(
-      lineObject.id,
       lineObject.name,
+      lineObject.id,
       lineObject.type,
       lineObject.color,
       lineObject.pointIds
