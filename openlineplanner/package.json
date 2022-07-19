@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "apexcharts": "^3.35.3",
+    "geographiclib-geodesic": "^2.0.0",
     "mapbox-gl": "^2.8.2",
     "pinia": "^2.0.13",
     "sass": "^1.51.0",

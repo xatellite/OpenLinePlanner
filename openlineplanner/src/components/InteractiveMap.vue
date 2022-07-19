@@ -144,6 +144,13 @@ export default {
     );
 
     watch(
+      () => this.overlayStore.showDistanceTags,
+      () => {
+        this.drawReferencePoints();
+      }
+    );
+
+    watch(
       () => this.overlayStore.overlayData,
       () => {
         this.updateOverlay();
@@ -278,6 +285,12 @@ export default {
       const lngLat = calculateMidPoint(pointOne, pointTwo);
       const domContainer = document.createElement("div");
       domContainer.className = "line-reference-point";
+      if (this.overlayStore.showDistanceTags) {
+        const distanceMarker = document.createElement("span");
+        distanceMarker.innerHTML = lngLat.totalDistance + "m";
+        distanceMarker.className = "line-reference-point__distance";
+        domContainer.appendChild(distanceMarker);
+      }
       const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
       newMarker.isReference = pointOne;
       newMarker.refIndex = refIndex;
@@ -392,8 +405,19 @@ export default {
 }
 
 .line-reference-point {
+  // position: relative;
   border: 12px solid transparent;
   border-radius: 100%;
+
+  &__distance {
+    position: absolute;
+    font-weight: bold;
+    left: -$space-md;
+    top: $space-sm;
+    background: $c-box;
+    border-radius: $br-md;
+    padding: 0 $space-ssm;
+  }
 
   &::before {
     display: block;
@@ -403,5 +427,17 @@ export default {
     border-radius: 100%;
     background-color: rgba($c-box, 0.5);
   }
+}
+
+.mapboxgl-marker {
+  z-index: 3;
+}
+
+.dialog-active {
+  z-index: 5;
+}
+
+.type-station {
+  z-index: 4;
 }
 </style>

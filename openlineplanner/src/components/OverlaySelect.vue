@@ -1,20 +1,18 @@
 <template>
-  <div class="overlay-select box">
-    <div class="overlay-select__box button">
-      <span>
-        <LoadingIcon class="loader" v-if="overlayStore.overlay != 'none' && !overlayStore.overlayData" />
-        <HomeAccountIcon v-else-if="overlayStore.overlay == 'residence'" />
-        <SchoolOutlineIcon v-else-if="overlayStore.overlay == 'schools'" />
-        <BriefcaseAccountIcon v-else-if="overlayStore.overlay == 'jobs'" />
-        <BlurOffIcon v-else />
-      </span>
-      <select @change="handleSelect">
-        <option value="none">None</option>
-        <option value="residence">Residential</option>
-        <option value="schools">Schools</option>
-        <option value="jobs">Jobs/Leisure</option>
-      </select>
-    </div>
+  <div class="overlay-select" @click="handleClick">
+    <span>
+      <LoadingIcon class="loader" v-if="overlayStore.overlay != 'none' && !overlayStore.overlayData" />
+      <HomeAccountIcon v-else-if="overlayStore.overlay == 'residence'" />
+      <SchoolOutlineIcon v-else-if="overlayStore.overlay == 'schools'" />
+      <BriefcaseAccountIcon v-else-if="overlayStore.overlay == 'jobs'" />
+      <BlurOffIcon v-else />
+    </span>
+    <select @change="handleSelect" :value="overlayStore.overlay">
+      <option value="none">None</option>
+      <option value="residence">Residential</option>
+      <option value="schools">Schools</option>
+      <option value="jobs">Jobs/Leisure</option>
+    </select>
   </div>
 </template>
 
@@ -40,9 +38,13 @@ export default {
     };
   },
   methods: {
-    handleSelect(event) {
-      const selection = event.target.value;
+    handleSelect(e) {
+      e.stopPropagation();
+      const selection = e.target.value;
       this.overlayStore.selectOverlay(selection);
+    },
+    handleClick(e) {
+      e.stopPropagation();
     },
   },
 };
@@ -51,28 +53,23 @@ export default {
 <style lang="scss" scoped>
 @import "@/assets/variables.scss";
 .overlay-select {
-  position: absolute;
-  bottom: $space-slg;
-  right: $space-md;
-  padding: $space-sm $space-sm;
+  @extend button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: auto;
+  padding: $space-ssm $space-ssm;
+  margin: 0;
 
-  &__box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: auto;
-    width: auto;
-    padding: $space-ssm $space-ssm;
-
+  & > span {
+    border-right: 1px solid #d6d6d6;
+    padding: $space-ssm;
     & > span {
-      border-right: 1px solid #d6d6d6;
-      padding: $space-ssm;
-      & > span {
-        display: flex;
-        align-items: center;
-        height: 1rem;
-        padding: 0;
-      }
+      display: flex;
+      align-items: center;
+      height: 1rem;
+      padding: 0;
     }
   }
 }
@@ -111,6 +108,7 @@ select {
   box-shadow: none;
   /* Personalize */
   flex: 1;
+  font-size: $font-md;
   padding: 0 1em;
   color: $c-text-primary;
   background-color: darken($c-box, 2);

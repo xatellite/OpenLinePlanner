@@ -17,9 +17,13 @@
     />
     <div
       class="line-point__name-label"
-      v-if="point.name && !(editStore.pointSelected === point.id)"
+      v-if="
+        point.name &&
+        !(editStore.pointSelected === point.id) &&
+        overlayStore.showNameTags
+      "
     >
-      <span>{{point.name}}</span>
+      <span>{{ point.name }}</span>
     </div>
     <MapAddStationPopup
       v-if="editStore.pointSelected === point.id && point.type != 'station'"
@@ -37,6 +41,7 @@ import MapAddStationPopup from "./MapAddStationPopup.vue";
 import MapStationPopup from "./MapStationPopup.vue";
 import { useEditStore } from "../stores/editing";
 import { useLinesStore } from "../stores/lines";
+import { useOverlayStore } from "../stores/overlay";
 import { watch } from "vue";
 
 export default {
@@ -44,6 +49,7 @@ export default {
     return {
       editStore: useEditStore(),
       linesStore: useLinesStore(),
+      overlayStore: useOverlayStore(),
       point: useLinesStore().getPointById(this.pointRef),
     };
   },
@@ -51,7 +57,20 @@ export default {
     watch(
       () => this.linesStore.points[this.pointRef],
       () => {
+        this.$el.parentElement.classList.remove(`type-${this.point.type}`);
         this.point = this.linesStore.getPointById(this.pointRef);
+        this.$el.parentElement.classList.add(`type-${this.point.type}`);
+      }
+    );
+    watch(
+      () => this.editStore.pointSelected,
+      (pointSelected) => {
+        if (this.$el.parentElement.classList.contains("dialog-active")) {
+          this.$el.parentElement.classList.remove("dialog-active");
+        }
+        if (pointSelected == this.point.id) {
+          this.$el.parentElement.classList.add("dialog-active");
+        }
       }
     );
     window.addEventListener("click", this.handleClickOutside);
@@ -104,11 +123,14 @@ export default {
         // Remove old station
         this.linesStore.removePoint(oldStation.id);
         oldStation.lines.forEach((lineRef) => {
-          this.linesStore.checkForParallelLine(this.point, this.linesStore.getLineById(lineRef));
+          this.linesStore.checkForParallelLine(
+            this.point,
+            this.linesStore.getLineById(lineRef)
+          );
         });
         this.editStore.isMerging = null;
         return;
-      // Handle merge during adding.
+        // Handle merge during adding.
       } else if (
         this.editStore.isEditing &&
         !this.point.lines.includes(this.editStore.isEditing.id) &&

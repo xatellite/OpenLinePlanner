@@ -5,6 +5,8 @@ export const useOverlayStore = defineStore({
   state: () => ({
     overlay: "none",
     overlayData: {},
+    showNameTags: true,
+    showDistanceTags: true,
   }),
   actions: {
     selectOverlay(type) {
@@ -23,6 +25,12 @@ export const useOverlayStore = defineStore({
             this.overlayData = JSON.parse(overlayData.layerGeoJson);
           });
       }
+    },
+    toggleNameTags() {
+      this.showNameTags = !this.showNameTags;
+    },
+    toggleDistanceTags() {
+      this.showDistanceTags = !this.showDistanceTags;
     },
   },
 });

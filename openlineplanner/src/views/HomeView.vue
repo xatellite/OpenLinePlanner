@@ -5,7 +5,7 @@
       <Logo />
       <LineList />
     </div>
-    <OverlaySelect />
+    <ViewSettings />
   </main>
   <div class="mobile">
     <h1>OpenLinePlanner is not yet supporting mobile use!</h1>
@@ -19,7 +19,7 @@ import InteractiveMap from "@/components/InteractiveMap.vue";
 import PageFooter from "@/components/PageFooter.vue";
 import Logo from "@/components/PageLogo.vue";
 import LineList from "@/components/LineList.vue";
-import OverlaySelect from "../components/OverlaySelect.vue";
+import ViewSettings from "../components/ViewSettings.vue";
 
 export default {
   components: {
@@ -27,7 +27,7 @@ export default {
     PageFooter,
     Logo,
     LineList,
-    OverlaySelect,
+    ViewSettings
 },
 };
 </script>
@@ -37,6 +37,7 @@ export default {
 @import "@/assets/variables.scss";
 .main-menu-pane {
   position: absolute;
+  z-index: 10;
   top: 0;
   left: 0;
   margin: $space-md;

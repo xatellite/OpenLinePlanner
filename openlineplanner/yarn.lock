@@ -705,6 +705,11 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
+geographiclib-geodesic@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/geographiclib-geodesic/-/geographiclib-geodesic-2.0.0.tgz#3dcdc5a54ccbd46858b9281d9cdb2597dec95069"
+  integrity sha512-qRE11UEF3Zn9VwDFf+Q1ZNn4VW2xwZWeAPiFRrKVSKn2K5lds1jOxhxgFJwbKh5YV58ME6+LGiRtm4A0CjFyiQ==
+
 geojson-vt@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/geojson-vt/-/geojson-vt-3.2.1.tgz#f8adb614d2c1d3f6ee7c4265cad4bbf3ad60c8b7"
@@ -1400,11 +1405,6 @@ vue-router@^4.0.14:
   integrity sha512-xa+pIN9ZqORdIW1MkN2+d9Ui2pCM1b/UMgwYUCZOiFYHAvz/slKKBDha8DLrh5aCG/RibtrpyhKjKOZ85tYyWg==
   dependencies:
     "@vue/devtools-api" "^6.0.0"
-
-vue-tailwind-color-picker@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/vue-tailwind-color-picker/-/vue-tailwind-color-picker-1.0.6.tgz#42014d74dd860afff7276b6420940797c27255b6"
-  integrity sha512-Ihe97uy9cdfb1s3oSQrC6CjN/VQjDg7O1GXP4IvwsKHyy9Zjp6Drrn8K0Rm55//MoZlWwLoGGdWj9INFL2hHTw==
 
 vue3-apexcharts@^1.4.1:
   version "1.4.1"
