@@ -2,20 +2,23 @@
   <div class="box line-list">
     <div class="line-list__center-box">
       <h1 class="line-list__title">Open-Line-Planner</h1>
-      <a class="line-list__subtitle" href="https://github.com/TheNewCivilian/OpenLinePlanner">Check Github to Contribute</a>
+      <a
+        class="line-list__subtitle"
+        href="https://github.com/TheNewCivilian/OpenLinePlanner"
+        >Contribute on Github</a
+      >
     </div>
     <hr />
     <div class="line-list__container">
-    <div
-      class="line-list__item"
-      v-for="line in linesStore.lines"
-      :key="`${line.name}-list-entry`"
-    >
-      <LineElement :line="line"/>
-      <hr />
+      <div
+        class="line-list__item"
+        v-for="line in linesStore.lines"
+        :key="`${line.name}-list-entry`"
+      >
+        <LineElement :line="line" />
+      </div>
     </div>
-    </div>
-    
+
     <div class="line-list__item__row">
       <button @click="addLine"><PlusIcon /></button>
       <span class="grow">Add new Line</span>
@@ -39,7 +42,7 @@ export default {
     PlusIcon,
     ActionToolbar,
     LineElement,
-},
+  },
   data() {
     return {
       linesStore: useLinesStore(),
@@ -85,6 +88,7 @@ export default {
         padding: $space-ssm;
       }
     }
+    border-bottom: 1px solid rgba($c-text-primary, 0.2);
   }
 
   &__title {
