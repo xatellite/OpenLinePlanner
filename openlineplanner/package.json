@@ -8,13 +8,15 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@fontsource/roboto": "^4.5.7",
     "apexcharts": "^3.35.3",
     "geographiclib-geodesic": "^2.0.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
     "mapbox-gl": "^2.8.2",
     "pinia": "^2.0.13",
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
-    "typeface-roboto": "^1.1.13",
     "vue": "^3.2.33",
     "vue-color-kit": "^1.0.5",
     "vue-material-design-icons": "^5.0.0",

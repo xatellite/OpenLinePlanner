@@ -1,7 +1,7 @@
 <template>
   <div class="overlay-select" @click="handleClick">
     <span>
-      <LoadingIcon class="loader" v-if="overlayStore.overlay != 'none' && !overlayStore.overlayData" />
+      <LoadingIcon class="loader" v-if="overlayStore.overlay != 'none' && Object.keys(overlayStore.overlayData).length === 0" />
       <HomeAccountIcon v-else-if="overlayStore.overlay == 'residence'" />
       <SchoolOutlineIcon v-else-if="overlayStore.overlay == 'schools'" />
       <BriefcaseAccountIcon v-else-if="overlayStore.overlay == 'jobs'" />

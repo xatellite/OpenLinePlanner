@@ -57,9 +57,11 @@ export default {
     watch(
       () => this.linesStore.points[this.pointRef],
       () => {
-        this.$el.parentElement.classList.remove(`type-${this.point.type}`);
-        this.point = this.linesStore.getPointById(this.pointRef);
-        this.$el.parentElement.classList.add(`type-${this.point.type}`);
+        if (this.linesStore.points[this.pointRef]) {
+          this.$el.parentElement.classList.remove(`type-${this.point.type}`);
+          this.point = this.linesStore.getPointById(this.pointRef);
+          this.$el.parentElement.classList.add(`type-${this.point.type}`);
+        }
       }
     );
     watch(
@@ -169,7 +171,7 @@ export default {
     bottom: 110%;
     width: fit-content;
     padding: 1px $space-ssm;
-    font-weight: bold;
+    font-weight: 700;
     white-space: nowrap;
     background-color: $c-box;
     border: 2px solid $c-text-primary;

@@ -1,5 +1,9 @@
 import { defineStore } from "pinia";
 
+const loadStationData = async () => {
+  
+}
+
 export const usePaxStore = defineStore({
   id: "pax",
   state: () => ({
@@ -12,15 +16,9 @@ export const usePaxStore = defineStore({
       this.isCurrent = isCurrent;
       return isCurrent;
     },
-    async getPaxForStation(stationRef, linesStore) {
-      if (this.isCurrent) {
-        return this.stationData.stationInfo.find(
-          (station) => station.id === stationRef
-        );
-      }
+    async loadStationData(linesStore) {
       const stations = {
-        stations: linesStore
-          .getPoints
+        stations: linesStore.getPoints
           .filter((point) => point.type === "station")
           .map((station) => ({
             lat: station.lat,
@@ -50,6 +48,21 @@ export const usePaxStore = defineStore({
         this.setCurrent(true);
       }
       this.currentRequestController = null;
+    },
+    async getPaxForAllStations(linesStore) {
+      if (this.isCurrent) {
+        return this.stationData.stationInfo;
+      }
+      await this.loadStationData(linesStore);
+      return this.stationData.stationInfo;
+    },
+    async getPaxForStation(stationRef, linesStore) {
+      if (this.isCurrent) {
+        return this.stationData.stationInfo.find(
+          (station) => station.id === stationRef
+        );
+      }
+      await this.loadStationData(linesStore);
       return this.stationData.stationInfo.find(
         (station) => station.id === stationRef
       );

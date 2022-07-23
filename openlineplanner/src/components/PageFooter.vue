@@ -26,7 +26,7 @@ export default {};
   box-sizing: border-box;
 
   &__center {
-    font-weight: bold;
+    font-weight: 700;
     text-align: center;
   }
 

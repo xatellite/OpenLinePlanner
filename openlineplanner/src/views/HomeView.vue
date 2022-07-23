@@ -11,6 +11,7 @@
     <h1>OpenLinePlanner is not yet supporting mobile use!</h1>
     <span>Please use your web browser or tablet to start planning</span>
   </div>
+  <ExportLoader />
   <PageFooter />
 </template>
 
@@ -19,7 +20,8 @@ import InteractiveMap from "@/components/InteractiveMap.vue";
 import PageFooter from "@/components/PageFooter.vue";
 import Logo from "@/components/PageLogo.vue";
 import LineList from "@/components/LineList.vue";
-import ViewSettings from "../components/ViewSettings.vue";
+import ExportLoader from "@/components/ExportLoader.vue";
+import ViewSettings from "@/components/ViewSettings.vue";
 
 export default {
   components: {
@@ -27,8 +29,9 @@ export default {
     PageFooter,
     Logo,
     LineList,
-    ViewSettings
-},
+    ExportLoader,
+    ViewSettings,
+  },
 };
 </script>
 

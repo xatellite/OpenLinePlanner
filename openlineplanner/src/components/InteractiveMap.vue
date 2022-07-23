@@ -1,5 +1,5 @@
 <template>
-  <div id="map" />
+  <div id="map" class="map" />
 </template>
 
 <script>
@@ -13,6 +13,7 @@ import { calculateMidPoint } from "@/helpers/geometry";
 import VueApexCharts from "vue3-apexcharts";
 import { usePaxStore } from "../stores/pax";
 import { useOverlayStore } from "../stores/overlay";
+import html2canvas from "html2canvas";
 
 export default {
   setup() {
@@ -44,10 +45,38 @@ export default {
       style: "mapbox://styles/mapbox/light-v9",
       center: [16.4585, 48.2284],
       zoom: 12,
+      preserveDrawingBuffer: true,
     });
     this.map.on("load", () => {
       this.loadState();
     });
+    // Receive and return export event data
+    document.addEventListener("generateMapExport", () => {
+      this.editStore.stopAllInputs();
+      this.$el.classList.add("print");
+      this.map.resize();
+      this.centerMap();
+      this.map.once("moveend", () => {
+        nextTick(() => {
+          html2canvas(this.$el).then((canvas) => {
+            const heightRatio = canvas.height / canvas.width;
+            this.$el.dispatchEvent(
+              new CustomEvent("mapExportGenerated", {
+                detail: {
+                  urlData: canvas.toDataURL(),
+                  heightRatio,
+                },
+                bubbles: true,
+              })
+            );
+            // Remove Map Styling again
+            this.$el.classList.remove("print");
+            this.map.resize();
+          });
+        });
+      });
+    });
+    // Handle mouse click
     this.map.on("mousedown", (e) => {
       if (e.originalEvent.target == this.map.getCanvas()) {
         const { lng, lat } = e.lngLat;
@@ -105,7 +134,6 @@ export default {
       }
       if (name === "removeLine") {
         const line = args[0];
-        console.log(line);
         this.removeLine(line);
         after((pointsToBeRemoved) => {
           pointsToBeRemoved.forEach((pointRef) => {
@@ -170,6 +198,25 @@ export default {
       this.linesStore.getPoints.forEach((point) => {
         this.addPoint(point);
       });
+      this.centerMap();
+    },
+    centerMap() {
+      if (Object.entries(this.pointMarkers).length > 0) {
+        var bounds = new mapboxgl.LngLatBounds();
+        Object.values(this.pointMarkers).forEach((marker) => {
+          bounds.extend(marker.getLngLat());
+        });
+        this.map.fitBounds(bounds, {
+          padding: {top: 300, bottom:100, left: 100, right: 100},
+        });
+      } else {
+        this.map.flyTo({
+          center: [
+            this.map.getCenter().lng - 0.001,
+            this.map.getCenter().lat - 0.001,
+          ],
+        });
+      }
     },
     addLine(line) {
       this.map.addSource(line.getLineLongId(), {
@@ -399,9 +446,16 @@ export default {
 
 <style lang="scss">
 @import "@/assets/variables.scss";
-#map {
+.map {
   position: relative;
   height: calc(100vh);
+}
+
+.print {
+  position: absolute;
+  top: 100%;
+  height: 1050px;
+  width: 1475px;
 }
 
 .line-reference-point {
@@ -411,7 +465,7 @@ export default {
 
   &__distance {
     position: absolute;
-    font-weight: bold;
+    font-weight: 700;
     left: -$space-md;
     top: $space-sm;
     background: $c-box;

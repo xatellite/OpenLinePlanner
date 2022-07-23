@@ -1,5 +1,6 @@
 <script setup>
 import { RouterView } from "vue-router";
+import "@fontsource/roboto";
 </script>
 
 <template>
@@ -8,8 +9,6 @@ import { RouterView } from "vue-router";
 </template>
 
 <style lang="scss">
-@import '../node_modules/typeface-roboto/index.css';
-
 body {
   margin: 0;
 }

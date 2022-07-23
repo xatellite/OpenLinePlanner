@@ -3,8 +3,6 @@ import gedesic from "geographiclib-geodesic";
 export const calculateMidPoint = (latLngA, latLngB) => {
   const geod84 = gedesic.Geodesic.WGS84;
   const totalDistance = Math.round(geod84.Inverse(latLngA.lat, latLngA.lng, latLngB.lat, latLngB.lng).s12);
-  console.log(geod84.Inverse(latLngA.lat, latLngA.lng, latLngB.lat, latLngB.lng));
-  console.log(totalDistance);
 
   function toRadians(degrees) {
     return degrees * (Math.PI / 180);

@@ -9,31 +9,23 @@
         @mousedown="handleMouseDown"
       />
       <div class="station-popup__actions">
-        <span v-if="editStore.isMerging">Merging active! Select other station to merge</span>
-        <button @click="toggleMerge"><TransitConnectionHorizontalIcon /></button>
+        <span v-if="editStore.isMerging"
+          >Merging active! Select other station to merge</span
+        >
+        <button @click="toggleMerge">
+          <TransitConnectionHorizontalIcon />
+        </button>
         <button v-if="isLast()" @click="extendLine"><PlusIcon /></button>
         <button class="trash" @click="removePoint">
           <TrashCanOutlineIcon />
         </button>
       </div>
     </div>
-    <div class="charts" v-if="seriesTransport.length > 0 && paxStore.isCurrent">
-      <div class="chart-container">
-        <apexchart
-          width="300"
-          type="bar"
-          :options="optionsTransport"
-          :series="seriesTransport"
-        />
-      </div>
-      <div class="chart-container">
-        <apexchart
-          width="300"
-          type="bar"
-          :options="optionsType"
-          :series="seriesType"
-        />
-      </div>
+    <div v-if="seriesTransport.length > 0 && paxStore.isCurrent">
+      <MapStationCharts
+        :seriesType="seriesType"
+        :seriesTransport="seriesTransport"
+      />
     </div>
     <span v-else> loading.. </span>
   </div>
@@ -47,6 +39,7 @@ import PlusIcon from "vue-material-design-icons/Plus.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import TransitConnectionHorizontalIcon from "vue-material-design-icons/TransitConnectionHorizontal.vue";
 import { useEditStore } from "../stores/editing";
+import MapStationCharts from "./MapStationCharts.vue";
 
 export default {
   props: {
@@ -56,42 +49,13 @@ export default {
     PlusIcon,
     TrashCanOutlineIcon,
     TransitConnectionHorizontalIcon,
+    MapStationCharts,
   },
   data() {
     return {
       paxStore: usePaxStore(),
       linesStore: useLinesStore(),
       editStore: useEditStore(),
-      optionsTransport: {
-        chart: {
-          id: "station-chart",
-        },
-        xaxis: {
-          categories: ["total", "foot", "bike", "car"],
-        },
-        colors: ["#424242", "#5DE947", "#54BA7D", "#BA546C"],
-        plotOptions: {
-          bar: {
-            horizontal: true,
-            distributed: true,
-          },
-        },
-      },
-      optionsType: {
-        chart: {
-          id: "station-chart",
-        },
-        xaxis: {
-          categories: ["total", "leisure", "school", "residence", "work"],
-        },
-        colors: ["#424242", "#47AEE9", "#EEC83F", "#54BA7D", "#BA546C"],
-        plotOptions: {
-          bar: {
-            horizontal: true,
-            distributed: true,
-          },
-        },
-      },
       seriesType: [],
       seriesTransport: [],
       lineExtendIndex: -1,
@@ -196,7 +160,7 @@ export default {
   &__title {
     font-size: $font-lg;
     padding: $space-ssm;
-    font-weight: bold;
+    font-weight: 700;
     padding: auto 0;
     pointer-events: auto;
     border: 0;
@@ -217,14 +181,5 @@ export default {
 
 .trash {
   color: red;
-}
-.charts {
-  display: flex;
-}
-.chart-container {
-  font-size: $font-md;
-  border: 1px solid $c-primary-light;
-  border-radius: $br-md;
-  margin: $space-ssm;
 }
 </style>

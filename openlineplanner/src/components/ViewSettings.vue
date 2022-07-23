@@ -84,6 +84,7 @@ export default {
 
 .view-settings {
   position: absolute;
+  z-index: 10;
   bottom: $space-slg;
   right: $space-md;
   padding: $space-sm $space-sm;

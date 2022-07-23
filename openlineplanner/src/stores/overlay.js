@@ -6,7 +6,8 @@ export const useOverlayStore = defineStore({
     overlay: "none",
     overlayData: {},
     showNameTags: true,
-    showDistanceTags: true,
+    showDistanceTags: false,
+    exporting: false,
   }),
   actions: {
     selectOverlay(type) {

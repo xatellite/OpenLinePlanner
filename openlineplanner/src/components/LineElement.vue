@@ -55,7 +55,7 @@ export default {
     TrashCanOutlineIcon,
     ColorPicker,
     ArrowDownRightIcon,
-},
+  },
   data() {
     return {
       linesStore: useLinesStore(),
@@ -113,7 +113,7 @@ export default {
     padding: $space-ssm $space-ssm;
 
     &__title {
-      font-weight: bold;
+      font-weight: 700;
     }
 
     svg {
@@ -126,6 +126,7 @@ export default {
     background-color: transparent;
     text-decoration: underline;
     font-size: $font-md;
+    width: 0;
   }
 
   .grow {
