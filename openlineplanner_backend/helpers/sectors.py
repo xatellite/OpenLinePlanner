@@ -11,9 +11,9 @@ def define_sectors(steps, layer_references):
 
     if sector_lat not in sectors:
       sectors[sector_lat] = {}
-      sectors[sector_lat][sector_lng] = {"children":[reference], "stations": []}
+      sectors[sector_lat][sector_lng] = {"children":[reference], "stations_possible": []}
     elif sector_lng not in sectors[sector_lat]:
-      sectors[sector_lat][sector_lng] = {"children":[reference], "stations": []}
+      sectors[sector_lat][sector_lng] = {"children":[reference], "stations_possible": []}
     else:
       sectors[sector_lat][sector_lng]["children"].append(reference)
 
