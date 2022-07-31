@@ -1,8 +1,11 @@
 import falcon
-from main import calculate_passengers_to_stations, find_optimal_station_spot_on_route, get_residence_geo_json, get_school_geo_json, get_jobs_geo_json
+from falcon.media.validators import jsonschema
+from main import data_layer_to_geo_json #, find_optimal_station_spot_on_route
+from schemas import passenger_resource_schema, overlay_resource_schema
 import json
 import numpy as np
 
+from processing import calculate_inhabitants_by_stations
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -13,46 +16,39 @@ class NpEncoder(json.JSONEncoder):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
 
-
 class PassengerResource:
+    @jsonschema.validate(passenger_resource_schema)
     def on_post(self, req, resp):
         obj = req.get_media()
 
         # ToDo Sanity check
         stations = obj.get('stations')
        
-        station_info = calculate_passengers_to_stations(stations)
+        station_info = calculate_inhabitants_by_stations(stations)
         station_info = json.loads(json.dumps(station_info, cls=NpEncoder))
 
-        resp.media = { "stationInfo": station_info};
+        resp.media = { "stationInfo": station_info}
 
-class StopFinder:
-    def on_post(self, req, resp):
-        obj = req.get_media()
+# class FinderResource:
+#     def on_post(self, req, resp):
+#         obj = req.get_media()
 
-        # ToDo Sanity check
-        stations = obj.get('stations')
-        route = obj.get('route')
+#         # ToDo Sanity check
+#         stations = obj.get('stations')
+#         route = obj.get('route')
        
-        station_info = find_optimal_station_spot_on_route(stations, route)
+#         station_info = find_optimal_station_spot_on_route(stations, route)
 
-        resp.media = { "optimalStation": station_info};
-
-class GetOverlay:
+#         resp.media = { "optimalStation": station_info};
+class OverlayResource:
+    @jsonschema.validate(overlay_resource_schema)
     def on_post(self, req, resp):
         obj = req.get_media()
 
         # ToDo Sanity check
         layer_name = obj.get('layer')
-        layer_data = {}
-        if layer_name == "residence":
-           layer_data = get_residence_geo_json()
-        elif layer_name == "schools":
-           layer_data = get_school_geo_json()
-        elif layer_name == "jobs":
-           layer_data = get_jobs_geo_json()
-
-        resp.media = { "layerGeoJson": layer_data};
+        layer_data = data_layer_to_geo_json(layer_name)
+        resp.media = { "layerGeoJson": layer_data}
 
 
 application = app = falcon.App(middleware=falcon.CORSMiddleware(
@@ -60,5 +56,5 @@ application = app = falcon.App(middleware=falcon.CORSMiddleware(
     allow_credentials='*',
 ))
 app.add_route('/station-info', PassengerResource())
-app.add_route('/find-station', StopFinder())
-app.add_route('/overlay', GetOverlay())
+# app.add_route('/find-station', FinderResource())
+app.add_route('/overlay', OverlayResource())

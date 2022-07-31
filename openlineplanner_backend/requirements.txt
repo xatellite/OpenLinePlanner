@@ -2,3 +2,4 @@ numpy
 gunicorn
 geopandas
 falcon
+jsonschema
