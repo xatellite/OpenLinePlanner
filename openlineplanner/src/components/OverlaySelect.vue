@@ -74,32 +74,6 @@ export default {
   }
 }
 
-.loader {
-  -webkit-animation: infiniteRotate 2s linear infinite;
-  animation: infiniteRotate 2s linear infinite;
-  height: 1rem;
-  padding: 0;
-}
-
-/* Safari 4.0 - 8.0 */
-@-webkit-keyframes infiniteRotate {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-/* Standard syntax */
-@keyframes infinite-rotate {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-
 select {
   /* Reset Select */
   appearance: none;

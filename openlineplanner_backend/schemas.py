@@ -21,6 +21,7 @@ point_list_schema = {
       "lat" : { "type": "number" },
       "lng" : { "type": "number" }
     },
+    "required":["lat", "lng"]
   },
   "minItems": 2,
   "uniqueItems": True,

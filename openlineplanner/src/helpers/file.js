@@ -13,7 +13,7 @@ export const readJSONFile = (file, callback) => {
     callback(JSON.parse(reader.result));
   };
   reader.readAsText(file);
-}
+};
 
 export const downloadJSON = (jsonData, filename = "Lines.save") => {
   let body = document.body;

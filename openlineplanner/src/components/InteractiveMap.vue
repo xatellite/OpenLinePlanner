@@ -202,7 +202,7 @@ export default {
     },
     centerMap() {
       if (Object.entries(this.pointMarkers).length > 0) {
-        var bounds = new mapboxgl.LngLatBounds();
+        const bounds = new mapboxgl.LngLatBounds();
         Object.values(this.pointMarkers).forEach((marker) => {
           bounds.extend(marker.getLngLat());
         });

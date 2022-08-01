@@ -26,7 +26,7 @@ import { useLinesStore } from "../stores/lines";
 import { selectFile, downloadJSON, readJSONFile } from "../helpers/file";
 import { usePaxStore } from "../stores/pax";
 import ApexCharts from "apexcharts";
-import { useOverlayStore } from '../stores/overlay';
+import { useOverlayStore } from "../stores/overlay";
 
 export default {
   components: {
@@ -97,128 +97,136 @@ export default {
 
           doc.setFont("helvetica", "normal", 700);
           await Promise.all(
-            stationsData.map(async (stationData, stationIndex) => {
-              const seriesTransport = [
-                {
-                  name: "series-1",
-                  data: [
-                    stationData.total,
-                    stationData.ped,
-                    stationData.bike,
-                    stationData.car,
+            Object.values(stationsData).map(
+              async (stationData, stationIndex) => {
+                const seriesTransport = [
+                  {
+                    name: "series-1",
+                    data: [
+                      stationData.total,
+                      stationData.ped,
+                      stationData.bike,
+                      stationData.car,
+                    ],
+                  },
+                ];
+                const seriesType = [
+                  {
+                    name: "series-1",
+                    data: [
+                      stationData.total,
+                      stationData.leisure,
+                      stationData.school,
+                      stationData.residential,
+                      stationData.work,
+                    ],
+                  },
+                ];
+                const optionsTransport = {
+                  plotOptions: {
+                    bar: {
+                      horizontal: true,
+                      distributed: true,
+                    },
+                  },
+                  colors: ["#424242", "#5DE947", "#54BA7D", "#BA546C"],
+                  xaxis: {
+                    categories: ["total", "foot", "bike", "car"],
+                  },
+                  chart: {
+                    id: "station-chart",
+                    type: "bar",
+                    animations: {
+                      enabled: false,
+                    },
+                    height: 300,
+                    width: 300,
+                  },
+                  series: seriesTransport,
+                };
+
+                const optionsType = {
+                  chart: {
+                    id: "station-chart",
+                    type: "bar",
+                    animations: {
+                      enabled: false,
+                    },
+                    height: 300,
+                    width: 300,
+                  },
+                  colors: [
+                    "#424242",
+                    "#47AEE9",
+                    "#EEC83F",
+                    "#54BA7D",
+                    "#BA546C",
                   ],
-                },
-              ];
-              const seriesType = [
-                {
-                  name: "series-1",
-                  data: [
-                    stationData.total,
-                    stationData.leisure,
-                    stationData.school,
-                    stationData.residential,
-                    stationData.work,
-                  ],
-                },
-              ];
-              const optionsTransport = {
-                plotOptions: {
-                  bar: {
-                    horizontal: true,
-                    distributed: true,
+                  plotOptions: {
+                    bar: {
+                      horizontal: true,
+                      distributed: true,
+                    },
                   },
-                },
-                colors: ["#424242", "#5DE947", "#54BA7D", "#BA546C"],
-                xaxis: {
-                  categories: ["total", "foot", "bike", "car"],
-                },
-                chart: {
-                  id: "station-chart",
-                  type: "bar",
-                  animations: {
-                    enabled: false,
+                  series: seriesType,
+                  xaxis: {
+                    categories: [
+                      "total",
+                      "leisure",
+                      "school",
+                      "residence",
+                      "work",
+                    ],
                   },
-                  height: 300,
-                  width: 300,
-                },
-                series: seriesTransport,
-              };
+                };
 
-              const optionsType = {
-                chart: {
-                  id: "station-chart",
-                  type: "bar",
-                  animations: {
-                    enabled: false,
-                  },
-                  height: 300,
-                  width: 300,
-                },
-                colors: ["#424242", "#47AEE9", "#EEC83F", "#54BA7D", "#BA546C"],
-                plotOptions: {
-                  bar: {
-                    horizontal: true,
-                    distributed: true,
-                  },
-                },
-                series: seriesType,
-                xaxis: {
-                  categories: [
-                    "total",
-                    "leisure",
-                    "school",
-                    "residence",
-                    "work",
-                  ],
-                },
-              };
+                const canvasTransportDiv = document.createElement("div");
+                document.body.appendChild(canvasTransportDiv);
+                const transportChart = new ApexCharts(
+                  canvasTransportDiv,
+                  optionsTransport
+                );
+                await transportChart.render();
+                const transportChartImage = await transportChart.dataURI();
+                document.body.removeChild(canvasTransportDiv);
 
-              const canvasTransportDiv = document.createElement("div");
-              document.body.appendChild(canvasTransportDiv);
-              const transportChart = new ApexCharts(
-                canvasTransportDiv,
-                optionsTransport
-              );
-              await transportChart.render();
-              const transportChartImage = await transportChart.dataURI();
-              document.body.removeChild(canvasTransportDiv);
+                const canvasTypeDiv = document.createElement("div");
+                document.body.appendChild(canvasTypeDiv);
+                const typeChart = new ApexCharts(canvasTypeDiv, optionsType);
+                await typeChart.render();
+                const typeChartImage = await typeChart.dataURI();
+                document.body.removeChild(canvasTypeDiv);
 
-              const canvasTypeDiv = document.createElement("div");
-              document.body.appendChild(canvasTypeDiv);
-              const typeChart = new ApexCharts(canvasTypeDiv, optionsType);
-              await typeChart.render();
-              const typeChartImage = await typeChart.dataURI();
-              document.body.removeChild(canvasTypeDiv);
+                let stationName = this.linesStore.getPointById(
+                  stationData.id
+                ).name;
+                if (stationName.length <= 0) {
+                  stationName = `Station ${stationIndex + 1}`;
+                }
+                if (stationIndex >= 4 && stationIndex % 4 === 0) {
+                  doc.insertPage();
+                }
+                const xOffset = 25 + (stationIndex % 2) * 148;
+                const yOffset = 25 + Math.floor((stationIndex % 4) / 2) * 105;
 
-              let stationName = this.linesStore.getPointById(
-                stationData.id
-              ).name;
-              if (stationName.length <= 0) {
-                stationName = `Station ${stationIndex + 1}`;
+                doc.text(stationName, xOffset, yOffset);
+                doc.addImage({
+                  imageData: transportChartImage.imgURI,
+                  x: xOffset,
+                  y: yOffset + 4,
+                  width: 52,
+                  height: 52,
+                });
+
+                doc.addImage({
+                  imageData: typeChartImage.imgURI,
+                  x: xOffset + 52,
+                  y: yOffset + 4,
+                  width: 52,
+                  height: 52,
+                });
               }
-              if (stationIndex >= 4 && stationIndex % 4 === 0) {
-                doc.insertPage();
-              }
-              const xOffset = 25 + (stationIndex % 2) * 148;
-              const yOffset = 25 + Math.floor((stationIndex % 4) / 2) * 105;
-
-              doc.text(stationName, xOffset, yOffset);
-              doc.addImage({
-                imageData: transportChartImage.imgURI,
-                x: xOffset,
-                y: yOffset + 4,
-                width: 52,
-                height: 52,
-              });
-
-              doc.addImage({
-                imageData: typeChartImage.imgURI,
-                x: xOffset + 52,
-                y: yOffset + 4,
-                width: 52,
-                height: 52,
-              });
-            })
+            )
           );
           doc.save("export.pdf");
           this.overlayStore.exporting = false;

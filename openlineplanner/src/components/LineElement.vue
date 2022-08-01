@@ -2,7 +2,12 @@
   <div class="line-element">
     <div class="line-element__data">
       <button @click="openColorPick"><IconLine :color="line.color" /></button>
-      <ColorPicker v-if="selectColor == true" :initColor="line.color" :handleColorChange="updateColor" :closeAction="() => selectColor = false"/>
+      <ColorPicker
+        v-if="selectColor == true"
+        :initColor="line.color"
+        :handleColorChange="updateColor"
+        :closeAction="() => (selectColor = false)"
+      />
       <input
         v-if="editStore.isEditing == line"
         type="text"
@@ -11,13 +16,20 @@
         @change="editName"
       />
       <span v-else class="grow">{{ line.name }}</span>
-      <!-- <button v-if="editStore.isEditing == line"><BusStopIcon /></button> -->
       <button
         v-if="editStore.isEditing != line"
         class="line-element__edit"
         @click="toggleEditing"
       >
         <PencilOutlineIcon />
+      </button>
+      <button
+        v-if="editStore.isEditing == line || findStationLoading"
+        class="line-element__station"
+        @click="findStation"
+      >
+        <LoadingIcon v-if="findStationLoading" class="loader" />
+        <BusStopIcon v-else />
       </button>
       <button
         v-if="editStore.isEditing == line"
@@ -27,18 +39,24 @@
         <TrashCanOutlineIcon />
       </button>
     </div>
-    <div class="line-element__warning" v-if="editStore.isEditing === line && editStore.isExtending != null">
-      <span class="line-element__warning__title">{{line.name}} is being extended!</span>
+    <div
+      class="line-element__warning"
+      v-if="editStore.isEditing === line && editStore.isExtending != null"
+    >
+      <span class="line-element__warning__title"
+        >{{ line.name }} is being extended!</span
+      >
       <span>To end the line stop editing (Enter) <ArrowDownRightIcon /></span>
     </div>
   </div>
 </template>
 
 <script>
-// import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import PencilOutlineIcon from "vue-material-design-icons/PencilOutline.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import ArrowDownRightIcon from "vue-material-design-icons/ArrowDownRight.vue";
+import BusStopIcon from "vue-material-design-icons/BusStop.vue";
+import LoadingIcon from "vue-material-design-icons/Loading.vue";
 import IconLine from "./icons/IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
@@ -50,17 +68,19 @@ export default {
   },
   components: {
     IconLine,
-    // BusStopIcon,
+    BusStopIcon,
     PencilOutlineIcon,
     TrashCanOutlineIcon,
     ColorPicker,
     ArrowDownRightIcon,
+    LoadingIcon,
   },
   data() {
     return {
       linesStore: useLinesStore(),
       editStore: useEditStore(),
       selectColor: false,
+      findStationLoading: false,
     };
   },
   methods: {
@@ -87,6 +107,57 @@ export default {
       this.editStore.isEditing = null;
       this.editStore.isExtending = null;
       this.linesStore.removeLine(this.line);
+    },
+    findStation() {
+      if (!this.findStationLoading) {
+        this.findStationLoading = true;
+        const route = [];
+        const stations = [];
+        const points = Object.values(this.linesStore.points);
+        if (points.length <= 0) {
+          return;
+        }
+        points.forEach((point) => {
+          if (point.type === "station") {
+            stations.push({
+              lat: point.lat,
+              lng: point.lng,
+              id: point.id,
+            });
+          }
+        });
+        this.linesStore
+          .getLineById(this.line.id)
+          .pointIds.forEach((pointRef) => {
+            const point = this.linesStore.getPointById(pointRef);
+            route.push({
+              lat: point.lat,
+              lng: point.lng,
+              id: point.id,
+            });
+          });
+
+        fetch("http://127.0.0.1:8000/find-station", {
+          method: "POST",
+          body: JSON.stringify({ route, stations }),
+          headers: {
+            "Content-type": "application/json",
+          },
+        })
+          .then((data) => data.json())
+          .then((stationProposal) => {
+            const newPoint = this.linesStore.addPoint(
+              stationProposal.optimalStation.lat,
+              stationProposal.optimalStation.lng,
+              this.line,
+              stationProposal.optimalStation.index
+            );
+            newPoint.type = "station";
+          })
+          .finally(() => {
+            this.findStationLoading = false;
+          });
+      }
     },
   },
 };

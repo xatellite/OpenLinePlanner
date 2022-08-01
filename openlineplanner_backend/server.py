@@ -56,7 +56,7 @@ class OverlayResource:
         obj = req.get_media()
 
         # ToDo Sanity check
-        layer_name = obj.get('layer')
+        layer_name = obj.get('layer_name')
         layer_data = data_layer_to_geo_json(layer_name)
         resp.media = { "layerGeoJson": layer_data}
 

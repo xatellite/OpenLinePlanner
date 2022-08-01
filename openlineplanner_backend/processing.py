@@ -48,7 +48,10 @@ def calculate_inhabitants_by_stations(stations, method = "absolute", decision_di
           station_relations[relation["id"]]["bike"] += peopleCount
         station_relations[relation["id"]]["total"] += peopleCount
         station_relations[relation["id"]][field["type"]] += peopleCount
-  
+  # Add station wich have not been mentioned
+  for station in stations:
+    if station["id"] not in station_relations:
+      station_relations[station["id"]] = empty_relation
   return station_relations
 
 def generate_geojson(stations):
@@ -111,6 +114,7 @@ def find_optimal_station_spot_on_route(stations, route, method = "absolute", dec
 
   updated_data_layers = define_layers(modified_data_layers)
   points_to_check = split_path_into_points(route)
+
   relations = calculate_relations(points_to_check, updated_data_layers, decision_distance, method="all")
 
   # Calculate pax
@@ -118,21 +122,21 @@ def find_optimal_station_spot_on_route(stations, route, method = "absolute", dec
   empty_relation = {"total": 0, "residential": 0, "work": 0, "school": 0}
   for data_layer in modified_data_layers:
     for relation_index in relations[data_layer]:
-      for relation in relations[data_layer][relation_index]:
+      for relation_station in relations[data_layer][relation_index]:
         for field in modified_data_layers[data_layer]["fields"]:
           peopleCount = modified_data_layers[data_layer]["data"][field["name"]][relation_index]
 
           if method == "relative":
-            peopleCount = peopleCount * (1 / math.sqrt(relation["d"]))
+            peopleCount = peopleCount * (1 / math.sqrt(relation_station["d"]))
           elif method != "absolute":
             # ToDo: Handle differently
             raise Exception("Method not allowed")
           
-          station_id = relation["station"]["id"]
+          station_id = relation_station["station"]["id"]
           if station_id not in station_relations:
             station_relations[station_id] = empty_relation.copy()
           
-          station_relations[station_id]["geometry"] = relation["station"]
+          station_relations[station_id]["geometry"] = relation_station["station"]
           station_relations[station_id]["total"] += peopleCount
           station_relations[station_id][field["type"]] += peopleCount
 

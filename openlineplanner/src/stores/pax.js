@@ -33,7 +33,7 @@ export const usePaxStore = defineStore({
       this.currentRequestController = new AbortController();
       const abortSignal = this.currentRequestController.signal;
       const response = await fetch(
-        "https://api.openlineplanner.xatellite.io/station-info",
+        import.meta.env.VITE_API_ENDPOINT + "/station-info",
         {
           method: "POST",
           body: JSON.stringify(stations),
@@ -58,14 +58,10 @@ export const usePaxStore = defineStore({
     },
     async getPaxForStation(stationRef, linesStore) {
       if (this.isCurrent) {
-        return this.stationData.stationInfo.find(
-          (station) => station.id === stationRef
-        );
+        return this.stationData.stationInfo[stationRef];
       }
       await this.loadStationData(linesStore);
-      return this.stationData.stationInfo.find(
-        (station) => station.id === stationRef
-      );
+      return this.stationData.stationInfo[stationRef];
     },
   },
 });

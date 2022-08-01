@@ -9,4 +9,4 @@ def data_layer_to_geo_json(data_layer_name):
   Returns:
       geojson: valid representation of data_layer
   """
-  return DATA_LAYERS[data_layer_name].to_json()
+  return DATA_LAYERS[data_layer_name]["data"].to_json()

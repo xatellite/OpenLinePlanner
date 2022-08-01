@@ -1,7 +1,7 @@
 name: Frontend build + deploy
 
 concurrency: 
-  group: ${{ github.ref }}
+  group: ${{ github.ref }}-fe
   cancel-in-progress: true
 
 on:

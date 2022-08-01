@@ -63,3 +63,29 @@ a {
   text-decoration: none;
   color: $c-text-primary
 }
+
+
+.loader {
+  -webkit-animation: infiniteRotate 2s linear infinite;
+  animation: infiniteRotate 2s linear infinite;
+  padding: 0;
+}
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes infiniteRotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+/* Standard syntax */
+@keyframes infinite-rotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}

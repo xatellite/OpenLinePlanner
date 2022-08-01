@@ -1,7 +1,7 @@
 name: Backend build + deploy
 
 concurrency: 
-  group: ${{ github.ref }}
+  group: ${{ github.ref }}-be
   cancel-in-progress: true
 
 on:

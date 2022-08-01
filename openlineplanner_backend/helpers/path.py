@@ -8,13 +8,11 @@ def split_path_into_points(route):
     distance = get_distance(point_one, point_two)
     steps = int(distance / 10)
 
+    if (steps <= 0): continue
+
     add_lat = (point_two["lat"] - point_one["lat"]) / steps
     add_lng = (point_two["lng"] - point_one["lng"]) / steps
 
-    # Skip first to avoid duplicates
-    skip_first = 0
-    if point_index > 0:
-      skip_first = 1
-    for step in range(skip_first, steps):
-      spots_to_check.append({"lat": point_one["lat"]+(step*add_lat), "lng": point_one["lng"]+(step*add_lng), "id": str(point_index)+"_"+str(step)})
+    for step in range(0, steps):
+      spots_to_check.append({"lat": point_one["lat"]+(step*add_lat), "lng": point_one["lng"]+(step*add_lng), "id": str(point_index)+"_"+str(step), "index": point_index})
   return spots_to_check
