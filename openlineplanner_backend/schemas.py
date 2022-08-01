@@ -7,8 +7,22 @@ station_list_schema = {
       "lat" : { "type": "number" },
       "lng" : { "type": "number" }
     },
+    "required":["lat", "lng", "id"]
   },
   "minItems": 0,
+  "uniqueItems": True,
+}
+
+point_list_schema = {
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "lat" : { "type": "number" },
+      "lng" : { "type": "number" }
+    },
+  },
+  "minItems": 2,
   "uniqueItems": True,
 }
 
@@ -29,4 +43,15 @@ overlay_resource_schema = {
         "layer_name": { "type" : "string" },
       },
   "required":["layer_name"]
+}
+
+optimal_station_schema = {
+  "type":"object",
+    "properties": {
+        "stations": station_list_schema,
+        "route": point_list_schema,
+        "decision_distance": { "type" : "integer" },
+        "method": { "type" : "string" },
+      },
+  "required":["stations", "route"]
 }

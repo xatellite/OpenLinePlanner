@@ -39,7 +39,10 @@ class CalculateStationTest(TestCase):
       stations = [station1, station2]
 
       actualResult_improved = calculate_inhabitants_by_stations(stations)
-      self.assertMatchSnapshot(actualResult_improved) 
+      self.assertMatchSnapshot(actualResult_improved)
+
+      actualResult_improved_relative = calculate_inhabitants_by_stations(stations, "relative")
+      self.assertMatchSnapshot(actualResult_improved_relative)
 
     def test_big(self):
       station1 = {"lng": 16.444110412596956, "lat": 48.23368923042784, "id": "station1"}
@@ -53,7 +56,10 @@ class CalculateStationTest(TestCase):
       stations = [station1, station2,station3,station4,station5, station6, station7, station8]
       
       actualResult_improved = calculate_inhabitants_by_stations(stations)
-      self.assertMatchSnapshot(actualResult_improved) 
+      self.assertMatchSnapshot(actualResult_improved)
+
+      actualResult_improved_relative = calculate_inhabitants_by_stations(stations, "relative")
+      self.assertMatchSnapshot(actualResult_improved_relative)
 
 
 if __name__ == '__main__':
