@@ -24,7 +24,7 @@
         <PencilOutlineIcon />
       </button>
       <button
-        v-if="editStore.isEditing == line || findStationLoading"
+        v-if="(editStore.isEditing == line && linesStore.lines[line.id].pointIds.length > 1) || findStationLoading"
         class="line-element__station"
         @click="findStation"
       >
@@ -137,7 +137,7 @@ export default {
             });
           });
 
-        fetch("http://127.0.0.1:8000/find-station", {
+        fetch(import.meta.env.VITE_API_ENDPOINT + "/find-station", {
           method: "POST",
           body: JSON.stringify({ route, stations }),
           headers: {
