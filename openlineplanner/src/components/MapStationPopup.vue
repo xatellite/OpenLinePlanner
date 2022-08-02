@@ -147,7 +147,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/variables.scss";
 .station-popup {
   position: absolute;
   top: auto;

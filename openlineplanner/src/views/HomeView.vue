@@ -35,9 +35,7 @@ export default {
 };
 </script>
 
-
 <style lang="scss">
-@import "@/assets/variables.scss";
 .main-menu-pane {
   position: absolute;
   z-index: 10;

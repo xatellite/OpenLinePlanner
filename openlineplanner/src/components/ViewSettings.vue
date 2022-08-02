@@ -9,6 +9,7 @@
     <div class="view-settings__list" v-if="isExtended">
       <!-- <span>View Settings</span> -->
       <OverlaySelect />
+      <CoverageSelect />
       <ToggleButton
         :active="overlayStore.showNameTags"
         :callback="overlayStore.toggleNameTags"
@@ -59,6 +60,7 @@ import OverlaySelect from "./OverlaySelect.vue";
 import ToggleButton from "./ToggleButton.vue";
 import { useOverlayStore } from "../stores/overlay";
 import { usePaxStore } from "../stores/pax";
+import CoverageSelect from "./CoverageSelect.vue";
 
 export default {
   components: {
@@ -69,7 +71,8 @@ export default {
     RulerIcon,
     BullseyeIcon,
     CheckboxBlankCircleIcon,
-  },
+    CoverageSelect,
+},
   data() {
     return {
       isExtended: false,
@@ -99,7 +102,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/variables.scss";
 
 .view-settings {
   position: absolute;
@@ -118,7 +120,7 @@ export default {
 
   &--extended {
     max-width: 300px;
-    max-height: 300px;
+    max-height: 600px;
   }
 
   &__list {

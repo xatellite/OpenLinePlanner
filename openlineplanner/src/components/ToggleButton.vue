@@ -29,8 +29,7 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-@import "@/assets/variables.scss";
+<style lang="scss">
 
 .toggle-button {
   @extend button;
@@ -64,7 +63,7 @@ export default {
       background-color: lighten($c-text-primary, 16);
     }
     .toggle-button__icon {
-        border-right: 1px solid #696969;
+      border-right: 1px solid #696969;
     }
   }
 }

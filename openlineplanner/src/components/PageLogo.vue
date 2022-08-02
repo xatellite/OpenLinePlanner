@@ -62,7 +62,6 @@
 </template>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 .page-logo {
   padding: $space-ssm;
   height: 70px;

@@ -23,9 +23,7 @@ export default {
 </script>
 
 
-<style lang="scss" scoped>
-@import "@/assets/variables.scss";
-
+<style lang="scss">
 .export {
   position: absolute;
   z-index: 100;

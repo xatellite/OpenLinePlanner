@@ -36,7 +36,7 @@ export default {
       const updatedPoint = this.point.copy();
       updatedPoint.type = "station";
       this.linesStore.points[this.point.id] = updatedPoint;
-      this.paxStore.isCurrent = false;
+      this.paxStore.setCurrent(false);
     },
     removePoint() {
       this.linesStore.removePoint(this.point.id);
@@ -66,7 +66,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/variables.scss";
 .add-station {
   position: absolute;
   top: auto;

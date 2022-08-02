@@ -1,5 +1,5 @@
 <template>
-  <div class="overlay-select" @click="handleClick">
+  <div :class="overlayStore.overlay != 'none' ?'select-container select-container--active':'select-container'" @click="handleClick">
     <span>
       <LoadingIcon class="loader" v-if="overlayStore.overlay != 'none' && Object.keys(overlayStore.overlayData).length === 0" />
       <HomeAccountIcon v-else-if="overlayStore.overlay == 'residence'" />
@@ -51,70 +51,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/variables.scss";
-.overlay-select {
-  @extend button;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 2.5rem;
-  width: auto;
-  padding: $space-ssm $space-ssm;
-  margin: 0;
-
-  & > span {
-    border-right: 1px solid #d6d6d6;
-    padding: $space-ssm;
-    & > span {
-      display: flex;
-      align-items: center;
-      height: 1rem;
-      padding: 0;
-    }
-  }
-}
-
-select {
-  /* Reset Select */
-  appearance: none;
-  outline: 0;
-  border: 0;
-  box-shadow: none;
-  /* Personalize */
-  flex: 1;
-  font-size: $font-md;
-  padding: 0 1em;
-  color: $c-text-primary;
-  background-color: darken($c-box, 2);
-  background-image: none;
-  cursor: pointer;
-}
-/* Remove IE arrow */
-select::-ms-expand {
-  display: none;
-}
-/* Custom Select wrapper */
-.select {
-  position: relative;
-  display: flex;
-  width: 20em;
-  height: 3em;
-  border-radius: 0.25em;
-  overflow: hidden;
-}
-/* Arrow */
-.select::after {
-  content: "\25BC";
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 1em;
-  background-color: #34495e;
-  transition: 0.25s all ease;
-  pointer-events: none;
-}
-/* Transition */
-.select:hover::after {
-  color: #f39c12;
-}
 </style>

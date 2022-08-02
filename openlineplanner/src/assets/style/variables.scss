@@ -39,26 +39,6 @@ html {
   box-sizing: border-box;
 }
 
-button, .button {
-  border: 1px solid #d6d6d6;
-  background-color: darken($c-box, 2);
-  border-radius: $br-md;
-  height: 2.5rem;
-  width: 2.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 $space-ssm;
-
-  &:hover {
-    background-color: darken($c-box, 4);
-  }
-
-  &:active {
-    background-color: darken($c-box, 8);
-  }
-}
-
 a {
   text-decoration: none;
   color: $c-text-primary

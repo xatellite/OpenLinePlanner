@@ -35,6 +35,7 @@ export default {
       referenceMarkers: [],
       pointMarkers: {},
       lines: {},
+      firstSymbolId: null,
     };
   },
   mounted() {
@@ -49,6 +50,12 @@ export default {
     });
     this.map.on("load", () => {
       this.loadState();
+      for (const layer of this.map.getStyle().layers) {
+        if (layer.type === "symbol") {
+          this.firstSymbolId = layer.id;
+          break;
+        }
+      }
     });
     // Receive and return export event data
     document.addEventListener("generateMapExport", () => {
@@ -184,6 +191,18 @@ export default {
         this.updateOverlay();
       }
     );
+    watch(
+      () => this.overlayStore.coverage,
+      () => {
+        this.updateCoverage();
+      }
+    );
+    watch(
+      () => this.overlayStore.coverageData,
+      () => {
+        this.updateCoverage();
+      }
+    );
   },
   methods: {
     loadState() {
@@ -207,7 +226,7 @@ export default {
           bounds.extend(marker.getLngLat());
         });
         this.map.fitBounds(bounds, {
-          padding: {top: 300, bottom:100, left: 100, right: 100},
+          padding: { top: 300, bottom: 100, left: 100, right: 100 },
         });
       } else {
         this.map.flyTo({
@@ -362,7 +381,32 @@ export default {
         });
       }
     },
-
+    updateCoverage() {
+      if (this.map.getSource("coverage")) {
+        this.map.removeLayer("coverage");
+        this.map.removeSource("coverage");
+      }
+      if (
+        this.overlayStore.coverageData &&
+        this.overlayStore.coverage != "none"
+      ) {
+        this.map.addSource("coverage", {
+          type: "geojson",
+          data: this.overlayStore.coverageData,
+        });
+        this.map.addLayer(
+          {
+            id: "coverage",
+            type: "circle",
+            source: "coverage",
+            paint: {
+              "circle-color": ["get", `${this.overlayStore.coverage}_color`],
+            },
+          },
+          this.firstSymbolId
+        );
+      }
+    },
     updateOverlay() {
       if (this.map.getSource("overlay")) {
         this.map.removeLayer("overlay");
@@ -407,37 +451,40 @@ export default {
           ],
         }[this.overlayStore.overlay];
 
-        this.map.addLayer({
-          id: "overlay",
-          type: "heatmap",
-          source: "overlay",
-          paint: {
-            // increase weight as diameter breast height increases
-            "heatmap-weight": {
-              property: weight,
-              type: "exponential",
-              stops: [
-                [1, 0],
-                [62, 1],
+        this.map.addLayer(
+          {
+            id: "overlay",
+            type: "heatmap",
+            source: "overlay",
+            paint: {
+              // increase weight as diameter breast height increases
+              "heatmap-weight": {
+                property: weight,
+                type: "exponential",
+                stops: [
+                  [1, 0],
+                  [62, 1],
+                ],
+              },
+              "heatmap-color": [
+                "interpolate",
+                ["linear"],
+                ["heatmap-density"],
+                0,
+                colors[0],
+                0.2,
+                colors[1],
+                0.4,
+                colors[2],
+                0.6,
+                colors[3],
+                0.8,
+                colors[4],
               ],
             },
-            "heatmap-color": [
-              "interpolate",
-              ["linear"],
-              ["heatmap-density"],
-              0,
-              colors[0],
-              0.2,
-              colors[1],
-              0.4,
-              colors[2],
-              0.6,
-              colors[3],
-              0.8,
-              colors[4],
-            ],
           },
-        });
+          this.firstSymbolId
+        );
       }
     },
   },
@@ -445,7 +492,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 .map {
   position: relative;
   height: calc(100vh);

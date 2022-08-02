@@ -11,7 +11,6 @@ export default {};
 </script>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 .footer {
   position: absolute;
   bottom: 0;

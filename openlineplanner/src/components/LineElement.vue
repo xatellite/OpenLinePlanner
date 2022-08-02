@@ -170,7 +170,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 .line-element {
   display: flex;
   flex-direction: column;

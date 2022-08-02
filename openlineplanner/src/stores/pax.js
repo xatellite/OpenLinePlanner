@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { useOverlayStore } from "./overlay";
 
 export const usePaxStore = defineStore({
   id: "pax",
@@ -10,6 +11,8 @@ export const usePaxStore = defineStore({
   }),
   actions: {
     setCurrent(isCurrent) {
+      const overlayStore = useOverlayStore();
+      overlayStore.updateCoverage();
       this.isCurrent = isCurrent;
       return isCurrent;
     },

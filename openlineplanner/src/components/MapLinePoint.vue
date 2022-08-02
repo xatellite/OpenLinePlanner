@@ -154,7 +154,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 .map-marker {
   border: 10px solid transparent;
   border-radius: 100%;

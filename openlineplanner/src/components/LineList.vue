@@ -60,7 +60,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 
 .line-list {
   margin: 0 $space-sm;

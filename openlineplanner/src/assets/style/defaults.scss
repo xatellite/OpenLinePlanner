@@ -1,0 +1,106 @@
+@import "@/assets/style/variables.scss";
+
+button, .button {
+  border: 1px solid #d6d6d6;
+  background-color: darken($c-box, 2);
+  border-radius: $br-md;
+  height: 2.5rem;
+  width: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 $space-ssm;
+
+  &:hover {
+    background-color: darken($c-box, 4);
+  }
+
+  &:active {
+    background-color: darken($c-box, 8);
+  }
+}
+
+select {
+  /* Reset Select */
+  appearance: none;
+  outline: 0;
+  border: 0;
+  box-shadow: none;
+  /* Personalize */
+  flex: 1;
+  font-size: $font-md;
+  padding: 0 1em;
+  color: $c-text-primary;
+  background-color: transparent;
+  cursor: pointer;
+}
+/* Remove IE arrow */
+select::-ms-expand {
+  display: none;
+}
+/* Custom Select wrapper */
+.select {
+  position: relative;
+  display: flex;
+  width: 20em;
+  height: 3em;
+  border-radius: 0.25em;
+  overflow: hidden;
+}
+/* Arrow */
+.select::after {
+  content: "\25BC";
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 1em;
+  background-color: #34495e;
+  transition: 0.25s all ease;
+  pointer-events: none;
+}
+/* Transition */
+.select:hover::after {
+  color: #f39c12;
+}
+
+.select-container {
+  @extend button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  width: auto;
+  padding: $space-ssm $space-ssm;
+  margin: 0;
+
+  & > span {
+    border-right: 1px solid #d6d6d6;
+    padding: $space-ssm;
+    & > span {
+      display: flex;
+      align-items: center;
+      height: 1rem;
+      padding: 0;
+    }
+  }
+
+  &--active {
+    background-color: $c-text-primary;
+    color: $c-text-inverted;
+
+    select {
+      color: $c-text-inverted;
+    }
+
+    &:hover {
+      background-color: lighten($c-text-primary, 8);
+    }
+
+    &:active {
+      background-color: lighten($c-text-primary, 16);
+    }
+    .toggle-button__icon {
+      border-right: 1px solid #696969;
+    }
+  }
+}

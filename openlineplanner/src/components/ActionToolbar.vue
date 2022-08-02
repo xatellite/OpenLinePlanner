@@ -243,7 +243,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import "@/assets/variables.scss";
 .action-toolbar {
   display: flex;
   align-items: center;
