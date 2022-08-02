@@ -127,7 +127,10 @@ def find_optimal_station_spot_on_route(stations, route, method = "absolute", dec
           peopleCount = modified_data_layers[data_layer]["data"][field["name"]][relation_index]
 
           if method == "relative":
-            peopleCount = peopleCount * (1 / math.sqrt(relation_station["d"]))
+            if (relation_station["d"] <= 0):
+              peopleCount = peopleCount
+            else:
+              peopleCount = round(peopleCount * (1 / math.sqrt(relation_station["d"])))
           elif method != "absolute":
             # ToDo: Handle differently
             raise Exception("Method not allowed")

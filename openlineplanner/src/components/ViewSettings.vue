@@ -31,6 +31,19 @@
           <span>Distances</span>
         </template>
       </ToggleButton>
+      <ToggleButton
+        :active="paxStore.calculationMethod == 'relative'"
+        :callback="paxStore.toggleCalculationMethod"
+      >
+        <template v-slot:icon>
+          <BullseyeIcon v-if="paxStore.calculationMethod == 'relative'" />
+          <CheckboxBlankCircleIcon v-else />
+        </template>
+        <template v-slot:text>
+          <span v-if="paxStore.calculationMethod == 'relative'">Relative calc.</span>
+          <span v-else>Absolute calc.</span>
+        </template>
+      </ToggleButton>
     </div>
     <CogOutlineIcon v-else class="view-settings__icon" />
   </div>
@@ -38,11 +51,14 @@
 
 <script>
 import CogOutlineIcon from "vue-material-design-icons/CogOutline.vue";
+import BullseyeIcon from "vue-material-design-icons/Bullseye.vue";
+import CheckboxBlankCircleIcon from "vue-material-design-icons/CheckboxBlankCircle.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import RulerIcon from "vue-material-design-icons/Ruler.vue";
 import OverlaySelect from "./OverlaySelect.vue";
 import ToggleButton from "./ToggleButton.vue";
 import { useOverlayStore } from "../stores/overlay";
+import { usePaxStore } from "../stores/pax";
 
 export default {
   components: {
@@ -51,11 +67,14 @@ export default {
     ToggleButton,
     BusStopIcon,
     RulerIcon,
+    BullseyeIcon,
+    CheckboxBlankCircleIcon,
   },
   data() {
     return {
       isExtended: false,
       overlayStore: useOverlayStore(),
+      paxStore: usePaxStore(),
     };
   },
   mounted() {

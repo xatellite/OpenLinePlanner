@@ -61,6 +61,7 @@ import IconLine from "./icons/IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
 import ColorPicker from "./ColorPicker.vue";
+import { usePaxStore } from '../stores/pax';
 
 export default {
   props: {
@@ -79,6 +80,7 @@ export default {
     return {
       linesStore: useLinesStore(),
       editStore: useEditStore(),
+      paxStore: usePaxStore(),
       selectColor: false,
       findStationLoading: false,
     };
@@ -139,7 +141,11 @@ export default {
 
         fetch(import.meta.env.VITE_API_ENDPOINT + "/find-station", {
           method: "POST",
-          body: JSON.stringify({ route, stations }),
+          body: JSON.stringify({
+            route,
+            stations,
+            method: this.paxStore.calculationMethod,
+          }),
           headers: {
             "Content-type": "application/json",
           },

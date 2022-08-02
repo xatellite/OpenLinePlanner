@@ -93,14 +93,15 @@ export default {
       this.paxStore
         .getPaxForStation(this.point.id, this.linesStore)
         .then((stationData) => {
+          // ToDo: Merge series build with chart series build
           this.seriesTransport = [
             {
               name: "series-1",
               data: [
-                stationData.total,
-                stationData.ped,
-                stationData.bike,
-                stationData.car,
+                Math.round(stationData.total),
+                Math.round(stationData.ped),
+                Math.round(stationData.bike),
+                Math.round(stationData.car),
               ],
             },
           ];
@@ -108,11 +109,11 @@ export default {
             {
               name: "series-1",
               data: [
-                stationData.total,
-                stationData.leisure,
-                stationData.school,
-                stationData.residential,
-                stationData.work,
+                Math.round(stationData.total),
+                Math.round(stationData.leisure),
+                Math.round(stationData.school),
+                Math.round(stationData.residential),
+                Math.round(stationData.work),
               ],
             },
           ];

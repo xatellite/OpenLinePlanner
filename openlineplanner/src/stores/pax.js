@@ -1,20 +1,25 @@
 import { defineStore } from "pinia";
 
-const loadStationData = async () => {
-  
-}
-
 export const usePaxStore = defineStore({
   id: "pax",
   state: () => ({
     stationData: [],
     isCurrent: false,
+    calculationMethod: "absolute",
     currentRequestController: null,
   }),
   actions: {
     setCurrent(isCurrent) {
       this.isCurrent = isCurrent;
       return isCurrent;
+    },
+    toggleCalculationMethod() {
+      this.isCurrent = false;
+      if (this.calculationMethod === "absolute") {
+        this.calculationMethod = "relative";
+        return;
+      }
+      this.calculationMethod = "absolute";
     },
     async loadStationData(linesStore) {
       const stations = {
@@ -25,6 +30,7 @@ export const usePaxStore = defineStore({
             lng: station.lng,
             id: station.id,
           })),
+        method: this.calculationMethod,
       };
       if (this.currentRequestController != null) {
         this.currentRequestController.abort();
