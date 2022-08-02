@@ -54,7 +54,7 @@ def calculate_inhabitants_by_stations(stations, method = "absolute", decision_di
       station_relations[station["id"]] = empty_relation
   return station_relations
 
-def generate_geojson(stations):
+def generate_geojson(stations, decision_distance = 500):
   """Generates geojson including all calculated properties by feature point
 
   Args:
@@ -65,7 +65,7 @@ def generate_geojson(stations):
   """
   layers = copy.deepcopy(main_layers) 
   data_layers = DATA_LAYERS
-  relations = calculate_relations(stations, layers, data_layers)
+  relations = calculate_relations(stations, layers, decision_distance)
 
   station_relations = {}
   for data_layer in data_layers:

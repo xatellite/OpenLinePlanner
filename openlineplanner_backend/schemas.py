@@ -27,7 +27,7 @@ point_list_schema = {
   "uniqueItems": True,
 }
 
-passenger_resource_schema = {
+station_resource_schema = {
  "type":"object",
     "properties": {
         "stations": station_list_schema,
@@ -35,6 +35,15 @@ passenger_resource_schema = {
         "separation_distance": { "type" : "integer" },
         "method": { "type" : "string" },
       },
+  "required":["stations"]
+}
+
+coverage_resource_schema = {
+  "type":"object",
+  "properties": {
+      "stations": station_list_schema,
+      "decision_distance": { "type" : "integer" },
+    },
   "required":["stations"]
 }
 

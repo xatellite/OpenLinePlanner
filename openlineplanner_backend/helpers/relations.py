@@ -59,7 +59,7 @@ def find_closest_station(point, sector, stations, decision_distance):
       closest_station = station
   if closest_station == None:
     return None, None, None
-  return sector["data_layer"], sector["index"], {"id": closest_station["id"], "d": distance}
+  return sector["data_layer"], sector["index"], {"id": closest_station["id"], "d": min_distance}
 
 # Inplace
 def check_sector_station_relation(lat, lng, sector, stations, steps, decision_distance):
@@ -100,10 +100,13 @@ def check_sector_station_relation(lat, lng, sector, stations, steps, decision_di
           break
 
     # Check point fully inside
+    # ToDo: Fix lat break mod 90
     if (
       not station_added and
-      station["lat"] > lat and station["lat"] < lat + grid_size
-      and station["lng"] > lng and station["lng"] < lng + grid_size
+      ((station["lat"] > lat - grid_size and station["lat"] < lat + 2 * grid_size
+        and station["lng"] > lng and station["lng"] < lng + grid_size)
+      or (station["lat"] > lat and station["lat"] < lat + grid_size
+        and station["lng"] > lng - grid_size and station["lng"] < lng + 2 * grid_size))
     ):
       sector["stations_possible"].append(station)
 
