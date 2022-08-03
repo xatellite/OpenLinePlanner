@@ -70,3 +70,16 @@ a {
     -webkit-transform: rotate(360deg);
   }
 }
+
+/* Standard syntax */
+@keyframes infinite-blur-change {
+  0% {
+    filter: blur($space-ssm);
+  }
+  50% {
+    filter: blur($space-sm);
+  }
+  100% {
+    filter: blur($space-ssm);
+  }
+}

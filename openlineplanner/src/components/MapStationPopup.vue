@@ -21,13 +21,23 @@
         </button>
       </div>
     </div>
-    <div v-if="seriesTransport.length > 0 && paxStore.isCurrent">
+    <div>
       <MapStationCharts
+        v-if="seriesTransport.length > 0 && paxStore.isCurrent"
         :seriesType="seriesType"
         :seriesTransport="seriesTransport"
       />
+      <div v-else class="station-popup__lazy">
+        <div class="station-popup__lazy__border">
+          <span> loading... </span>
+          <div class="station-popup__lazy__chart" />
+        </div>
+        <div class="station-popup__lazy__border">
+          <span> loading... </span>
+          <div class="station-popup__lazy__chart" />
+        </div>
+      </div>
     </div>
-    <span v-else> loading.. </span>
   </div>
 </template>
 
@@ -176,6 +186,36 @@ export default {
   &__actions {
     display: flex;
     align-items: center;
+  }
+
+  &__lazy {
+    position: relative;
+    display: flex;
+
+    &__border {
+      position: relative;
+      display: flex;
+      align-items: center;
+      font-size: $font-md;
+      z-index: 10;
+      justify-content: center;
+      border: 1px solid $c-primary-light;
+      border-radius: $br-md;
+      margin: $space-ssm;
+      width: 300px;
+      height: 200px;
+    }
+
+    &__chart {
+      position: absolute;
+      z-index: -1;
+      width: 280px;
+      height: 190px;
+      padding: 5px 10px;
+      background-image: url(@/assets/lazy_graph.png);
+      // filter: blur($space-sm);
+      animation: infinite-blur-change 1s linear infinite;
+    }
   }
 }
 
