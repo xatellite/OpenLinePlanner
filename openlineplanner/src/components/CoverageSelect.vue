@@ -1,7 +1,23 @@
 <template>
-  <div :class="overlayStore.coverage != 'none' ?'select-container select-container--active':'select-container'" @click="handleClick">
+  <div
+    :class="
+      overlayStore.coverage != 'none'
+        ? 'select-container select-container--active'
+        : 'select-container'
+    "
+    @click="handleClick"
+    @mousemove="handleMouseMove"
+    @mouseenter="hovering = true"
+    @mouseleave="hovering = false"
+  >
     <span>
-      <LoadingIcon class="loader" v-if="overlayStore.coverage != 'none' && Object.keys(overlayStore.coverageData).length === 0" />
+      <LoadingIcon
+        class="loader"
+        v-if="
+          overlayStore.coverage != 'none' &&
+          Object.keys(overlayStore.coverageData).length === 0
+        "
+      />
       <BusStopIcon v-else-if="overlayStore.coverage == 'station'" />
       <MapMarkerDistanceIcon v-else-if="overlayStore.coverage == 'distance'" />
       <BlurOffIcon v-else />
@@ -11,6 +27,13 @@
       <option value="station">Stations</option>
       <option value="distance">Distance</option>
     </select>
+    <div
+      class="tooltip"
+      :style="`left: ${tooltipOffsetX}px; top: ${tooltipOffsetY}px`"
+      v-if="hovering"
+    >
+      Select coverage overlay
+    </div>
   </div>
 </template>
 
@@ -31,6 +54,9 @@ export default {
   data() {
     return {
       overlayStore: useOverlayStore(),
+      hovering: false,
+      tooltipOffsetX: 0,
+      tooltipOffsetY: 0,
     };
   },
   methods: {
@@ -41,6 +67,10 @@ export default {
     },
     handleClick(e) {
       e.stopPropagation();
+    },
+    handleMouseMove(e) {
+      this.tooltipOffsetX = e.x;
+      this.tooltipOffsetY = e.y;
     },
   },
 };

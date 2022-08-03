@@ -4,6 +4,9 @@
       active ? 'toggle-button toggle-button--active' : 'toggle-button'
     }`"
     @click="handleClick"
+    @mousemove="handleMouseMove"
+    @mouseenter="hovering = true"
+    @mouseleave="hovering = false"
   >
     <span class="toggle-button__icon">
       <slot name="icon" />
@@ -11,6 +14,13 @@
     <span class="toggle-button__text">
       <slot name="text" />
     </span>
+    <div
+      class="tooltip"
+      :style="`left: ${tooltipOffsetX}px; top: ${tooltipOffsetY}px`"
+      v-if="hovering"
+    >
+      {{ toolTip }}
+    </div>
   </div>
 </template>
 
@@ -19,20 +29,32 @@ export default {
   props: {
     active: Boolean,
     callback: Function,
+    toolTip: String,
+  },
+  data() {
+    return {
+      hovering: false,
+      tooltipOffsetX: 0,
+      tooltipOffsetY: 0,
+    };
   },
   methods: {
     handleClick(e) {
       e.stopPropagation();
       this.callback();
     },
+    handleMouseMove(e) {
+      this.tooltipOffsetX = e.x;
+      this.tooltipOffsetY = e.y;
+    },
   },
 };
 </script>
 
 <style lang="scss">
-
 .toggle-button {
   @extend button;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;

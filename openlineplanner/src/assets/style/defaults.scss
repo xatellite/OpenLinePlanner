@@ -65,6 +65,7 @@ select::-ms-expand {
 
 .select-container {
   @extend button;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,4 +104,16 @@ select::-ms-expand {
       border-right: 1px solid #696969;
     }
   }
+}
+
+.tooltip {
+  position: fixed;
+  background-color: $c-box;
+  color: $c-text-primary;
+  border-radius: $br-md;
+  padding: $space-ssm;
+  font-size: $font-sm;
+  white-space: nowrap;
+  z-index: 200;
+  margin-top: $space-md;
 }

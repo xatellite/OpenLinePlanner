@@ -73,7 +73,7 @@ export default {
 
   &__container {
     max-height: 500px;
-    overflow: auto;
+    overflow-y: auto;
   }
 
   &__item {
@@ -87,6 +87,7 @@ export default {
         padding: $space-ssm;
       }
     }
+    margin-bottom: $space-ssm;
     border-bottom: 1px solid rgba($c-text-primary, 0.2);
   }
 

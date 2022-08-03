@@ -13,6 +13,7 @@
       <ToggleButton
         :active="overlayStore.showNameTags"
         :callback="overlayStore.toggleNameTags"
+        toolTip="Toggle Station names"
       >
         <template v-slot:icon>
           <BusStopIcon />
@@ -24,6 +25,7 @@
       <ToggleButton
         :active="overlayStore.showDistanceTags"
         :callback="overlayStore.toggleDistanceTags"
+        toolTip="Toggle line distances"
       >
         <template v-slot:icon>
           <RulerIcon />
@@ -35,6 +37,7 @@
       <ToggleButton
         :active="paxStore.calculationMethod == 'relative'"
         :callback="paxStore.toggleCalculationMethod"
+        toolTip="Switch calculation method"
       >
         <template v-slot:icon>
           <BullseyeIcon v-if="paxStore.calculationMethod == 'relative'" />
@@ -102,7 +105,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-
 .view-settings {
   position: absolute;
   z-index: 10;

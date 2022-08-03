@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { randomColor } from "@/helpers/random";
 import TransportLine from "@/helpers/classes/TransportLine";
 import LinePoint from "@/helpers/classes/LinePoint";
+import { usePaxStore } from "./pax";
 
 export const useLinesStore = defineStore({
   id: "lines",
@@ -107,6 +108,8 @@ export const useLinesStore = defineStore({
       return this.lines[lineRef];
     },
     removePoint(pointRef) {
+      const paxStore = usePaxStore();
+      paxStore.setCurrent(false);
       const linesToBeUpdated = this.points[pointRef].lines;
       linesToBeUpdated.forEach((lineRef) => {
         const line = this.lines[lineRef];
@@ -144,7 +147,9 @@ export const useLinesStore = defineStore({
     },
     loadState(savedState) {
       this.parallels = [];
-      Object.keys(this.lines).forEach((lineRef) => this.removeLine(this.lines[lineRef]));
+      Object.keys(this.lines).forEach((lineRef) =>
+        this.removeLine(this.lines[lineRef])
+      );
       Object.values(savedState.lines).forEach((line) => {
         this.lines[line.id] = TransportLine.fromObject(line);
       });

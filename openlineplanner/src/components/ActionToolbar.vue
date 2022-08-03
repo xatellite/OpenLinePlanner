@@ -1,17 +1,17 @@
 <template>
   <div class="action-toolbar">
     <div class="action-toolbar__standard">
-      <button @click="save"><TrayArrowDownIcon /></button>
-      <button @click="load"><FolderUploadOutlineIcon /></button>
-      <button @click="generatePdf"><FileExportOutlineIcon /></button>
+      <TooltipButton :handler="save" toolTip="Save configuration as file"><TrayArrowDownIcon /></TooltipButton>
+      <TooltipButton :handler="load" toolTip="Load configuration from file"><FolderUploadOutlineIcon /></TooltipButton>
+      <TooltipButton :handler="generatePdf" toolTip="Export configuration to PDF"><FileExportOutlineIcon /></TooltipButton>
     </div>
-    <button
-      class="action-toolbar__stop"
+    <TooltipButton
       v-if="editStore.isEditing"
-      @click="disableEditing"
+      :handler="disableEditing"
+      toolTip="Stop editing"
     >
-      <PencilOffOutlineIcon />
-    </button>
+      <span class="action-toolbar__stop"><PencilOffOutlineIcon /></span> 
+    </TooltipButton>
   </div>
 </template>
 
@@ -27,6 +27,7 @@ import { selectFile, downloadJSON, readJSONFile } from "../helpers/file";
 import { usePaxStore } from "../stores/pax";
 import ApexCharts from "apexcharts";
 import { useOverlayStore } from "../stores/overlay";
+import TooltipButton from "./TooltipButton.vue";
 
 export default {
   components: {
@@ -34,7 +35,8 @@ export default {
     FolderUploadOutlineIcon,
     PencilOffOutlineIcon,
     FileExportOutlineIcon,
-  },
+    TooltipButton
+},
   setup() {
     const editStore = useEditStore();
     const linesStore = useLinesStore();

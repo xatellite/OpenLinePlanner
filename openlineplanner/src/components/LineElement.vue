@@ -1,7 +1,9 @@
 <template>
   <div class="line-element">
     <div class="line-element__data">
-      <button @click="openColorPick"><IconLine :color="line.color" /></button>
+      <TooltipButton :handler="openColorPick" toolTip="Change line color">
+        <IconLine :color="line.color" />
+      </TooltipButton>
       <ColorPicker
         v-if="selectColor == true"
         :initColor="line.color"
@@ -16,28 +18,31 @@
         @change="editName"
       />
       <span v-else class="grow">{{ line.name }}</span>
-      <button
+      <TooltipButton
         v-if="editStore.isEditing != line"
+        :handler="toggleEditing"
+        toolTip="Start editing line"
         class="line-element__edit"
-        @click="toggleEditing"
       >
-        <PencilOutlineIcon />
-      </button>
-      <button
+        <span>
+          <PencilOutlineIcon />
+        </span>
+      </TooltipButton>
+      <TooltipButton
         v-if="(editStore.isEditing == line && linesStore.lines[line.id].pointIds.length > 1) || findStationLoading"
-        class="line-element__station"
-        @click="findStation"
+        :handler="findStation"
+        toolTip="Automatically find ideal station"
       >
         <LoadingIcon v-if="findStationLoading" class="loader" />
         <BusStopIcon v-else />
-      </button>
-      <button
+      </TooltipButton>
+      <TooltipButton
         v-if="editStore.isEditing == line"
-        class="line-element__remove"
-        @click="removeLine"
+        toolTip="Remove line (permanent)"
+        handler="removeLine"
       >
-        <TrashCanOutlineIcon />
-      </button>
+        <span class="line-element__remove"><TrashCanOutlineIcon /></span> 
+      </TooltipButton>
     </div>
     <div
       class="line-element__warning"
@@ -57,6 +62,7 @@ import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import ArrowDownRightIcon from "vue-material-design-icons/ArrowDownRight.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import LoadingIcon from "vue-material-design-icons/Loading.vue";
+import TooltipButton from "./TooltipButton.vue";
 import IconLine from "./icons/IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
@@ -75,6 +81,7 @@ export default {
     ColorPicker,
     ArrowDownRightIcon,
     LoadingIcon,
+    TooltipButton,
   },
   data() {
     return {
@@ -173,6 +180,7 @@ export default {
 .line-element {
   display: flex;
   flex-direction: column;
+  margin-bottom: $space-ssm;
 
   &__data {
     display: flex;

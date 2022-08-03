@@ -1,7 +1,23 @@
 <template>
-  <div :class="overlayStore.overlay != 'none' ?'select-container select-container--active':'select-container'" @click="handleClick">
+  <div
+    :class="
+      overlayStore.overlay != 'none'
+        ? 'select-container select-container--active'
+        : 'select-container'
+    "
+    @click="handleClick"
+    @mousemove="handleMouseMove"
+    @mouseenter="hovering = true"
+    @mouseleave="hovering = false"
+  >
     <span>
-      <LoadingIcon class="loader" v-if="overlayStore.overlay != 'none' && Object.keys(overlayStore.overlayData).length === 0" />
+      <LoadingIcon
+        class="loader"
+        v-if="
+          overlayStore.overlay != 'none' &&
+          Object.keys(overlayStore.overlayData).length === 0
+        "
+      />
       <HomeAccountIcon v-else-if="overlayStore.overlay == 'residence'" />
       <SchoolOutlineIcon v-else-if="overlayStore.overlay == 'schools'" />
       <BriefcaseAccountIcon v-else-if="overlayStore.overlay == 'jobs'" />
@@ -13,6 +29,13 @@
       <option value="schools">Schools</option>
       <option value="jobs">Jobs/Leisure</option>
     </select>
+    <div
+      class="tooltip"
+      :style="`left: ${tooltipOffsetX}px; top: ${tooltipOffsetY}px`"
+      v-if="hovering"
+    >
+      Select data overlay
+    </div>
   </div>
 </template>
 
@@ -35,6 +58,9 @@ export default {
   data() {
     return {
       overlayStore: useOverlayStore(),
+      hovering: false,
+      tooltipOffsetX: 0,
+      tooltipOffsetY: 0,
     };
   },
   methods: {
@@ -46,9 +72,12 @@ export default {
     handleClick(e) {
       e.stopPropagation();
     },
+    handleMouseMove(e) {
+      this.tooltipOffsetX = e.x;
+      this.tooltipOffsetY = e.y;
+    },
   },
 };
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
