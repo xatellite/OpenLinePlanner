@@ -91,6 +91,7 @@ This project was build with:
 [![Vue][Vue.js]][Vue-url]
 [![Vite][Vite]][Vite-url]
 [![Falcon][Falcon]][Falcon-url]
+[![Matomo][Matomo]][Matomo-url]
 
 And deployed with:
 
@@ -263,3 +264,6 @@ This project was created as part of the interdisciplinary project of the master 
 [Falcon-url]: https://falconframework.org/
 [Docker]: https://img.shields.io/badge/Docker-35495E?style=for-the-badge&logo=Docker&logoColor=2496ED
 [Docker-url]: https://www.docker.com/
+
+[Matomo]: https://img.shields.io/badge/Matomo-35495E?style=for-the-badge&logo=Matomo&logoColor=3152A0
+[Matomo-url]: https://matomo.org/
