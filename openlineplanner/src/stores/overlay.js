@@ -17,6 +17,8 @@ export const useOverlayStore = defineStore({
     selectOverlay(type) {
       this.overlay = type;
       this.overlayData = {};
+      // Send api parameters to Matomo
+      window._paq.push(["overlay_select", type]);
       if (type != "none") {
         fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay", {
           method: "POST",
@@ -60,6 +62,8 @@ export const useOverlayStore = defineStore({
           })),
         method: this.calculationMethod,
       };
+      // Send api parameters to Matomo
+      window._paq.push(["coverage-info", stations]);
       fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info", {
         method: "POST",
         body: JSON.stringify(stations),

@@ -14,10 +14,10 @@
 #### Added or Changed
 
 - [ ] Make Repo public
-- [ ] Add Matomo tracking
 - [ ] Fix automatic residence processing
 - [ ] Add data present markings
 - [ ] ? Request more areas button
+- [x] Add Matomo tracking
 - [x] Added Readme
 - [x] Added Changelog
 - [x] Added License
@@ -29,7 +29,7 @@
 - [x] Added PDF export
 - [x] Added automatic Station positioning
 - [x] Added coverage overlay
-- [] ? Added rudimentary Unit Testing
+- [ ] ? Added rudimentary Unit Testing
 - [x] Added distance between stations calculation and overlay
 - [x] Improved usability
 

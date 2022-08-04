@@ -75,7 +75,7 @@ export default {
     BullseyeIcon,
     CheckboxBlankCircleIcon,
     CoverageSelect,
-},
+  },
   data() {
     return {
       isExtended: false,

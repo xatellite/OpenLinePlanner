@@ -41,6 +41,8 @@ export const usePaxStore = defineStore({
 
       this.currentRequestController = new AbortController();
       const abortSignal = this.currentRequestController.signal;
+      // Send api parameters to Matomo
+      window._paq.push(["station-info", stations]);
       const response = await fetch(
         import.meta.env.VITE_API_ENDPOINT + "/station-info",
         {

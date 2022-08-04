@@ -20,6 +20,7 @@
     "vue": "^3.2.33",
     "vue-color-kit": "^1.0.5",
     "vue-material-design-icons": "^5.0.0",
+    "vue-matomo": "^4.1.0",
     "vue-router": "^4.0.14",
     "vue3-apexcharts": "^1.4.1"
   },

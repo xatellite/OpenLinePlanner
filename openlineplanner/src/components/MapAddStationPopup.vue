@@ -1,6 +1,8 @@
 <template>
   <div class="box add-station">
-    <button v-if="isLast()" @click="extendLine"><PlusIcon /></button>
+    <TooltipButton v-if="isLast()" :handler="extendLine" toolTip="Extend line">
+      <PlusIcon />
+    </TooltipButton>
     <button @click="addStation"><BusStopIcon /></button>
     <button class="trash" @click="removePoint"><TrashCanOutlineIcon /></button>
   </div>
@@ -10,9 +12,10 @@
 import PlusIcon from "vue-material-design-icons/Plus.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
+import TooltipButton from "./TooltipButton.vue";
 import { useLinesStore } from "../stores/lines";
 import { usePaxStore } from "../stores/pax";
-import { useEditStore } from '../stores/editing';
+import { useEditStore } from "../stores/editing";
 
 export default {
   props: {
@@ -22,6 +25,7 @@ export default {
     PlusIcon,
     TrashCanOutlineIcon,
     BusStopIcon,
+    TooltipButton,
   },
   data() {
     return {
@@ -39,10 +43,14 @@ export default {
       this.paxStore.setCurrent(false);
     },
     removePoint() {
+      // Matomo Tracking
+      window._paq.push(["removePoint"]);
       this.linesStore.removePoint(this.point.id);
     },
     extendLine(e) {
       e.stopPropagation();
+      // Matomo Tracking
+      window._paq.push(["extendLine"]);
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;

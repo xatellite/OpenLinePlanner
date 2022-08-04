@@ -12,10 +12,19 @@
         <span v-if="editStore.isMerging"
           >Merging active! Select other station to merge</span
         >
-        <button @click="toggleMerge">
+        <TooltipButton
+          :handler="toggleMerge"
+          toolTip="Activate/Deactivate station merging"
+        >
           <TransitConnectionHorizontalIcon />
-        </button>
-        <button v-if="isLast()" @click="extendLine"><PlusIcon /></button>
+        </TooltipButton>
+        <TooltipButton
+          v-if="isLast()"
+          :handler="extendLine"
+          toolTip="Extend line"
+        >
+          <PlusIcon />
+        </TooltipButton>
         <button class="trash" @click="removePoint">
           <TrashCanOutlineIcon />
         </button>
@@ -50,6 +59,7 @@ import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import TransitConnectionHorizontalIcon from "vue-material-design-icons/TransitConnectionHorizontal.vue";
 import { useEditStore } from "../stores/editing";
 import MapStationCharts from "./MapStationCharts.vue";
+import TooltipButton from "./TooltipButton.vue";
 
 export default {
   props: {
@@ -60,6 +70,7 @@ export default {
     TrashCanOutlineIcon,
     TransitConnectionHorizontalIcon,
     MapStationCharts,
+    TooltipButton,
   },
   data() {
     return {
@@ -93,6 +104,8 @@ export default {
     },
     toggleMerge(e) {
       e.stopPropagation();
+      // Matomo Tracking
+      window._paq.push(["toggleMerge"]);
       if (this.editStore.isMerging) {
         this.editStore.isMerging = null;
         return;
@@ -131,6 +144,8 @@ export default {
     },
     extendLine(e) {
       e.stopPropagation();
+      // Matomo Tracking
+      window._paq.push(["extendLine"]);
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;
@@ -150,6 +165,8 @@ export default {
       return lineEndPointRef;
     },
     removePoint() {
+      // Matomo Tracking
+      window._paq.push(["removePoint"]);
       this.linesStore.removePoint(this.point.id);
     },
   },

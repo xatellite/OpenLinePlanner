@@ -1,16 +1,24 @@
 <template>
   <div class="action-toolbar">
     <div class="action-toolbar__standard">
-      <TooltipButton :handler="save" toolTip="Save configuration as file"><TrayArrowDownIcon /></TooltipButton>
-      <TooltipButton :handler="load" toolTip="Load configuration from file"><FolderUploadOutlineIcon /></TooltipButton>
-      <TooltipButton :handler="generatePdf" toolTip="Export configuration to PDF"><FileExportOutlineIcon /></TooltipButton>
+      <TooltipButton :handler="save" toolTip="Save configuration as file"
+        ><TrayArrowDownIcon
+      /></TooltipButton>
+      <TooltipButton :handler="load" toolTip="Load configuration from file"
+        ><FolderUploadOutlineIcon
+      /></TooltipButton>
+      <TooltipButton
+        :handler="generatePdf"
+        toolTip="Export configuration to PDF"
+        ><FileExportOutlineIcon
+      /></TooltipButton>
     </div>
     <TooltipButton
       v-if="editStore.isEditing"
       :handler="disableEditing"
       toolTip="Stop editing"
     >
-      <span class="action-toolbar__stop"><PencilOffOutlineIcon /></span> 
+      <span class="action-toolbar__stop"><PencilOffOutlineIcon /></span>
     </TooltipButton>
   </div>
 </template>
@@ -35,8 +43,8 @@ export default {
     FolderUploadOutlineIcon,
     PencilOffOutlineIcon,
     FileExportOutlineIcon,
-    TooltipButton
-},
+    TooltipButton,
+  },
   setup() {
     const editStore = useEditStore();
     const linesStore = useLinesStore();
@@ -63,6 +71,17 @@ export default {
       this.editStore.isExtending = null;
     },
     save() {
+      // Matomo tracking
+      window._paq.push([
+        "save",
+        {
+          lines: Object.keys(this.linesStore.lines).length,
+          points: Object.keys(this.linesStore.points).length,
+          stations: Object.values(this.linesStore.points)
+            .map((point) => point.type === "station")
+            .reduce((a, b) => a + b),
+        },
+      ]);
       const linesStore = this.linesStore.$state;
       downloadJSON({ linesStore });
     },
@@ -71,10 +90,32 @@ export default {
         readJSONFile(file, (json) => {
           this.editStore.stopAllInputs();
           this.linesStore.loadState(json.linesStore);
+          // Matomo tracking
+          window._paq.push([
+            "load",
+            {
+              lines: Object.keys(this.linesStore.lines).length,
+              points: Object.keys(this.linesStore.points).length,
+              stations: Object.values(this.linesStore.points)
+                .map((point) => point.type === "station")
+                .reduce((a, b) => a + b),
+            },
+          ]);
         });
       });
     },
     generatePdf() {
+      // Matomo tracking
+      window._paq.push([
+        "pdf",
+        {
+          lines: Object.keys(this.linesStore.lines).length,
+          points: Object.keys(this.linesStore.points).length,
+          stations: Object.values(this.linesStore.points)
+            .map((point) => point.type === "station")
+            .reduce((a, b) => a + b),
+        },
+      ]);
       document.addEventListener(
         "mapExportGenerated",
         async (exportedImageEvent) => {

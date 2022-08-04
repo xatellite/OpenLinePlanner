@@ -51,6 +51,8 @@ export default {
   },
   methods: {
     addLine() {
+      // Matomo Tracking
+      window._paq.push(["addLine"]);
       const line = this.linesStore.addLine();
       this.editStore.isEditing = line;
       this.editStore.isExtending = -1;

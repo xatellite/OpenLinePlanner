@@ -97,9 +97,13 @@ export default {
       this.linesStore.getLineById(this.line.id).name = e.srcElement.value;
     },
     updateColor(color) {
+      // Matomo Tracking
+      window._paq.push(["updateColor", color]);
       this.linesStore.updateLineColor(this.line.id, color);
     },
     toggleEditing() {
+      // Matomo Tracking
+      window._paq.push(["toggleEditing"]);
       this.editStore.isEditing = this.line;
       if (this.line.pointIds.length === 0) {
         this.editStore.isExtending = -1;
@@ -107,17 +111,22 @@ export default {
       }
       this.editStore.isExtending = null;
     },
-    findNewStation() {},
     openColorPick(e) {
+      // Matomo Tracking
+      window._paq.push(["openColorPick"]);
       e.stopPropagation();
       this.selectColor = true;
     },
     removeLine() {
+      // Matomo Tracking
+      window._paq.push(["removeLine"]);
       this.editStore.isEditing = null;
       this.editStore.isExtending = null;
       this.linesStore.removeLine(this.line);
     },
     findStation() {
+      // Matomo Tracking
+      window._paq.push(["findStation"]);
       if (!this.findStationLoading) {
         this.findStationLoading = true;
         const route = [];
