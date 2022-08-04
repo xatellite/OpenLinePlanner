@@ -39,7 +39,7 @@
       <TooltipButton
         v-if="editStore.isEditing == line"
         toolTip="Remove line (permanent)"
-        handler="removeLine"
+        :handler="removeLine"
       >
         <span class="line-element__remove"><TrashCanOutlineIcon /></span> 
       </TooltipButton>
