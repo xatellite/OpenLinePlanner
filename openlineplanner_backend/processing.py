@@ -29,7 +29,7 @@ def calculate_inhabitants_by_stations(stations, method = "absolute", decision_di
     for relation_index in relations[data_layer]:
       relation = relations[data_layer][relation_index]
       for field in data_layers[data_layer]["fields"]:
-        peopleCount = data_layers[data_layer]["data"][field["name"]][relation_index]
+        peopleCount = int(data_layers[data_layer]["data"][field["name"]][relation_index])
 
         if method == "relative":
           if (relation["d"] <= 0):

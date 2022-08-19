@@ -4,6 +4,7 @@ services:
   openlineplanner_xat_io:
     build: .
     container_name: "openlineplanner_xat_io"
+    restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.openlineplanner_xat_io.rule=Host(`openlineplanner.xatellite.io`)"
