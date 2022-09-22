@@ -18,7 +18,9 @@ export const useOverlayStore = defineStore({
       this.overlay = type;
       this.overlayData = {};
       // Send api parameters to Matomo
-      window._paq.push(["overlay_select", type]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "overlay_select", type);
+      }
       if (type != "none") {
         fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay", {
           method: "POST",
@@ -63,7 +65,13 @@ export const useOverlayStore = defineStore({
         method: this.calculationMethod,
       };
       // Send api parameters to Matomo
-      window._paq.push(["coverage-info", stations]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent(
+          "editing",
+          "coverage-info",
+          stations
+        );
+      }
       fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info", {
         method: "POST",
         body: JSON.stringify(stations),

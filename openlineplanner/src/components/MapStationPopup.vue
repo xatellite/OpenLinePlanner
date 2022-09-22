@@ -105,7 +105,9 @@ export default {
     toggleMerge(e) {
       e.stopPropagation();
       // Matomo Tracking
-      window._paq.push(["toggleMerge"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "toggleMerge");
+      }
       if (this.editStore.isMerging) {
         this.editStore.isMerging = null;
         return;
@@ -145,7 +147,9 @@ export default {
     extendLine(e) {
       e.stopPropagation();
       // Matomo Tracking
-      window._paq.push(["extendLine"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "extendLine");
+      }
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;
@@ -166,7 +170,9 @@ export default {
     },
     removePoint() {
       // Matomo Tracking
-      window._paq.push(["removePoint"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "removePoint");
+      }
       this.linesStore.removePoint(this.point.id);
     },
   },

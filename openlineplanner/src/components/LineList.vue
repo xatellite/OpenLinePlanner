@@ -52,7 +52,9 @@ export default {
   methods: {
     addLine() {
       // Matomo Tracking
-      window._paq.push(["addLine"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "addLine");
+      }
       const line = this.linesStore.addLine();
       this.editStore.isEditing = line;
       this.editStore.isExtending = -1;

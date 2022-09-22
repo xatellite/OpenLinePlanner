@@ -72,16 +72,16 @@ export default {
     },
     save() {
       // Matomo tracking
-      window._paq.push([
-        "save",
-        {
+
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "save", {
           lines: Object.keys(this.linesStore.lines).length,
           points: Object.keys(this.linesStore.points).length,
           stations: Object.values(this.linesStore.points)
             .map((point) => point.type === "station")
             .reduce((a, b) => a + b),
-        },
-      ]);
+        });
+      }
       const linesStore = this.linesStore.$state;
       downloadJSON({ linesStore });
     },
@@ -91,31 +91,29 @@ export default {
           this.editStore.stopAllInputs();
           this.linesStore.loadState(json.linesStore);
           // Matomo tracking
-          window._paq.push([
-            "load",
-            {
+          if (window && window.Piwik) {
+            window.Piwik.getTracker().trackEvent("editing", "load", {
               lines: Object.keys(this.linesStore.lines).length,
               points: Object.keys(this.linesStore.points).length,
               stations: Object.values(this.linesStore.points)
                 .map((point) => point.type === "station")
                 .reduce((a, b) => a + b),
-            },
-          ]);
+            });
+          }
         });
       });
     },
     generatePdf() {
       // Matomo tracking
-      window._paq.push([
-        "pdf",
-        {
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "pdf", {
           lines: Object.keys(this.linesStore.lines).length,
           points: Object.keys(this.linesStore.points).length,
           stations: Object.values(this.linesStore.points)
             .map((point) => point.type === "station")
             .reduce((a, b) => a + b),
-        },
-      ]);
+        });
+      }
       document.addEventListener(
         "mapExportGenerated",
         async (exportedImageEvent) => {

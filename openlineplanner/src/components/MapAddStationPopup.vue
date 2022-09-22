@@ -44,13 +44,17 @@ export default {
     },
     removePoint() {
       // Matomo Tracking
-      window._paq.push(["removePoint"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "removePoint");
+      }
       this.linesStore.removePoint(this.point.id);
     },
     extendLine(e) {
       e.stopPropagation();
       // Matomo Tracking
-      window._paq.push(["extendLine"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "extendLine");
+      }
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;

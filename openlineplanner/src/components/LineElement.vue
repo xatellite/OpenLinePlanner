@@ -29,7 +29,11 @@
         </span>
       </TooltipButton>
       <TooltipButton
-        v-if="(editStore.isEditing == line && linesStore.lines[line.id].pointIds.length > 1) || findStationLoading"
+        v-if="
+          (editStore.isEditing == line &&
+            linesStore.lines[line.id].pointIds.length > 1) ||
+          findStationLoading
+        "
         :handler="findStation"
         toolTip="Automatically find ideal station"
       >
@@ -41,7 +45,7 @@
         toolTip="Remove line (permanent)"
         :handler="removeLine"
       >
-        <span class="line-element__remove"><TrashCanOutlineIcon /></span> 
+        <span class="line-element__remove"><TrashCanOutlineIcon /></span>
       </TooltipButton>
     </div>
     <div
@@ -67,7 +71,7 @@ import IconLine from "./icons/IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
 import ColorPicker from "./ColorPicker.vue";
-import { usePaxStore } from '../stores/pax';
+import { usePaxStore } from "../stores/pax";
 
 export default {
   props: {
@@ -98,12 +102,16 @@ export default {
     },
     updateColor(color) {
       // Matomo Tracking
-      window._paq.push(["updateColor", color]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "updateColor", color);
+      }
       this.linesStore.updateLineColor(this.line.id, color);
     },
     toggleEditing() {
       // Matomo Tracking
-      window._paq.push(["toggleEditing"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "toggleEditing");
+      }
       this.editStore.isEditing = this.line;
       if (this.line.pointIds.length === 0) {
         this.editStore.isExtending = -1;
@@ -113,20 +121,26 @@ export default {
     },
     openColorPick(e) {
       // Matomo Tracking
-      window._paq.push(["openColorPick"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "openColorPick");
+      }
       e.stopPropagation();
       this.selectColor = true;
     },
     removeLine() {
       // Matomo Tracking
-      window._paq.push(["removeLine"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "removeLine");
+      }
       this.editStore.isEditing = null;
       this.editStore.isExtending = null;
       this.linesStore.removeLine(this.line);
     },
     findStation() {
       // Matomo Tracking
-      window._paq.push(["findStation"]);
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "findStation");
+      }
       if (!this.findStationLoading) {
         this.findStationLoading = true;
         const route = [];
