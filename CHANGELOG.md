@@ -2,21 +2,22 @@
 
 ### VX.X - Future Releases
 #### Added or Changed
-
-- [ ] Add different transportation types
 - [ ] Add background data management
 - [ ] Add custom profiles
 - [ ] Add commercial banner
 - [ ] Mobile version?
 - [ ] ? Optimize for large scale networks
 
-### V0.5 - "Make it public"
+### V0.6 - "More functionality"
 #### Added or Changed
-
-- [ ] Make Repo public
 - [ ] Fix automatic residence processing
 - [ ] Add data present markings
 - [ ] ? Request more areas button
+- [ ] Add different transportation types
+### V0.5 - "Make it public"
+#### Added or Changed
+
+- [x] Make Repo public
 - [x] Add Matomo tracking
 - [x] Added Readme
 - [x] Added Changelog
