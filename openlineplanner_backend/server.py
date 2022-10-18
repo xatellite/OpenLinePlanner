@@ -41,8 +41,6 @@ class CoverageResource:
         # Build arg object
         args = {}
         args["stations"] = obj.get('stations')
-        if obj.get('decision_distance'):
-            args["decision_distance"] = obj.get('decision_distance')
         # Retrieve result
         station_info = generate_geojson(**args)
         station_info = json.loads(json.dumps(station_info, cls=NpEncoder))
@@ -58,8 +56,6 @@ class FinderResource:
         args["route"] = obj.get('route')
         if obj.get('method'):
             args["method"] = obj.get('method')
-        if obj.get('decision_distance'):
-            args["decision_distance"] = obj.get('decision_distance')
         # Retrieve result
         station_info = find_optimal_station_spot_on_route(**args)
         resp.media = { "optimalStation": station_info}

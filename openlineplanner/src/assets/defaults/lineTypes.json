@@ -1,0 +1,37 @@
+{
+  "gondola": {
+    "coverageArea": 300,
+    "acceleration": 3,
+    "maxSpeed": 30,
+    "stopTime": 15,
+    "lineWidth": 4
+  },
+  "bus": {
+    "coverageArea": 300,
+    "acceleration": 1.5,
+    "maxSpeed": 50,
+    "stopTime": 20,
+    "lineWidth": 4
+  },
+  "tram": {
+    "coverageArea": 500,
+    "acceleration": 1,
+    "maxSpeed": 60,
+    "stopTime": 20,
+    "lineWidth": 5
+  },
+  "subway": {
+    "coverageArea": 700,
+    "acceleration": 1,
+    "maxSpeed": 80,
+    "stopTime": 20,
+    "lineWidth": 6
+  },
+  "train": {
+    "coverageArea": 1000,
+    "acceleration": 1,
+    "maxSpeed": 90,
+    "stopTime": 20,
+    "lineWidth": 8
+  }
+}

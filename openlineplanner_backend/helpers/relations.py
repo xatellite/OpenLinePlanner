@@ -2,7 +2,7 @@
 from config.statics import DATA_LAYERS, MAX_STEPS, MIN_STEPS
 from helpers.geometry import get_distance
 
-def check_station_relation(parent_layer, layers, steps, data_layer_types, method="closest", decision_distance=500):
+def check_station_relation(parent_layer, layers, steps, data_layer_types, method="closest"):
   is_base_layer = False
   relations = {}
   if steps > MAX_STEPS:
@@ -26,7 +26,7 @@ def check_station_relation(parent_layer, layers, steps, data_layer_types, method
 
             if method == "closest":
               # Check closest station and apply pax
-              point_data_layer, point_index, closest_station = find_closest_station(child_sector_ref, child_sector, stations_to_be_checked, decision_distance)
+              point_data_layer, point_index, closest_station = find_closest_station(child_sector_ref, child_sector, stations_to_be_checked)
               if not point_data_layer == None:
                 relations[point_data_layer][point_index] = closest_station
             else:
@@ -36,25 +36,25 @@ def check_station_relation(parent_layer, layers, steps, data_layer_types, method
               relations[point_data_layer][point_index] = []
               for station in stations_to_be_checked:
                 distance = get_distance(station, child_sector_ref)
-                if (distance <= decision_distance):
+                if (distance <= stations["coverage"]):
                   relations[point_data_layer][point_index].append({"station": station, "d": distance})
           else:
             if "station_selected" in sector:
               child_sector["station_selected"] = sector["station_selected"]
             else:
-              check_sector_station_relation(child_sector_ref["lat"], child_sector_ref["lng"], child_sector, sector["stations_possible"], steps, decision_distance)
+              check_sector_station_relation(child_sector_ref["lat"], child_sector_ref["lng"], child_sector, sector["stations_possible"], steps)
   # ToDo Improvement: Remove sectors without station
   if not is_base_layer:
-    return check_station_relation(layer, layers, steps * 10, data_layer_types, method, decision_distance)
+    return check_station_relation(layer, layers, steps * 10, data_layer_types, method)
   return relations
 
-def find_closest_station(point, sector, stations, decision_distance):
+def find_closest_station(point, sector, stations):
   # calculate for each building
   min_distance = None
   closest_station = None
   for station in stations:
     distance = get_distance(station, point)
-    if (min_distance == None or min_distance > distance) and distance <= decision_distance:
+    if (min_distance == None or min_distance > distance) and distance <= station["coverage"]:
       min_distance = distance
       closest_station = station
   if closest_station == None:
@@ -62,7 +62,7 @@ def find_closest_station(point, sector, stations, decision_distance):
   return sector["data_layer"], sector["index"], {"id": closest_station["id"], "d": min_distance}
 
 # Inplace
-def check_sector_station_relation(lat, lng, sector, stations, steps, decision_distance):
+def check_sector_station_relation(lat, lng, sector, stations, steps):
   grid_size = (90 / steps)
   sector_corners = [
     {"lat": lat, "lng": lng},
@@ -78,9 +78,9 @@ def check_sector_station_relation(lat, lng, sector, stations, steps, decision_di
       station_select = True
       for sector_corner in sector_corners:
         distance = get_distance(station, sector_corner)
-        if (distance <= decision_distance):
+        if (distance <= station["coverage"]):
           station_added = True
-        if (distance > decision_distance):
+        if (distance > station["coverage"]):
           station_select = False
           # break if there is no chance for selection and station already reaches section
           if station_added: break
@@ -94,7 +94,7 @@ def check_sector_station_relation(lat, lng, sector, stations, steps, decision_di
       # Check one corner is covered
       for sector_corner in sector_corners:
         distance = get_distance(station, sector_corner)
-        if (distance <= decision_distance):
+        if (distance <= station["coverage"]):
           sector["stations_possible"].append(station)
           station_added = True
           break
@@ -111,11 +111,11 @@ def check_sector_station_relation(lat, lng, sector, stations, steps, decision_di
       sector["stations_possible"].append(station)
 
 
-def calculate_relations(stations, layers, decision_distance, method="closest"):
+def calculate_relations(stations, layers, method="closest"):
   top_layer_steps = MIN_STEPS
 
   # Initialize stations
   for sector_lat in layers[top_layer_steps]:
     for sector_lng in layers[top_layer_steps][sector_lat]:
       layers[top_layer_steps][sector_lat][sector_lng]["stations_possible"] = stations
-  return check_station_relation(layers[top_layer_steps], layers, top_layer_steps * 10, list(DATA_LAYERS.keys()), method, decision_distance)
+  return check_station_relation(layers[top_layer_steps], layers, top_layer_steps * 10, list(DATA_LAYERS.keys()), method)

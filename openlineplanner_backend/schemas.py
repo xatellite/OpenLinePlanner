@@ -5,7 +5,8 @@ station_list_schema = {
     "properties": {
       "id" : { "type": "string" },
       "lat" : { "type": "number" },
-      "lng" : { "type": "number" }
+      "lng" : { "type": "number" },
+      "coverage": { "type": "number" },
     },
     "required":["lat", "lng", "id"]
   },
@@ -31,7 +32,6 @@ station_resource_schema = {
  "type":"object",
     "properties": {
         "stations": station_list_schema,
-        "decision_distance": { "type" : "integer" },
         "separation_distance": { "type" : "integer" },
         "method": { "type" : "string" },
       },
@@ -42,7 +42,6 @@ coverage_resource_schema = {
   "type":"object",
   "properties": {
       "stations": station_list_schema,
-      "decision_distance": { "type" : "integer" },
     },
   "required":["stations"]
 }
@@ -60,7 +59,6 @@ optimal_station_schema = {
     "properties": {
         "stations": station_list_schema,
         "route": point_list_schema,
-        "decision_distance": { "type" : "integer" },
         "method": { "type" : "string" },
       },
   "required":["stations", "route"]

@@ -1543,6 +1543,11 @@ vue-router@^4.0.14:
   dependencies:
     "@vue/devtools-api" "^6.0.0"
 
+vue-slider-component@^4.1.0-beta.2:
+  version "4.1.0-beta.2"
+  resolved "https://registry.yarnpkg.com/vue-slider-component/-/vue-slider-component-4.1.0-beta.2.tgz#ee7bd81ca148a3122da1ca9de94a950385a6819b"
+  integrity sha512-VHRUdxg7EkT49/iHoNpyctq2LoFpWtZXgDfS+OHpl53wUCTmFWKVTu32JupyfbmJFRVBhSgB1b98HalDY/ulPQ==
+
 vue3-apexcharts@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/vue3-apexcharts/-/vue3-apexcharts-1.4.1.tgz#ea561308430a1c5213b7f17c44ba3c845f6c490d"

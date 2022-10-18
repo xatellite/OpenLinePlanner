@@ -1,15 +1,20 @@
 <template>
   <div class="line-element">
+    <ColorPicker
+      v-if="selectColor && selectType == false"
+      :initColor="line.color"
+      :handleColorChange="updateColor"
+      :closeAction="toggleColorPick"
+    />
+    <TypePicker
+      v-if="selectType && selectColor == false"
+      :line="line"
+      :closeAction="toggleTypePicker"
+    />
     <div class="line-element__data">
-      <TooltipButton :handler="openColorPick" toolTip="Change line color">
+      <TooltipButton :handler="toggleColorPick" toolTip="Change line color">
         <IconLine :color="line.color" />
       </TooltipButton>
-      <ColorPicker
-        v-if="selectColor == true"
-        :initColor="line.color"
-        :handleColorChange="updateColor"
-        :closeAction="() => (selectColor = false)"
-      />
       <input
         v-if="editStore.isEditing == line"
         type="text"
@@ -41,6 +46,18 @@
         <BusStopIcon v-else />
       </TooltipButton>
       <TooltipButton
+        v-if="editStore.isEditing != line"
+        toolTip="Toggle line options"
+        :handler="toggleTypePicker"
+      >
+        <GondolaIcon v-if="line.type === 'gondola'" />
+        <BusIcon v-if="line.type === 'bus'" />
+        <TramIcon v-if="line.type === 'tram'" />
+        <SubwayIcon v-if="line.type === 'subway'" />
+        <TrainIcon v-if="line.type === 'train'" />
+        <TuneVariantIcon v-if="line.type === 'custom'" />
+      </TooltipButton>
+      <TooltipButton
         v-if="editStore.isEditing == line"
         toolTip="Remove line (permanent)"
         :handler="removeLine"
@@ -64,6 +81,12 @@
 import PencilOutlineIcon from "vue-material-design-icons/PencilOutline.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import ArrowDownRightIcon from "vue-material-design-icons/ArrowDownRight.vue";
+import GondolaIcon from "vue-material-design-icons/Gondola.vue";
+import BusIcon from "vue-material-design-icons/Bus.vue";
+import TrainIcon from "vue-material-design-icons/Train.vue";
+import TramIcon from "vue-material-design-icons/Tram.vue";
+import SubwayIcon from "vue-material-design-icons/Subway.vue";
+import TuneVariantIcon from "vue-material-design-icons/TuneVariant.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import LoadingIcon from "vue-material-design-icons/Loading.vue";
 import TooltipButton from "./TooltipButton.vue";
@@ -72,6 +95,7 @@ import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
 import ColorPicker from "./ColorPicker.vue";
 import { usePaxStore } from "../stores/pax";
+import TypePicker from "./TypePicker.vue";
 
 export default {
   props: {
@@ -86,6 +110,13 @@ export default {
     ArrowDownRightIcon,
     LoadingIcon,
     TooltipButton,
+    TypePicker,
+    GondolaIcon,
+    BusIcon,
+    TrainIcon,
+    TramIcon,
+    SubwayIcon,
+    TuneVariantIcon,
   },
   data() {
     return {
@@ -93,6 +124,7 @@ export default {
       editStore: useEditStore(),
       paxStore: usePaxStore(),
       selectColor: false,
+      selectType: false,
       findStationLoading: false,
     };
   },
@@ -105,7 +137,7 @@ export default {
       if (window && window.Piwik) {
         window.Piwik.getTracker().trackEvent("editing", "updateColor", color);
       }
-      this.linesStore.updateLineColor(this.line.id, color);
+      this.linesStore.updateLineValues(this.line.id, { color });
     },
     toggleEditing() {
       // Matomo Tracking
@@ -119,13 +151,27 @@ export default {
       }
       this.editStore.isExtending = null;
     },
-    openColorPick(e) {
+    toggleColorPick(e) {
       // Matomo Tracking
       if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "openColorPick");
+        window.Piwik.getTracker().trackEvent("editing", "toggleColorPick");
       }
-      e.stopPropagation();
-      this.selectColor = true;
+      if (e) {
+        e.stopPropagation();
+      }
+      this.selectType = false;
+      this.selectColor = !this.selectColor;
+    },
+    toggleTypePicker(e) {
+      // Matomo Tracking
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "toggleTypePick");
+      }
+      if (e) {
+        e.stopPropagation();
+      }
+      this.selectColor = false;
+      this.selectType = !this.selectType;
     },
     removeLine() {
       // Matomo Tracking
@@ -209,6 +255,12 @@ export default {
     display: flex;
     align-items: center;
     padding: $space-ssm $space-ssm;
+
+    &:hover {
+      .line-element__edit {
+        display: block;
+      }
+    }
   }
 
   &__warning {
@@ -247,12 +299,6 @@ export default {
 
   &__edit {
     display: none;
-  }
-
-  &:hover {
-    .line-element__edit {
-      display: block;
-    }
   }
 }
 </style>

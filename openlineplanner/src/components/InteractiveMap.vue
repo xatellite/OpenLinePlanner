@@ -150,12 +150,19 @@ export default {
           this.drawReferencePoints();
         });
       }
-      if (name === "updateLineColor") {
+      if (name === "updateLineValues") {
         const lineRef = args[0];
-        const line = this.linesStore.lines[lineRef];
-        after(() => {
-          this.updateLineStyle(line);
-        });
+        const updateObject = args[1];
+        if (
+          updateObject["color"] ||
+          updateObject["lineThickness"] ||
+          updateObject["type"]
+        ) {
+          const line = this.linesStore.lines[lineRef];
+          after(() => {
+            this.updateLineStyle(line);
+          });
+        }
       }
       if (
         name === "checkForParallelLine" ||
@@ -252,7 +259,7 @@ export default {
         },
         paint: {
           "line-color": line.color,
-          "line-width": 5,
+          "line-width": line.getLineThickness(),
         },
       });
       this.lines[line.id] = line;
@@ -273,7 +280,9 @@ export default {
       delete this.lines[line.id];
     },
     updateLineStyle(line) {
+      console.log("update");
       this.map.setPaintProperty(line.getLineLongId(), "line-color", line.color);
+      this.map.setPaintProperty(line.getLineLongId(), "line-width", line.getLineThickness());
     },
     addPoint(point) {
       let domContainer;

@@ -142,8 +142,10 @@ export const useLinesStore = defineStore({
       this.checkParallelsStillExist();
       return pointsRemoved;
     },
-    updateLineColor(line, color) {
-      this.lines[line].color = color;
+    updateLineValues(lineId, updateObject) {
+      Object.keys(updateObject).forEach((key) => {
+        this.lines[lineId][key] = updateObject[key];
+      });
     },
     loadState(savedState) {
       this.parallels = [];

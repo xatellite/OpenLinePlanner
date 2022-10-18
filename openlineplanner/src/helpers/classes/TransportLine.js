@@ -1,10 +1,28 @@
+import LineTypeParameters from "../../assets/defaults/lineTypes.json";
+
 export default class TransportLine {
-  constructor(name, id=crypto.randomUUID(), type = "tram", color = "#ff0000", pointIds = []) {
+  constructor(
+    name,
+    id = crypto.randomUUID(),
+    type = "tram",
+    color = "#ff0000",
+    pointIds = [],
+    customAcceleration = 1.0,
+    customStopTime = 30,
+    customMaxSpeed = 50,
+    customCoverage = 300,
+    lineThickness = 2.0
+  ) {
     this.id = id;
     this.name = name;
-    this.pointIds = pointIds;
     this.type = type;
     this.color = color;
+    this.pointIds = pointIds;
+    this.customAcceleration = customAcceleration;
+    this.customStopTime = customStopTime;
+    this.lineThickness = lineThickness;
+    this.customCoverage = customCoverage;
+    this.customMaxSpeed = customMaxSpeed;
   }
 
   static fromObject(lineObject) {
@@ -13,12 +31,31 @@ export default class TransportLine {
       lineObject.id,
       lineObject.type,
       lineObject.color,
-      lineObject.pointIds
+      lineObject.pointIds,
+      lineObject.customAcceleration,
+      lineObject.customStopTime,
+      lineObject.lineThickness,
+      lineObject.customCoverage,
+      lineObject.customMaxSpeed
     );
   }
 
   getLineLongId() {
     return `line-${this.id}`;
+  }
+
+  getCoverage() {
+    if (this.type === "custom") {
+      return this.customCoverage;
+    }
+    return LineTypeParameters[this.type]["coverageArea"];
+  }
+
+  getLineThickness() {
+    if (this.type === "custom") {
+      return this.lineThickness;
+    }
+    return LineTypeParameters[this.type]["lineWidth"];
   }
 
   setName(name) {

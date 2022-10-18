@@ -76,7 +76,7 @@ export default {
   }
 
   &__container {
-    max-height: 500px;
+    max-height: 300px;
     overflow-y: auto;
   }
 

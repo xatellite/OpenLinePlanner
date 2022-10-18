@@ -13,6 +13,9 @@
         ><FileExportOutlineIcon
       /></TooltipButton>
     </div>
+    <!-- <TooltipButton toolTip="Check Line Infos" href="/analysis">
+      <BlurLinearIcon />
+    </TooltipButton> -->
     <TooltipButton
       v-if="editStore.isEditing"
       :handler="disableEditing"
@@ -25,6 +28,7 @@
 
 <script>
 import TrayArrowDownIcon from "vue-material-design-icons/TrayArrowDown.vue";
+import BlurLinearIcon from "vue-material-design-icons/BlurLinear.vue";
 import FolderUploadOutlineIcon from "vue-material-design-icons/FolderUploadOutline.vue";
 import PencilOffOutlineIcon from "vue-material-design-icons/PencilOffOutline.vue";
 import FileExportOutlineIcon from "vue-material-design-icons/FileExportOutline.vue";
@@ -44,6 +48,7 @@ export default {
     PencilOffOutlineIcon,
     FileExportOutlineIcon,
     TooltipButton,
+    BlurLinearIcon,
   },
   setup() {
     const editStore = useEditStore();

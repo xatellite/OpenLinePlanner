@@ -8,13 +8,13 @@ from helpers.path import split_path_into_points
 
 main_layers = define_layers(DATA_LAYERS)
 
-def calculate_inhabitants_by_stations(stations, method = "absolute", decision_distance = 500, separation_distance = 300):
+# ToDo: make separation distance parameterized
+def calculate_inhabitants_by_stations(stations, method = "absolute", separation_distance = 500):
   """Calculates inhabitants covered by station radius
 
   Args:
       stations (list): list of stations
       method (str): "absolute" or "relative" [x 1/sqrt(distance)] calculation
-      decision_distance (int): max coverage distance of station (default is 500)
       separation_distance (int): distance to split pedestrian and bike transit (default is 300)
 
   Returns:
@@ -22,7 +22,7 @@ def calculate_inhabitants_by_stations(stations, method = "absolute", decision_di
   """
   data_layers = DATA_LAYERS
   layers = copy.deepcopy(main_layers)
-  relations = calculate_relations(stations, layers, decision_distance)
+  relations = calculate_relations(stations, layers)
   station_relations = {}
   empty_relation = {"ped": 0, "bike": 0, "total": 0, "residential": 0, "work": 0, "school": 0}
   for data_layer in data_layers:
@@ -54,7 +54,7 @@ def calculate_inhabitants_by_stations(stations, method = "absolute", decision_di
       station_relations[station["id"]] = empty_relation
   return station_relations
 
-def generate_geojson(stations, decision_distance = 500):
+def generate_geojson(stations):
   """Generates geojson including all calculated properties by feature point
 
   Args:
@@ -65,7 +65,7 @@ def generate_geojson(stations, decision_distance = 500):
   """
   layers = copy.deepcopy(main_layers) 
   data_layers = DATA_LAYERS
-  relations = calculate_relations(stations, layers, decision_distance)
+  relations = calculate_relations(stations, layers)
 
   station_relations = {}
   for data_layer in data_layers:
@@ -92,21 +92,20 @@ def generate_geojson(stations, decision_distance = 500):
 
   return FeatureCollection(feature_list)
 
-def find_optimal_station_spot_on_route(stations, route, method = "absolute", decision_distance = 500):
+def find_optimal_station_spot_on_route(stations, route, method = "absolute"):
   """Finds the optimal spot to place a new station on a route
 
   Args:
       stations (list): list of stations
       route (list): list of all points forming the rout the new station should be placed on
       method (string): weighting method of point search: "absolute" or "relative" [x 1/sqrt(distance)] calculation
-      decision_distance (int): max coverage distance of station (default is 500)
 
   Returns:
       object: point of new optimal station
   """
   layers = copy.deepcopy(main_layers) 
   modified_data_layers = copy.deepcopy(DATA_LAYERS)
-  relations = calculate_relations(stations, layers, decision_distance)
+  relations = calculate_relations(stations, layers)
 
   for data_layer in DATA_LAYERS:
     modified_data_layers[data_layer]["data"] = modified_data_layers[data_layer]["data"].drop(relations[data_layer].keys())
@@ -115,7 +114,7 @@ def find_optimal_station_spot_on_route(stations, route, method = "absolute", dec
   updated_data_layers = define_layers(modified_data_layers)
   points_to_check = split_path_into_points(route)
 
-  relations = calculate_relations(points_to_check, updated_data_layers, decision_distance, method="all")
+  relations = calculate_relations(points_to_check, updated_data_layers, method="all")
 
   # Calculate pax
   station_relations = {}

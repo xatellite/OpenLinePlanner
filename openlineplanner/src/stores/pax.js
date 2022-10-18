@@ -32,6 +32,11 @@ export const usePaxStore = defineStore({
             lat: station.lat,
             lng: station.lng,
             id: station.id,
+            coverage: Math.max(
+              ...station.lines.map((lineId) =>
+                linesStore.getLineById(lineId).getCoverage()
+              )
+            ),
           })),
         method: this.calculationMethod,
       };

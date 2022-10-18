@@ -12,6 +12,7 @@ export const useOverlayStore = defineStore({
     exporting: false,
     coverage: "none",
     coverageData: {},
+    currentRequestController: null,
   }),
   actions: {
     selectOverlay(type) {
@@ -61,9 +62,20 @@ export const useOverlayStore = defineStore({
             lat: station.lat,
             lng: station.lng,
             id: station.id,
+            coverage: Math.max(
+              ...station.lines.map((lineId) =>
+                linesStore.getLineById(lineId).getCoverage()
+              )
+            ),
           })),
         method: this.calculationMethod,
       };
+      // cancel request if duplicate exists
+      if (this.currentRequestController != null) {
+        this.currentRequestController.abort();
+      }
+      this.currentRequestController = new AbortController();
+      const abortSignal = this.currentRequestController.signal;
       // Send api parameters to Matomo
       if (window && window.Piwik) {
         window.Piwik.getTracker().trackEvent(
@@ -78,15 +90,19 @@ export const useOverlayStore = defineStore({
         headers: {
           "Content-type": "application/json",
         },
+        signal: abortSignal,
       })
         .then((data) => data.json())
         .then((overlayData) => {
           const distanceColors = [
+            "#47aee9",
             "#6dc490",
             "#75ec62",
-            "#47aee9",
             "#eec83f",
+            "#ED983E",
             "#ba546c",
+            "#501478",
+            "#371D49",
           ];
 
           const stationColorMapping = {};
@@ -100,9 +116,10 @@ export const useOverlayStore = defineStore({
             point.properties["station_color"] =
               stationColorMapping[point.properties["closest_station"]];
             point.properties["distance_color"] =
-              distanceColors[Math.round(point.properties.distance / 100)];
+              distanceColors[Math.floor(point.properties.distance / 100)];
           });
           this.coverageData = overlayData.coverage;
+          this.currentRequestController = null;
         });
     },
     toggleNameTags() {

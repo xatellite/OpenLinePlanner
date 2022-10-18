@@ -2,7 +2,6 @@
   <main>
     <InteractiveMap />
     <div class="main-menu-pane">
-      <Logo />
       <LineList />
     </div>
     <ViewSettings />
