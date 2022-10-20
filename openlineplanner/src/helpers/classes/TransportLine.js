@@ -34,9 +34,9 @@ export default class TransportLine {
       lineObject.pointIds,
       lineObject.customAcceleration,
       lineObject.customStopTime,
-      lineObject.lineThickness,
+      lineObject.customMaxSpeed,
       lineObject.customCoverage,
-      lineObject.customMaxSpeed
+      lineObject.lineThickness
     );
   }
 

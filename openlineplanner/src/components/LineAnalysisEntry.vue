@@ -88,13 +88,11 @@ export default {
         if (xOffset - lastOffset < 10) {
           absoluteXOffset += 20 - (xOffset - lastOffset);
         }
-        console.log(xOffset, absoluteXOffset, absoluteXOffset + xOffset);
         lastOffset = xOffset;
 
-        const driveTime = this.calculateDriveTime(distanceCounter);
-        totalTravelTimeSeconds += driveTime;
-
         if (point.type === "station") {
+          const driveTime = this.calculateDriveTime(distanceCounter);
+          totalTravelTimeSeconds += driveTime;
           stations.push({
             ...point,
             distance: totalDistanceCounter,

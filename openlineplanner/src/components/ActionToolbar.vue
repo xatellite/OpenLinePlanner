@@ -142,8 +142,6 @@ export default {
           }
 
           doc.setFont("helvetica", "normal", 700);
-          console.log(stationsData);
-          console.log(Object.values(stationsData));
           await Promise.all(
             Object.keys(stationsData).map(async (stationId, stationIndex) => {
               const stationData = stationsData[stationId];
