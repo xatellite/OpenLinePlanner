@@ -58,6 +58,27 @@ export default class TransportLine {
     return LineTypeParameters[this.type]["lineWidth"];
   }
 
+  getMaxSpeed() {
+    if (this.type === "custom") {
+      return this.customMaxSpeed;
+    }
+    return LineTypeParameters[this.type]["maxSpeed"];
+  }
+
+  getStopTime() {
+    if (this.type === "custom") {
+      return this.customStopTime;
+    }
+    return LineTypeParameters[this.type]["stopTime"];
+  }
+
+  getAcceleration() {
+    if (this.type === "custom") {
+      return this.customAcceleration;
+    }
+    return LineTypeParameters[this.type]["acceleration"];
+  }
+
   setName(name) {
     this.name = name;
   }

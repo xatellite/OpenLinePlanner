@@ -63,10 +63,10 @@
         :marks="[50, 250, 500, 750, 1000, 1250, 1500, 1750, 2000]"
         @update:modelValue="updateValue({ customCoverage: $event })"
       />
-      <!-- <div class="type-picker__sliders__title">
+      <div class="type-picker__sliders__title">
         <span>Avg. acceleration: </span><b>{{ this.acceleration }}m/s²</b>
-      </div> -->
-      <!-- <VueSlider
+      </div>
+      <VueSlider
         class="type-picker__sliders__element"
         :modelValue="this.acceleration"
         :disabled="line.type !== 'custom'"
@@ -99,7 +99,7 @@
         tooltip="none"
         :marks="[0, 30, 50, 100, 150, 200]"
         @update:modelValue="updateValue({ customMaxSpeed: $event })"
-      /> -->
+      />
       <div class="type-picker__sliders__title">
         <span>Line width: </span><b>{{ this.lineWidth }}px</b>
       </div>

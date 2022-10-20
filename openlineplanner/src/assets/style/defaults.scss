@@ -1,7 +1,7 @@
 @import "@/assets/style/variables.scss";
 
 button, .button {
-  border: 1px solid #d6d6d6;
+  border: 1px solid $c-button-background;
   background-color: darken($c-box, 2);
   border-radius: $br-md;
   height: 2.5rem;
@@ -75,7 +75,7 @@ select::-ms-expand {
   margin: 0;
 
   & > span {
-    border-right: 1px solid #d6d6d6;
+    border-right: 1px solid $c-button-background;
     padding: $space-ssm;
     & > span {
       display: flex;

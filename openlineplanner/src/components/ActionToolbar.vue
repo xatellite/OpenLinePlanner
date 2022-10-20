@@ -13,9 +13,9 @@
         ><FileExportOutlineIcon
       /></TooltipButton>
     </div>
-    <!-- <TooltipButton toolTip="Check Line Infos" href="/analysis">
+    <TooltipButton toolTip="Check Line Infos" href="/analysis">
       <BlurLinearIcon />
-    </TooltipButton> -->
+    </TooltipButton>
     <TooltipButton
       v-if="editStore.isEditing"
       :handler="disableEditing"

@@ -1,9 +1,7 @@
 <template>
   <div>
     <NavigationBar />
-    <div>
-      <LineAnalysisEntry />
-    </div>
+    <LineAnalysisList />
     <PageFooter />
   </div>
 </template>
@@ -11,12 +9,8 @@
 <script>
 import NavigationBar from '../components/NavigationBar.vue';
 import PageFooter from '../components/PageFooter.vue';
-import LineAnalysisEntry from '../components/LineAnalysisEntry.vue';
+import LineAnalysisList from '../components/LineAnalysisList.vue';
 export default {
-    components: { NavigationBar, PageFooter, LineAnalysisEntry }
+    components: { NavigationBar, PageFooter, LineAnalysisList }
 }
 </script>
-
-<style>
-
-</style>

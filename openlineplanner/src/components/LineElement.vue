@@ -50,12 +50,7 @@
         toolTip="Toggle line options"
         :handler="toggleTypePicker"
       >
-        <GondolaIcon v-if="line.type === 'gondola'" />
-        <BusIcon v-if="line.type === 'bus'" />
-        <TramIcon v-if="line.type === 'tram'" />
-        <SubwayIcon v-if="line.type === 'subway'" />
-        <TrainIcon v-if="line.type === 'train'" />
-        <TuneVariantIcon v-if="line.type === 'custom'" />
+        <TypeIcon :type="line.type" />
       </TooltipButton>
       <TooltipButton
         v-if="editStore.isEditing == line"
@@ -81,12 +76,6 @@
 import PencilOutlineIcon from "vue-material-design-icons/PencilOutline.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import ArrowDownRightIcon from "vue-material-design-icons/ArrowDownRight.vue";
-import GondolaIcon from "vue-material-design-icons/Gondola.vue";
-import BusIcon from "vue-material-design-icons/Bus.vue";
-import TrainIcon from "vue-material-design-icons/Train.vue";
-import TramIcon from "vue-material-design-icons/Tram.vue";
-import SubwayIcon from "vue-material-design-icons/Subway.vue";
-import TuneVariantIcon from "vue-material-design-icons/TuneVariant.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import LoadingIcon from "vue-material-design-icons/Loading.vue";
 import TooltipButton from "./TooltipButton.vue";
@@ -96,6 +85,7 @@ import { useEditStore } from "../stores/editing";
 import ColorPicker from "./ColorPicker.vue";
 import { usePaxStore } from "../stores/pax";
 import TypePicker from "./TypePicker.vue";
+import TypeIcon from "./TypeIcon.vue";
 
 export default {
   props: {
@@ -111,13 +101,8 @@ export default {
     LoadingIcon,
     TooltipButton,
     TypePicker,
-    GondolaIcon,
-    BusIcon,
-    TrainIcon,
-    TramIcon,
-    SubwayIcon,
-    TuneVariantIcon,
-  },
+    TypeIcon,
+},
   data() {
     return {
       linesStore: useLinesStore(),

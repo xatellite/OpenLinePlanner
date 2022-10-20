@@ -12,7 +12,7 @@ export default {};
 
 <style lang="scss">
 .footer {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   z-index: 100;
   background: $c-text-primary;
