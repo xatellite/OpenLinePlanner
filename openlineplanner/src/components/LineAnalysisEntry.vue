@@ -40,7 +40,7 @@
 // ToDo: Add manual perspective adjust
 import TransportLine from "../helpers/classes/TransportLine";
 import TypeIcon from "./TypeIcon.vue";
-import IconLine from "./icons/IconLine.vue";
+import IconLine from "./IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { calculateMidPoint } from "../helpers/geometry";
 import { secondsToMinSecPadded } from "../helpers/time";
@@ -91,7 +91,8 @@ export default {
         lastOffset = xOffset;
 
         if (point.type === "station") {
-          const driveTime = this.calculateDriveTime(distanceCounter);
+          const maxSpeed = this.getMaxSpeedForSegment(points, index);
+          const driveTime = this.calculateDriveTime(distanceCounter, maxSpeed);
           totalTravelTimeSeconds += driveTime;
           stations.push({
             ...point,
@@ -106,10 +107,20 @@ export default {
       this.totalTravelTime = secondsToMinSecPadded(totalTravelTimeSeconds);
       return stations;
     },
+    getMaxSpeedForSegment(points, index) {
+      if (index <= 0) {
+        return this.line.getMaxSpeed();
+      }
+      const previousPoint = points[index - 1];
+      if (this.line.customSpeedLimits[previousPoint.id]) {
+        return this.line.customSpeedLimits[previousPoint.id];
+      }
+      return this.line.getMaxSpeed();
+    },
     // Calculate travel time based on acceleration data
-    calculateDriveTime(distance) {
+    calculateDriveTime(distance, maxSpeed) {
       const a = this.line.getAcceleration();
-      const vMax = this.line.getMaxSpeed() / 3.6;
+      const vMax = maxSpeed / 3.6;
       const aDistance = vMax / a;
       let legTime = 0;
       // Handle acceleration distance to short

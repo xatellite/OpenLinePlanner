@@ -14,6 +14,8 @@ import VueApexCharts from "vue3-apexcharts";
 import { usePaxStore } from "../stores/pax";
 import { useOverlayStore } from "../stores/overlay";
 import html2canvas from "html2canvas";
+import ReferenceMarker from "./ReferenceMarker.vue";
+import router from "../router";
 
 export default {
   setup() {
@@ -193,6 +195,13 @@ export default {
     );
 
     watch(
+      () => this.overlayStore.showSpeedTags,
+      () => {
+        this.drawReferencePoints();
+      }
+    );
+
+    watch(
       () => this.overlayStore.overlayData,
       () => {
         this.updateOverlay();
@@ -280,7 +289,6 @@ export default {
       delete this.lines[line.id];
     },
     updateLineStyle(line) {
-      console.log("update");
       this.map.setPaintProperty(line.getLineLongId(), "line-color", line.color);
       this.map.setPaintProperty(line.getLineLongId(), "line-width", line.getLineThickness());
     },
@@ -324,6 +332,7 @@ export default {
         this.referenceMarkers = this.referenceMarkers.filter(
           (markerInList) => marker.refIndex !== markerInList.refIndex
         );
+        marker.vue.unmount();
         this.linesStore.addPoint(
           lat,
           lng,
@@ -332,7 +341,6 @@ export default {
           marker
         );
         this.updateLine(this.editStore.isEditing);
-        this.drawReferencePoints();
       } else {
         const point = this.linesStore.getPointById(marker.pointRef);
         if (
@@ -358,19 +366,19 @@ export default {
 
     addReferencePoint(pointOne, pointTwo, refIndex) {
       const lngLat = calculateMidPoint(pointOne, pointTwo);
+      const mapPoint = createApp(ReferenceMarker, { pointOne, pointTwo, lngLat });
+      mapPoint.use(this.store);
+      mapPoint.use(router);
       const domContainer = document.createElement("div");
-      domContainer.className = "line-reference-point";
-      if (this.overlayStore.showDistanceTags) {
-        const distanceMarker = document.createElement("span");
-        distanceMarker.innerHTML = lngLat.totalDistance + "m";
-        distanceMarker.className = "line-reference-point__distance";
-        domContainer.appendChild(distanceMarker);
-      }
       const newMarker = new mapboxgl.Marker(domContainer, { draggable: true });
       newMarker.isReference = pointOne;
       newMarker.refIndex = refIndex;
+      newMarker.vue = mapPoint;
       newMarker.setLngLat(lngLat).addTo(this.map);
       newMarker.on("dragend", this.onDragEnd);
+      nextTick(() => {
+        mapPoint.mount(domContainer);
+      });
       this.referenceMarkers.push(newMarker);
     },
 
@@ -511,31 +519,6 @@ export default {
   top: 100%;
   height: 1050px;
   width: 1475px;
-}
-
-.line-reference-point {
-  // position: relative;
-  border: 12px solid transparent;
-  border-radius: 100%;
-
-  &__distance {
-    position: absolute;
-    font-weight: 700;
-    left: -$space-md;
-    top: $space-sm;
-    background: $c-box;
-    border-radius: $br-md;
-    padding: 0 $space-ssm;
-  }
-
-  &::before {
-    display: block;
-    content: "";
-    height: 8px;
-    width: 8px;
-    border-radius: 100%;
-    background-color: rgba($c-box, 0.5);
-  }
 }
 
 .mapboxgl-marker {

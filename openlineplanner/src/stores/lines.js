@@ -115,6 +115,9 @@ export const useLinesStore = defineStore({
         const line = this.lines[lineRef];
         const pointIndex = line.pointIds.indexOf(pointRef);
         line.pointIds = line.pointIds.filter((point) => point != pointRef);
+        if (Object.keys(line.customSpeedLimits).includes(pointRef)) {
+          delete line.customSpeedLimits[pointRef];
+        }
         if (line.pointIds.length >= pointIndex) {
           this.checkForParallelLine(
             this.points[line.pointIds[pointIndex]],

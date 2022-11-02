@@ -4,6 +4,6 @@ export const secondsToMinSecPadded = (time) => {
   if (minutes < 10) {
     minutesString = "0" + minutes;
   }
-  const seconds = "0" + (time - minutes * 60);
+  const seconds = "0" + Math.round(time - (minutes * 60));
   return minutesString + ":" + seconds.substr(-2);
 };

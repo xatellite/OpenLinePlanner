@@ -89,7 +89,7 @@
         @update:modelValue="updateValue({ customStopTime: $event })"
       />
       <div class="type-picker__sliders__title">
-        <span>Avg. max Speed: </span><b>{{ this.maxSpeed }}km/h</b>
+        <span>General max Speed: </span><b>{{ this.maxSpeed }}km/h</b>
       </div>
       <VueSlider
         class="type-picker__sliders__element"

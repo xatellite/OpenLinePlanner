@@ -79,7 +79,7 @@ import ArrowDownRightIcon from "vue-material-design-icons/ArrowDownRight.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import LoadingIcon from "vue-material-design-icons/Loading.vue";
 import TooltipButton from "./TooltipButton.vue";
-import IconLine from "./icons/IconLine.vue";
+import IconLine from "./IconLine.vue";
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
 import ColorPicker from "./ColorPicker.vue";

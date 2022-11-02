@@ -9,6 +9,7 @@ export const useOverlayStore = defineStore({
     overlayData: {},
     showNameTags: true,
     showDistanceTags: false,
+    showSpeedTags: false,
     exporting: false,
     coverage: "none",
     coverageData: {},
@@ -42,10 +43,8 @@ export const useOverlayStore = defineStore({
       }
     },
     selectCoverage(style) {
-      console.log("select", style);
       this.coverage = style;
       if (Object.keys(this.coverageData).length <= 0 && style != "none") {
-        console.log("load", style);
         this.loadCoverage();
         return;
       }
@@ -127,6 +126,9 @@ export const useOverlayStore = defineStore({
     },
     toggleDistanceTags() {
       this.showDistanceTags = !this.showDistanceTags;
+    },
+    toggleSpeedTags() {
+      this.showSpeedTags = !this.showSpeedTags;
     },
   },
 });

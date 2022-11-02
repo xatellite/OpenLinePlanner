@@ -35,6 +35,18 @@
         </template>
       </ToggleButton>
       <ToggleButton
+        :active="overlayStore.showSpeedTags"
+        :callback="overlayStore.toggleSpeedTags"
+        toolTip="Toggle line max speed"
+      >
+        <template v-slot:icon>
+          <SpeedometerIcon />
+        </template>
+        <template v-slot:text>
+          <span>Max speed</span>
+        </template>
+      </ToggleButton>
+      <ToggleButton
         :active="paxStore.calculationMethod == 'relative'"
         :callback="paxStore.toggleCalculationMethod"
         toolTip="Switch calculation method"
@@ -59,6 +71,7 @@ import BullseyeIcon from "vue-material-design-icons/Bullseye.vue";
 import CheckboxBlankCircleIcon from "vue-material-design-icons/CheckboxBlankCircle.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import RulerIcon from "vue-material-design-icons/Ruler.vue";
+import SpeedometerIcon from "vue-material-design-icons/Speedometer.vue";
 import OverlaySelect from "./OverlaySelect.vue";
 import ToggleButton from "./ToggleButton.vue";
 import { useOverlayStore } from "../stores/overlay";
@@ -75,6 +88,7 @@ export default {
     BullseyeIcon,
     CheckboxBlankCircleIcon,
     CoverageSelect,
+    SpeedometerIcon,
   },
   data() {
     return {

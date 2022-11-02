@@ -10,6 +10,7 @@ button, .button {
   align-items: center;
   justify-content: center;
   margin: 0 $space-ssm;
+  cursor: pointer;
 
   &:hover {
     background-color: darken($c-box, 4);

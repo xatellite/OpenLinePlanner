@@ -7,6 +7,7 @@ export default class TransportLine {
     type = "tram",
     color = "#ff0000",
     pointIds = [],
+    customSpeedLimits = {},
     customAcceleration = 1.0,
     customStopTime = 30,
     customMaxSpeed = 50,
@@ -18,6 +19,7 @@ export default class TransportLine {
     this.type = type;
     this.color = color;
     this.pointIds = pointIds;
+    this.customSpeedLimits = customSpeedLimits;
     this.customAcceleration = customAcceleration;
     this.customStopTime = customStopTime;
     this.lineThickness = lineThickness;
@@ -32,6 +34,7 @@ export default class TransportLine {
       lineObject.type,
       lineObject.color,
       lineObject.pointIds,
+      lineObject.customSpeedLimits,
       lineObject.customAcceleration,
       lineObject.customStopTime,
       lineObject.customMaxSpeed,
@@ -81,6 +84,13 @@ export default class TransportLine {
 
   setName(name) {
     this.name = name;
+  }
+
+  getSectionSpeed(stationId) {
+    if (Object.keys(this.customSpeedLimits).includes(stationId)) {
+      return this.customSpeedLimits[stationId];
+    }
+    return this.getMaxSpeed();
   }
 
   addPoint(pointId, index = -1) {
