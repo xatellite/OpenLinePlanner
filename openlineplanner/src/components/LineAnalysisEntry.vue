@@ -60,7 +60,7 @@ export default {
   methods: {
     calculateStationData() {
       let lastPoint = null;
-      const segments = [];
+      let segments = [];
       const linePoints = [];
       // Collect segments
       this.line.pointIds.forEach((pointId, index) => {
@@ -76,7 +76,7 @@ export default {
         lastPoint = point;
       });
       // Calculate drive time
-      this.calculateSegmentTime(segments);
+      segments = this.calculateSegmentTime(segments);
       this.totalDistance = segments.reduce((a, b) => a + b.distance, 0);
       const totalTravelTime = segments.reduce((a, b) => a + b.time, 0);
 
@@ -138,9 +138,9 @@ export default {
         }
       });
       // Check for too short for breaking segments
-      segments = segments
-        .reverse()
-        .map((segment, index) => {
+      segments.reverse();
+      // ToDo: Investigate why direct assign doesnt work.
+      const segmentsReverted = segments.map((segment, index) => {
           const speedDelta = segment.endSpeed - segment.speed;
           if (speedDelta < 0) {
             // Check if breaking is possible
@@ -155,13 +155,15 @@ export default {
           }
           return segment;
         })
-        .reverse();
+      
+      segmentsReverted.reverse();
 
       // Calculate segment times
-      segments.forEach((segment) => {
+      segmentsReverted.forEach((segment) => {
         segment.time = Math.round(this.calculateDriveTime(segment.distance, segment.speed, segment.endSpeed, segment.startSpeed));
       });
-      console.log(segments);
+      console.log(segmentsReverted);
+      return segmentsReverted;
     },
     // Calculate travel time based on acceleration data
     calculateDriveTime(distance, maxSpeed, endSpeed, startSpeed) {
