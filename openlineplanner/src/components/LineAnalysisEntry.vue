@@ -31,7 +31,7 @@
     </div>
     <div class="line-analysis__totals">
       <span>Total distance: <b>{{ totalDistance }}m</b></span>
-      <span>Total time: <b>{{ totalTravelTime }}</b></span>
+      <span>Total time: <b>{{ totalTravelTime }} (incl. stop times)</b></span>
     </div>
   </div>
 </template>
