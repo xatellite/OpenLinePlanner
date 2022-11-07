@@ -1,6 +1,7 @@
 export const selectFile = (callback) => {
   const fileChooser = document.createElement("input");
   fileChooser.type = "file";
+  fileChooser.accept = ".save,.json,application/json";
   fileChooser.click();
   fileChooser.onchange = () => {
     callback(fileChooser.files[0]);
