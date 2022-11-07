@@ -110,8 +110,8 @@ export default {
         return this.line.getMaxSpeed();
       }
       const previousPoint = points[index - 1];
-      if (this.line.customSpeedLimits[previousPoint.id]) {
-        return this.line.customSpeedLimits[previousPoint.id];
+      if (this.line.customSpeedLimits[previousPoint]) {
+        return this.line.customSpeedLimits[previousPoint];
       }
       return this.line.getMaxSpeed();
     },
@@ -161,6 +161,7 @@ export default {
       segments.forEach((segment) => {
         segment.time = Math.round(this.calculateDriveTime(segment.distance, segment.speed, segment.endSpeed, segment.startSpeed));
       });
+      console.log(segments);
     },
     // Calculate travel time based on acceleration data
     calculateDriveTime(distance, maxSpeed, endSpeed, startSpeed) {
