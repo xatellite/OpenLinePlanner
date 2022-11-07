@@ -14,7 +14,7 @@
     "lineWidth": 4
   },
   "tram": {
-    "coverageArea": 500,
+    "coverageArea": 300,
     "acceleration": 1,
     "maxSpeed": 60,
     "stopTime": 20,

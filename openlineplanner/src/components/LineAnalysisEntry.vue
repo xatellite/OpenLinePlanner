@@ -60,51 +60,49 @@ export default {
   methods: {
     calculateStationData() {
       let lastPoint = null;
-      const distances = [];
-      const points = [];
+      const segments = [];
+      const linePoints = [];
+      // Collect segments
       this.line.pointIds.forEach((pointId, index) => {
         const point = this.lineStore.getPointById(pointId);
-        points.push(point);
+        linePoints.push(point);
         if (index > 0) {
-          distances.push(calculateMidPoint(lastPoint, point).totalDistance);
+          segments.push({
+            distance: calculateMidPoint(lastPoint, point).totalDistance,
+            speed: this.getMaxSpeedForSegment(this.line.pointIds, index) / 3.6,
+            endsAtStation: point.type === "station",
+          });
         }
         lastPoint = point;
       });
-      this.totalDistance = distances.reduce((a, b) => a + b);
+      // Calculate drive time
+      this.calculateSegmentTime(segments);
+      this.totalDistance = segments.reduce((a, b) => a + b.distance, 0);
+      const totalTravelTime = segments.reduce((a, b) => a + b.time, 0);
+
       const stations = [];
       let totalDistanceCounter = 0;
-      let distanceCounter = 0;
-      let absoluteXOffset = 0;
-      let totalTravelTimeSeconds = 0;
-      let lastOffset = -100;
-      points.forEach((point, index) => {
+      let sectorTravelTime = 0;
+      let timeAtStations = 0;
+      linePoints.forEach((point, index) => {
         if (index > 0) {
-          totalDistanceCounter += distances[index - 1];
-          distanceCounter += distances[index - 1];
+          const segmentDistance = segments[index - 1].distance;
+          totalDistanceCounter += segmentDistance;
+          sectorTravelTime += segments[index - 1].time;
         }
-        let xOffset = Math.round(
-          (totalDistanceCounter / this.totalDistance) * 100
-        );
-        if (xOffset - lastOffset < 10) {
-          absoluteXOffset += 20 - (xOffset - lastOffset);
-        }
-        lastOffset = xOffset;
-
         if (point.type === "station") {
-          const maxSpeed = this.getMaxSpeedForSegment(points, index);
-          const driveTime = this.calculateDriveTime(distanceCounter, maxSpeed);
-          totalTravelTimeSeconds += driveTime;
           stations.push({
             ...point,
             distance: totalDistanceCounter,
-            x: xOffset,
-            driveTime: secondsToMinSecPadded(driveTime),
+            x: (totalDistanceCounter / this.totalDistance) * 100,
+            driveTime: secondsToMinSecPadded(sectorTravelTime),
           });
-          distanceCounter = 0;
+          sectorTravelTime = 0;
+          timeAtStations += this.line.getStopTime();
         }
       });
-      this.minLineLength = 100 + absoluteXOffset;
-      this.totalTravelTime = secondsToMinSecPadded(totalTravelTimeSeconds);
+      this.minLineLength = 100;
+      this.totalTravelTime = secondsToMinSecPadded(totalTravelTime + timeAtStations);
       return stations;
     },
     getMaxSpeedForSegment(points, index) {
@@ -117,21 +115,76 @@ export default {
       }
       return this.line.getMaxSpeed();
     },
+    calculateSegmentTime(segments) {
+      const a = this.line.getAcceleration();
+      // Prepare segment speeds
+      segments.forEach((segment, index) => {
+        if (index === 0) {
+          segment.startSpeed = 0;
+        } else {
+          segment.startSpeed = segments[index - 1].endSpeed;
+        }
+        if (index >= segments.length - 1 || segment.endsAtStation) {
+          segment.endSpeed = 0;
+        } else {
+          const requiredTime = (segment.speed - segment.startSpeed) / a;
+          const requiredDistance = (segment.startSpeed * requiredTime) + 0.5 * (segment.speed - segment.startSpeed) * requiredTime;
+          if (requiredDistance > segment.distance) {
+            // Calculate max speed reachable in segment
+            segment.speed = Math.sqrt((2*segment.distance * a) + segment.startSpeed^2);
+          }
+          // Reduced max Speed if next sector requires lower speed limit
+          segment.endSpeed = segment.speed > segments[index + 1].speed ? segments[index + 1].speed : segment.speed;
+        }
+      });
+      // Check for too short for breaking segments
+      segments = segments
+        .reverse()
+        .map((segment, index) => {
+          const speedDelta = segment.endSpeed - segment.speed;
+          if (speedDelta < 0) {
+            // Check if breaking is possible
+            const requiredTime = speedDelta / a;
+            const requiredDistance = (segment.startSpeed * requiredTime) - 0.5 * speedDelta * requiredTime;
+            if (requiredDistance > segment.distance) {
+              // Calculate Maximum breakable speed
+              const breakableSpeed = Math.sqrt((2*segment.distance * a) + segment.endSpeed^2);
+              segment.startSpeed = breakableSpeed;
+              segment[index + 1].endSpeed = breakableSpeed;
+            }
+          }
+          return segment;
+        })
+        .reverse();
+
+      // Calculate segment times
+      segments.forEach((segment) => {
+        segment.time = Math.round(this.calculateDriveTime(segment.distance, segment.speed, segment.endSpeed, segment.startSpeed));
+      });
+    },
     // Calculate travel time based on acceleration data
-    calculateDriveTime(distance, maxSpeed) {
+    calculateDriveTime(distance, maxSpeed, endSpeed, startSpeed) {
       const a = this.line.getAcceleration();
       const vMax = maxSpeed / 3.6;
-      const aDistance = vMax / a;
+      const accelerationTime = (vMax - startSpeed) / a;
+      const decelerationTime = (vMax - endSpeed) / a;
+      const accelerationDistance = (startSpeed * accelerationTime) + (0.5 * a * (accelerationTime^2));
+      const decelerationDistance = (vMax * decelerationTime) + (0.5 * a * (decelerationTime^2));
       let legTime = 0;
       // Handle acceleration distance to short
-      if (distance < 2 * aDistance) {
-        const legVMax = Math.sqrt((distance / 2) * (a ^ 2));
-        legTime = legVMax / a;
+      if (distance < decelerationDistance) {
+        // ToDo Rollback
+      } else if (distance < accelerationDistance + decelerationDistance) {
+        const limitedAccelerationDistance = (endSpeed^2-startSpeed^2+2*a*distance)/(4*a);
+        const reachedSpeed = Math.sqrt(startSpeed^2+(2*a*limitedAccelerationDistance));
+        const limitedDecelerationDistance = distance - limitedAccelerationDistance;
+        const limitedAccelerationTime = (startSpeed+(0.5*reachedSpeed))/limitedAccelerationDistance;
+        const limitedDecelerationTime = (reachedSpeed-(0.5*endSpeed))/limitedDecelerationDistance;
+        legTime = limitedAccelerationTime + limitedDecelerationTime;
       } else {
-        const leftDistance = distance - 2 * aDistance;
+        const leftDistance = distance - (accelerationDistance + decelerationDistance);
         const steadyTime = leftDistance / vMax;
-        const aTime = vMax / a;
-        legTime = aTime * 2 + steadyTime;
+        legTime = accelerationTime + decelerationTime + steadyTime;
       }
       legTime += this.line.getStopTime();
       return legTime;
