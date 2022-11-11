@@ -223,7 +223,7 @@ export default {
     width: 100%;
     border-bottom: 3px solid;
     border-radius: 3px;
-    margin: $space-md 0 100px;
+    margin: $space-md 0 140px;
     box-sizing: border-box;
   }
 
