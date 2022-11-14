@@ -65,8 +65,10 @@ export default {
   },
   mounted() {
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        this.disableEditing();
+      if (this.editStore.isExtending) {
+        if (e.key === "Enter") {
+          this.disableEditing();
+        }
       }
     });
   },

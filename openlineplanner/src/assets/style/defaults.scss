@@ -21,6 +21,14 @@ button, .button {
   }
 }
 
+input[type="number"] {
+  border: 1px solid $c-button-background;
+  height: 2.5rem;
+  width: 100px;
+  text-align: center;
+  font-size: $font-md;
+}
+
 select {
   /* Reset Select */
   appearance: none;

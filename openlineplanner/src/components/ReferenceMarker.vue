@@ -49,6 +49,7 @@ export default {
     handlePopupOpen(event) {
       if (!this.popupOpen) {
         event.stopPropagation();
+        this.editStore.isExtending = null;
         this.popupOpen = true;
       }
     },
@@ -89,7 +90,7 @@ export default {
     position: absolute;
     z-index: 100;
     bottom: 100%;
-    left: -$space-sm;
+    left: 0;
   }
 
   &::before {
