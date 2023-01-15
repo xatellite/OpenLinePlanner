@@ -102,7 +102,7 @@ export default {
     TooltipButton,
     TypePicker,
     TypeIcon,
-},
+  },
   data() {
     return {
       linesStore: useLinesStore(),
@@ -180,12 +180,19 @@ export default {
         if (points.length <= 0) {
           return;
         }
+        // ToDo: Add max coverage
         points.forEach((point) => {
           if (point.type === "station") {
             stations.push({
               lat: point.lat,
               lng: point.lng,
               id: point.id,
+              // Add max coverage
+              coverage: Math.max(
+                ...point.lines.map((lineId) =>
+                  this.linesStore.getLineById(lineId).getCoverage()
+                )
+              ),
             });
           }
         });
@@ -205,6 +212,7 @@ export default {
           body: JSON.stringify({
             route,
             stations,
+            coverage: this.editStore.isEditing.getCoverage(),
             method: this.paxStore.calculationMethod,
           }),
           headers: {

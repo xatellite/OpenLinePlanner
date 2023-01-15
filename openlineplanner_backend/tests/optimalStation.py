@@ -12,10 +12,12 @@ class OptimalStationTest(TestCase):
       station1 = {"lng": 16.64321174146274, "lat": 48.19013354182042, "id": "station1"}
       stations = [station1]
 
-      actualResult_improved = find_optimal_station_spot_on_route(stations, route)
+      coverage = 300
+
+      actualResult_improved = find_optimal_station_spot_on_route(stations, route, coverage)
       self.assertMatchSnapshot(actualResult_improved)
 
-      actualResult_improved = find_optimal_station_spot_on_route(stations, route, "relative")
+      actualResult_improved = find_optimal_station_spot_on_route(stations, route, coverage, "relative")
       self.assertMatchSnapshot(actualResult_improved)
 
 

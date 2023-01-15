@@ -92,7 +92,7 @@ def generate_geojson(stations):
 
   return FeatureCollection(feature_list)
 
-def find_optimal_station_spot_on_route(stations, route, method = "absolute"):
+def find_optimal_station_spot_on_route(stations, route, coverage, method = "absolute"):
   """Finds the optimal spot to place a new station on a route
 
   Args:
@@ -112,7 +112,7 @@ def find_optimal_station_spot_on_route(stations, route, method = "absolute"):
     modified_data_layers[data_layer]["data"] = modified_data_layers[data_layer]["data"].reset_index()
 
   updated_data_layers = define_layers(modified_data_layers)
-  points_to_check = split_path_into_points(route)
+  points_to_check = split_path_into_points(route, coverage)
 
   relations = calculate_relations(points_to_check, updated_data_layers, method="all")
 
@@ -137,10 +137,10 @@ def find_optimal_station_spot_on_route(stations, route, method = "absolute"):
           station_id = relation_station["station"]["id"]
           if station_id not in station_relations:
             station_relations[station_id] = empty_relation.copy()
-          
+
           station_relations[station_id]["geometry"] = relation_station["station"]
-          station_relations[station_id]["total"] += peopleCount
-          station_relations[station_id][field["type"]] += peopleCount
+          station_relations[station_id]["total"] = int(station_relations[station_id]["total"]) + int(peopleCount)
+          station_relations[station_id][field["type"]] = int(station_relations[station_id][field["type"]]) + int(peopleCount)
 
   # Select point with highest pax
   max_total = None

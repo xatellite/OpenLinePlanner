@@ -54,6 +54,7 @@ class FinderResource:
         args = {}
         args["stations"] = obj.get('stations')
         args["route"] = obj.get('route')
+        args["coverage"] = obj.get('coverage')
         if obj.get('method'):
             args["method"] = obj.get('method')
         # Retrieve result

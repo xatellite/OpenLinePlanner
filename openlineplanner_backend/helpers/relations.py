@@ -36,7 +36,7 @@ def check_station_relation(parent_layer, layers, steps, data_layer_types, method
               relations[point_data_layer][point_index] = []
               for station in stations_to_be_checked:
                 distance = get_distance(station, child_sector_ref)
-                if (distance <= stations["coverage"]):
+                if (distance <= station["coverage"]):
                   relations[point_data_layer][point_index].append({"station": station, "d": distance})
           else:
             if "station_selected" in sector:
