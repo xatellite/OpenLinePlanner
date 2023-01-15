@@ -123,8 +123,7 @@ def find_optimal_station_spot_on_route(stations, route, coverage, method = "abso
     for relation_index in relations[data_layer]:
       for relation_station in relations[data_layer][relation_index]:
         for field in modified_data_layers[data_layer]["fields"]:
-          peopleCount = modified_data_layers[data_layer]["data"][field["name"]][relation_index]
-
+          peopleCount = int(modified_data_layers[data_layer]["data"][field["name"]][relation_index])
           if method == "relative":
             if (relation_station["d"] <= 0):
               peopleCount = peopleCount
