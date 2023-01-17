@@ -11,6 +11,7 @@ button, .button {
   justify-content: center;
   margin: 0 $space-ssm;
   cursor: pointer;
+  color: $c-text-primary;
 
   &:hover {
     background-color: darken($c-box, 4);
