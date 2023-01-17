@@ -134,6 +134,12 @@ export default {
 
   transition: max-height 0.4s linear;
 
+
+  @media (max-width: 700px), (max-height: 600px) {
+    top: $space-sm;
+    bottom: auto;
+  }
+
   &--extended {
     max-width: 300px;
     max-height: 600px;

@@ -38,7 +38,16 @@ html {
   background-color: $c-box;
   box-shadow: $bs-md;
   border-radius: $br-md;
-  box-sizing: border-box;
+  box-sizing: border-box;  
+}
+
+@media (min-width: 700px) and (min-height: 600px) {
+  .box--desktop {
+    background-color: $c-box;
+    box-shadow: $bs-md;
+    border-radius: $br-md;
+    box-sizing: border-box;  
+  }
 }
 
 a {

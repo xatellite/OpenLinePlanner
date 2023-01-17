@@ -512,6 +512,7 @@ export default {
 .map {
   position: relative;
   height: calc(100vh);
+
 }
 
 .print {

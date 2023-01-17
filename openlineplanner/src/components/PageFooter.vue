@@ -24,6 +24,10 @@ export default {};
   padding: 4px $space-sm;
   box-sizing: border-box;
 
+  @media (max-width: 700px), (max-height: 600px) {
+    position: relative;
+  }
+
   &__center {
     font-weight: 700;
     text-align: center;

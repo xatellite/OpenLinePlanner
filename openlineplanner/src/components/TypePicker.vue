@@ -1,5 +1,5 @@
 <template>
-  <div id="type-picker" class="box type-picker">
+  <div id="type-picker" class="box--desktop type-picker">
     <div class="type-picker__base">
       <span class="type-picker__title"
         >Select type of line: <b>{{ line.name }}</b></span
@@ -218,6 +218,12 @@ $themeColor: $c-text-primary;
   top: 0;
   left: 100%;
   z-index: 100;
+  margin: 0 $space-sm;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    position: relative;
+    left: auto;
+  }
 
   &__base {
     display: flex;

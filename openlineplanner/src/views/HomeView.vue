@@ -1,15 +1,11 @@
 <template>
   <main>
     <InteractiveMap />
-    <div class="main-menu-pane">
+    <div class="main-menu-pane box">
       <LineList />
     </div>
     <ViewSettings />
   </main>
-  <div class="mobile">
-    <h1>OpenLinePlanner is not yet supporting mobile use!</h1>
-    <span>Please use your web browser or tablet to start planning</span>
-  </div>
   <ExportLoader />
   <PageFooter />
 </template>
@@ -17,7 +13,6 @@
 <script>
 import InteractiveMap from "@/components/InteractiveMap.vue";
 import PageFooter from "@/components/PageFooter.vue";
-import Logo from "@/components/PageLogo.vue";
 import LineList from "@/components/LineList.vue";
 import ExportLoader from "@/components/ExportLoader.vue";
 import ViewSettings from "@/components/ViewSettings.vue";
@@ -26,7 +21,6 @@ export default {
   components: {
     InteractiveMap,
     PageFooter,
-    Logo,
     LineList,
     ExportLoader,
     ViewSettings,
@@ -43,13 +37,19 @@ export default {
   margin: $space-md;
   display: flex;
   flex-direction: row;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    position: relative;
+    margin-top: -100px;
+  }
 }
 
 main {
   display: block;
 
   @media (max-width: 700px), (max-height: 600px) {
-    display: none;
+    display: flex;
+    flex-direction: column;
   }
 }
 

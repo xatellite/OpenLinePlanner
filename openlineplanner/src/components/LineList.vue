@@ -1,5 +1,5 @@
 <template>
-  <div class="box line-list">
+  <div class="line-list">
     <div class="line-list__center-box">
       <h1 class="line-list__title">Open-Line-Planner</h1>
       <a
@@ -64,10 +64,13 @@ export default {
 </script>
 
 <style lang="scss">
-
 .line-list {
   margin: 0 $space-sm;
   padding-bottom: $space-sm;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    width: 100%;
+  }
 
   &__center-box {
     display: flex;
@@ -78,6 +81,10 @@ export default {
   &__container {
     max-height: 300px;
     overflow-y: auto;
+
+    @media (max-width: 700px), (max-height: 600px) {
+      max-height: none;
+    }
   }
 
   &__item {

@@ -1,5 +1,5 @@
 <template>
-  <div id="color-picker" class="box color-picker">
+  <div id="color-picker" class="box--desktop color-picker">
     <ColorPicker
       theme="light"
       :color="color"
@@ -65,6 +65,12 @@ export default {
   position: absolute;
   top: 0;
   left: 100%;
+  margin: 0 $space-sm;
   z-index: 100;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    position: relative;
+    left: auto;
+  }
 }
 </style>

@@ -1,16 +1,5 @@
 <template>
   <div class="line-element">
-    <ColorPicker
-      v-if="selectColor && selectType == false"
-      :initColor="line.color"
-      :handleColorChange="updateColor"
-      :closeAction="toggleColorPick"
-    />
-    <TypePicker
-      v-if="selectType && selectColor == false"
-      :line="line"
-      :closeAction="toggleTypePicker"
-    />
     <div class="line-element__data">
       <TooltipButton :handler="toggleColorPick" toolTip="Change line color">
         <IconLine :color="line.color" />
@@ -60,6 +49,17 @@
         <span class="line-element__remove"><TrashCanOutlineIcon /></span>
       </TooltipButton>
     </div>
+    <ColorPicker
+      v-if="selectColor && selectType == false"
+      :initColor="line.color"
+      :handleColorChange="updateColor"
+      :closeAction="toggleColorPick"
+    />
+    <TypePicker
+      v-if="selectType && selectColor == false"
+      :line="line"
+      :closeAction="toggleTypePicker"
+    />
     <div
       class="line-element__warning"
       v-if="editStore.isEditing === line && editStore.isExtending != null"
