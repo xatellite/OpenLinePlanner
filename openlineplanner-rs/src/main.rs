@@ -19,8 +19,7 @@ struct FindStationRequest {
 #[derive(Deserialize)]
 struct Station {
     id: String,
-    lat: f64,
-    lon: f64,
+    location: Point,
     coverage: Option<i32>,
 }
 
