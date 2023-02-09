@@ -57,10 +57,9 @@ async fn overlay(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let overlays = overlay::load_overlay_files();
-
     HttpServer::new(|| {
         App::new()
+            .app_data(web::Data::new(overlay::load_overlay_files()))
             .route("/station-info", web::get().to(station_info))
             .route("/coverage-info", web::get().to(coverage_info))
             .route("/find-station", web::get().to(find_station))
