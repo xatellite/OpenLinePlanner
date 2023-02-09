@@ -9,6 +9,7 @@ mod population;
 mod station;
 
 use overlay::{OverlayName, Overlays};
+use population::Method;
 use station::Station;
 
 #[derive(Deserialize)]
@@ -25,20 +26,16 @@ struct FindStationRequest {
     method: Option<Method>,
 }
 
-#[derive(Deserialize)]
-enum Method {
-    #[serde(rename = "relative")]
-    Relative,
-    #[serde(rename = "absolute")]
-    Absolute,
-}
-
 async fn station_info(
     request: web::Query<StationInfoRequest>,
     overlays: web::Data<Overlays>,
 ) -> impl Responder {
     let houses = &overlays.residence;
-    let res = population::inhabitants_for_stations(&request.stations, houses.get_houses());
+    let res = population::inhabitants_for_stations(
+        &request.stations,
+        houses.get_houses(),
+        request.method.as_ref().unwrap_or(&Method::Absolute),
+    );
     HttpResponse::Ok()
         .content_type(ContentType::json())
         .json(res.0)

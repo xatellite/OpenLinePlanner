@@ -37,7 +37,7 @@ pub struct House {
     geometry: Point,
     flats: u32,
     housenumbers: u32,
-    pop: u32,
+    pub pop: u32,
 }
 
 impl House {
