@@ -2,6 +2,11 @@ use actix_web::{dev::Response, web, App, HttpServer, Responder};
 use geo::Point;
 use serde::Deserialize;
 
+mod overlay;
+mod population;
+
+use overlay::{OverlayName, Overlays};
+
 #[derive(Deserialize)]
 struct StationInfoRequest {
     stations: Vec<Station>,
@@ -24,9 +29,14 @@ struct Station {
 }
 
 #[derive(Deserialize)]
-enum Method {}
+enum Method {
+    #[serde(rename = "relative")]
+    Relative,
+    #[serde(rename = "absolute")]
+    Absolute,
+}
 
-async fn station_info(req: web::Query<StationInfoRequest>) -> impl Responder {
+async fn station_info(request: web::Query<StationInfoRequest>) -> impl Responder {
     Response::ok()
 }
 
@@ -34,16 +44,21 @@ async fn coverage_info(stations: web::Query<Vec<Station>>) -> impl Responder {
     Response::ok()
 }
 
-async fn find_station(req: web::Query<FindStationRequest>) -> impl Responder {
+async fn find_station(request: web::Query<FindStationRequest>) -> impl Responder {
     Response::ok()
 }
 
-async fn overlay(layer_name: web::Path<String>) -> impl Responder {
-    Response::ok()
+async fn overlay(
+    layer_name: web::Path<OverlayName>,
+    overlays: web::Data<Overlays>,
+) -> impl Responder {
+    overlays.get_by_name(layer_name.as_ref())
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let overlays = overlay::load_overlay_files();
+
     HttpServer::new(|| {
         App::new()
             .route("/station-info", web::get().to(station_info))
