@@ -31,14 +31,11 @@ async fn station_info(
     overlays: web::Data<Overlays>,
 ) -> impl Responder {
     let houses = &overlays.residence;
-    let res = population::inhabitants_for_stations(
+    population::inhabitants_for_stations(
         &request.stations,
         houses.get_houses(),
         request.method.as_ref().unwrap_or(&Method::Absolute),
-    );
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .json(res.0)
+    )
 }
 
 async fn coverage_info(stations: web::Query<Vec<Station>>) -> impl Responder {
