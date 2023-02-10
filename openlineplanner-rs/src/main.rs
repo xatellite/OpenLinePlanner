@@ -1,15 +1,14 @@
-use actix_web::{
-    dev::Response, http::header::ContentType, web, App, HttpResponse, HttpServer, Responder,
-};
+use actix_web::{dev::Response, web, App, HttpServer, Responder};
 use geo::Point;
 use serde::Deserialize;
 
+mod coverage;
 mod overlay;
 mod population;
 mod station;
 
+use coverage::Method;
 use overlay::{OverlayName, Overlays};
-use population::Method;
 use station::Station;
 
 #[derive(Deserialize)]
@@ -31,15 +30,22 @@ async fn station_info(
     overlays: web::Data<Overlays>,
 ) -> impl Responder {
     let houses = &overlays.residence;
-    population::inhabitants_for_stations(
+    let coverage_info = coverage::houses_for_stations(
         &request.stations,
         houses.get_houses(),
-        request.method.as_ref().unwrap_or(&Method::Absolute),
-    )
+        &request.method.as_ref().unwrap_or(&Method::Relative),
+    );
+    population::InhabitantsMap::from(coverage_info)
 }
 
-async fn coverage_info(stations: web::Query<Vec<Station>>) -> impl Responder {
-    Response::ok()
+async fn coverage_info(
+    stations: web::Query<Vec<Station>>,
+    overlays: web::Data<Overlays>,
+) -> impl Responder {
+    let houses = &overlays.residence;
+    let coverage_info =
+        coverage::houses_for_stations(&stations, houses.get_houses(), &Method::Relative);
+    overlay::HouseCoverageCollection::from(coverage_info)
 }
 
 async fn find_station(request: web::Query<FindStationRequest>) -> impl Responder {
