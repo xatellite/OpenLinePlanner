@@ -3,7 +3,7 @@ use serde::Deserialize;
 
 static DEFAULT_COVERAGE: f64 = 300f64;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, PartialEq)]
 pub struct Station {
     pub id: String,
     pub location: Point,

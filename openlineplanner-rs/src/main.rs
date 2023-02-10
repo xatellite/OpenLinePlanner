@@ -26,7 +26,7 @@ struct FindStationRequest {
 }
 
 async fn station_info(
-    request: web::Query<StationInfoRequest>,
+    request: web::Json<StationInfoRequest>,
     datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
     let houses = &datalayers.residence;
@@ -39,7 +39,7 @@ async fn station_info(
 }
 
 async fn coverage_info(
-    stations: web::Query<Vec<Station>>,
+    stations: web::Json<Vec<Station>>,
     datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
     let houses = &datalayers.residence;
@@ -48,7 +48,7 @@ async fn coverage_info(
     datalayer::HouseCoverageDataLayer::from(coverage_info)
 }
 
-async fn find_station(request: web::Query<FindStationRequest>) -> impl Responder {
+async fn find_station(request: web::Json<FindStationRequest>) -> impl Responder {
     Response::ok()
 }
 
@@ -66,9 +66,9 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(
                 datalayer::load_data_layer_files().expect("Failed to read data layer data"),
             ))
-            .route("/station-info", web::get().to(station_info))
-            .route("/coverage-info", web::get().to(coverage_info))
-            .route("/find-station", web::get().to(find_station))
+            .route("/station-info", web::post().to(station_info))
+            .route("/coverage-info", web::post().to(coverage_info))
+            .route("/find-station", web::post().to(find_station))
             .route("/overlay/{layer_name}", web::get().to(overlay))
     })
     .bind(("127.0.0.1", 8080))?

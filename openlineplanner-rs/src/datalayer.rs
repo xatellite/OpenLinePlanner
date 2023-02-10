@@ -19,8 +19,11 @@ use crate::coverage::CoverageMap;
 
 #[derive(Deserialize)]
 pub enum DataLayerName {
+    #[serde(rename = "residence")]
     Residence,
+    #[serde(rename = "schools")]
     Schools,
+    #[serde(rename = "jobs")]
     Jobs,
 }
 

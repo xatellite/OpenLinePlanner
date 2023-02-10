@@ -68,6 +68,7 @@ pub fn houses_for_stations<'a, 'b>(
     for station in stations {
         let possible_collision_stations = stations
             .iter()
+            .filter(|other| *other != station)
             .filter(|other| {
                 other.haversine_distance(station) < (other.coverage() + station.coverage())
             })
