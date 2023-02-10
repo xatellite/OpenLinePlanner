@@ -1,4 +1,5 @@
-use actix_web::{dev::Response, web, App, HttpServer, Responder};
+use actix_cors::Cors;
+use actix_web::{web, App, HttpServer, Responder};
 use geo::Point;
 use serde::Deserialize;
 
@@ -48,8 +49,17 @@ async fn coverage_info(
     datalayer::HouseCoverageDataLayer::from(coverage_info)
 }
 
-async fn find_station(request: web::Json<FindStationRequest>) -> impl Responder {
-    Response::ok()
+async fn find_station(
+    request: web::Json<FindStationRequest>,
+    datalayers: web::Data<DataLayers>,
+) -> impl Responder {
+    let houses = &datalayers.residence;
+    station::find_optimal_station(
+        request.route.clone(),
+        300f64,
+        &houses.get_houses(),
+        &request.stations,
+    )
 }
 
 async fn overlay(
@@ -63,6 +73,7 @@ async fn overlay(
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
+            .wrap(Cors::permissive())
             .app_data(web::Data::new(
                 datalayer::load_data_layer_files().expect("Failed to read data layer data"),
             ))

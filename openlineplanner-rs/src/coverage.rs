@@ -1,3 +1,4 @@
+use geo::Point;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -15,6 +16,18 @@ pub struct StationCoverageInfo<'a> {
     pub inhabitants: u32,
 }
 
+impl<'a> From<Vec<HouseInfo<'a>>> for StationCoverageInfo<'a> {
+    fn from(value: Vec<HouseInfo<'a>>) -> Self {
+        StationCoverageInfo {
+            inhabitants: value
+                .iter()
+                .map(|hi| (hi.house.pop as f64 * (1f64 / hi.distance.sqrt())) as u32) // TODO currently hardcoded method
+                .sum(),
+            houses: value,
+        }
+    }
+}
+
 #[derive(Serialize)]
 pub struct HouseInfo<'a> {
     pub house: &'a House,
@@ -30,19 +43,17 @@ pub enum Method {
 }
 
 /// Gets all houses which are in the coverage area of a station and which are not closer to another station
-fn get_houses_in_coverage<'a>(
-    station: &Station,
+pub fn get_houses_in_coverage<'a>(
+    origin: &Point,
+    coverage: f64,
     houses: &'a [House],
-    possible_collision_stations: Vec<&Station>,
+    possible_collision_stations: &[&Station],
 ) -> Vec<HouseInfo<'a>> {
-    let origin = station.location;
-    let radius = station.coverage();
-
     houses
         .iter()
         .filter_map(|house| {
             let distance = house.haversine_distance(&origin);
-            if distance < radius {
+            if distance < coverage {
                 Some(HouseInfo{house, distance})
             } else {
                 None
@@ -66,29 +77,20 @@ pub fn houses_for_stations<'a, 'b>(
     let mut inhabitants_map = HashMap::new();
 
     for station in stations {
-        let possible_collision_stations = stations
+        let possible_collision_stations: Vec<&Station> = stations
             .iter()
             .filter(|other| *other != station)
             .filter(|other| {
                 other.haversine_distance(station) < (other.coverage() + station.coverage())
             })
             .collect();
-        let houses = get_houses_in_coverage(station, houses, possible_collision_stations);
-        inhabitants_map.insert(
-            station.id.as_str(),
-            StationCoverageInfo {
-                inhabitants: houses
-                    .iter()
-                    .map(|hi| match method {
-                        Method::Absolute => hi.house.pop,
-                        Method::Relative => {
-                            (hi.house.pop as f64 * (1f64 / hi.distance.sqrt())) as u32
-                        }
-                    })
-                    .sum(),
-                houses,
-            },
+        let houses = get_houses_in_coverage(
+            &station.location,
+            station.coverage(),
+            houses,
+            &possible_collision_stations,
         );
+        inhabitants_map.insert(station.id.as_str(), StationCoverageInfo::from(houses));
     }
 
     CoverageMap(inhabitants_map)

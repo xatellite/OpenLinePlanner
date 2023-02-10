@@ -31,6 +31,7 @@ impl From<CoverageMap<'_, '_>> for InhabitantsMap {
                     (
                         key.to_owned(),
                         InhabitantsInfo {
+                            // TODO: check if bike, work, school still needed
                             ped: coverage.inhabitants,
                             bike: 0,
                             total: coverage.inhabitants,

@@ -63,7 +63,7 @@ impl From<CoverageMap<'_, '_>> for HouseCoverageDataLayer {
                 .flat_map(|(station, sci)| {
                     sci.houses.into_iter().map(|hi| HouseCoverage {
                         geometry: hi.house.geometry,
-                        data_layer: "dl".to_owned(),
+                        data_layer: "dl".to_owned(), // TODO: maybe remove this
                         distance: hi.distance,
                         closest_station: station.to_owned(),
                     })
