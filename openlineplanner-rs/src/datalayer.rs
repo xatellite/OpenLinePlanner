@@ -18,16 +18,16 @@ use serde::Serialize;
 use crate::coverage::CoverageMap;
 
 #[derive(Deserialize)]
-pub enum OverlayName {
+pub enum DataLayerName {
     Residence,
     Schools,
     Jobs,
 }
 
-pub struct Overlays {
-    pub residence: Overlay,
-    pub schools: Overlay,
-    pub jobs: Overlay,
+pub struct DataLayers {
+    pub residence: DataLayer,
+    pub schools: DataLayer,
+    pub jobs: DataLayer,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -49,9 +49,9 @@ impl House {
 }
 
 #[derive(Serialize)]
-pub struct HouseCoverageCollection(Vec<HouseCoverage>);
+pub struct HouseCoverageDataLayer(Vec<HouseCoverage>);
 
-impl From<CoverageMap<'_, '_>> for HouseCoverageCollection {
+impl From<CoverageMap<'_, '_>> for HouseCoverageDataLayer {
     fn from(value: CoverageMap<'_, '_>) -> Self {
         Self(
             value
@@ -70,7 +70,7 @@ impl From<CoverageMap<'_, '_>> for HouseCoverageCollection {
     }
 }
 
-impl Responder for HouseCoverageCollection {
+impl Responder for HouseCoverageDataLayer {
     type Body = BoxBody;
 
     fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
@@ -96,26 +96,26 @@ pub struct HouseCoverage {
     closest_station: String,
 }
 
-impl Overlays {
-    pub fn get_by_name(&self, name: &OverlayName) -> Overlay {
+impl DataLayers {
+    pub fn get_by_name(&self, name: &DataLayerName) -> DataLayer {
         match name {
-            OverlayName::Residence => self.residence.clone(),
-            OverlayName::Schools => self.schools.clone(),
-            OverlayName::Jobs => self.jobs.clone(),
+            DataLayerName::Residence => self.residence.clone(),
+            DataLayerName::Schools => self.schools.clone(),
+            DataLayerName::Jobs => self.jobs.clone(),
         }
     }
 }
 
 #[derive(Clone)]
-pub struct Overlay(Vec<House>);
+pub struct DataLayer(Vec<House>);
 
-impl Overlay {
+impl DataLayer {
     pub fn get_houses(&self) -> &Vec<House> {
         &self.0
     }
 }
 
-impl Responder for Overlay {
+impl Responder for DataLayer {
     type Body = BoxBody;
 
     fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
@@ -124,7 +124,7 @@ impl Responder for Overlay {
                 .content_type(ContentType::json())
                 .body(body),
             Err(error) => HttpResponse::InternalServerError()
-                .body(format!("failed to get overlay: {}", error)),
+                .body(format!("failed to get data layers: {}", error)),
         }
     }
 }
@@ -133,17 +133,17 @@ static RESIDENCE_PATH: &str = "../residents.geojson";
 static SCHOOLS_PATH: &str = "../residents.geojson";
 static JOBS_PATH: &str = "../residents.geojson";
 
-pub fn load_overlay_files() -> Result<Overlays> {
+pub fn load_data_layer_files() -> Result<DataLayers> {
     let residence_file = File::open(RESIDENCE_PATH)?;
-    let residence = Overlay(deserialize_feature_collection_to_vec(residence_file)?);
+    let residence = DataLayer(deserialize_feature_collection_to_vec(residence_file)?);
 
     let schools_file = File::open(SCHOOLS_PATH)?;
-    let schools = Overlay(deserialize_feature_collection_to_vec(schools_file)?);
+    let schools = DataLayer(deserialize_feature_collection_to_vec(schools_file)?);
 
     let jobs_file = File::open(JOBS_PATH)?;
-    let jobs = Overlay(deserialize_feature_collection_to_vec(jobs_file)?);
+    let jobs = DataLayer(deserialize_feature_collection_to_vec(jobs_file)?);
 
-    Ok(Overlays {
+    Ok(DataLayers {
         residence,
         schools,
         jobs,

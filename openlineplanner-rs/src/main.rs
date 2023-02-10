@@ -3,12 +3,12 @@ use geo::Point;
 use serde::Deserialize;
 
 mod coverage;
-mod overlay;
+mod datalayer;
 mod population;
 mod station;
 
 use coverage::Method;
-use overlay::{OverlayName, Overlays};
+use datalayer::{DataLayerName, DataLayers};
 use station::Station;
 
 #[derive(Deserialize)]
@@ -27,9 +27,9 @@ struct FindStationRequest {
 
 async fn station_info(
     request: web::Query<StationInfoRequest>,
-    overlays: web::Data<Overlays>,
+    datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
-    let houses = &overlays.residence;
+    let houses = &datalayers.residence;
     let coverage_info = coverage::houses_for_stations(
         &request.stations,
         houses.get_houses(),
@@ -40,12 +40,12 @@ async fn station_info(
 
 async fn coverage_info(
     stations: web::Query<Vec<Station>>,
-    overlays: web::Data<Overlays>,
+    datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
-    let houses = &overlays.residence;
+    let houses = &datalayers.residence;
     let coverage_info =
         coverage::houses_for_stations(&stations, houses.get_houses(), &Method::Relative);
-    overlay::HouseCoverageCollection::from(coverage_info)
+    datalayer::HouseCoverageDataLayer::from(coverage_info)
 }
 
 async fn find_station(request: web::Query<FindStationRequest>) -> impl Responder {
@@ -53,10 +53,10 @@ async fn find_station(request: web::Query<FindStationRequest>) -> impl Responder
 }
 
 async fn overlay(
-    layer_name: web::Path<OverlayName>,
-    overlays: web::Data<Overlays>,
+    layer_name: web::Path<DataLayerName>,
+    datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
-    overlays.get_by_name(layer_name.as_ref())
+    datalayers.get_by_name(layer_name.as_ref())
 }
 
 #[actix_web::main]
@@ -64,7 +64,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         App::new()
             .app_data(web::Data::new(
-                overlay::load_overlay_files().expect("Failed to read overlay data"),
+                datalayer::load_data_layer_files().expect("Failed to read data layer data"),
             ))
             .route("/station-info", web::get().to(station_info))
             .route("/coverage-info", web::get().to(coverage_info))
