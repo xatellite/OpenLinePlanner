@@ -184,8 +184,10 @@ export default {
         points.forEach((point) => {
           if (point.type === "station") {
             stations.push({
-              lat: point.lat,
-              lng: point.lng,
+              location: {
+                y: station.lat,
+                x: station.lng,
+              },
               id: point.id,
               // Add max coverage
               coverage: Math.max(
@@ -201,9 +203,8 @@ export default {
           .pointIds.forEach((pointRef) => {
             const point = this.linesStore.getPointById(pointRef);
             route.push({
-              lat: point.lat,
-              lng: point.lng,
-              id: point.id,
+              y: point.lat,
+              x: point.lng,
             });
           });
 
@@ -222,10 +223,10 @@ export default {
           .then((data) => data.json())
           .then((stationProposal) => {
             const newPoint = this.linesStore.addPoint(
-              stationProposal.optimalStation.lat,
-              stationProposal.optimalStation.lng,
+              stationProposal.y,
+              stationProposal.x,
               this.line,
-              stationProposal.optimalStation.index
+              crypto.randomUUID()
             );
             newPoint.type = "station";
           })

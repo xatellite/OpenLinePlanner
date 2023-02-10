@@ -29,8 +29,10 @@ export const usePaxStore = defineStore({
         stations: linesStore.getPoints
           .filter((point) => point.type === "station")
           .map((station) => ({
-            lat: station.lat,
-            lng: station.lng,
+            location: {
+              y: station.lat,
+              x: station.lng,
+            },
             id: station.id,
             coverage: Math.max(
               ...station.lines.map((lineId) =>
@@ -69,17 +71,17 @@ export const usePaxStore = defineStore({
     },
     async getPaxForAllStations(linesStore) {
       if (this.isCurrent) {
-        return this.stationData.stationInfo;
+        return this.stationData;
       }
       await this.loadStationData(linesStore);
-      return this.stationData.stationInfo;
+      return this.stationData;
     },
     async getPaxForStation(stationRef, linesStore) {
       if (this.isCurrent) {
-        return this.stationData.stationInfo[stationRef];
+        return this.stationData[stationRef];
       }
       await this.loadStationData(linesStore);
-      return this.stationData.stationInfo[stationRef];
+      return this.stationData[stationRef];
     },
   },
 });
