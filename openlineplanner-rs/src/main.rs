@@ -21,12 +21,6 @@ struct StationInfoRequest {
 }
 
 #[derive(Deserialize)]
-struct CoverageInfoRequest {
-    stations: Vec<Station>,
-    method: Option<Method>,
-}
-
-#[derive(Deserialize)]
 struct FindStationRequest {
     stations: Vec<Station>,
     route: Vec<Point>,
@@ -47,15 +41,12 @@ async fn station_info(
 }
 
 async fn coverage_info(
-    request: web::Json<CoverageInfoRequest>,
+    stations: web::Json<Vec<Station>>,
     datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
     let houses = &datalayers.residence;
-    let coverage_info = coverage::houses_for_stations(
-        &request.stations,
-        houses.get_houses(),
-        &request.method.as_ref().unwrap_or(&Method::Relative),
-    );
+    let coverage_info =
+        coverage::houses_for_stations(&stations, houses.get_houses(), &Method::Relative);
     datalayer::HouseCoverageDataLayer::from(coverage_info)
 }
 
