@@ -2,7 +2,9 @@ use actix_cors::Cors;
 use actix_web::{web, App, HttpServer, Responder};
 use config::Config;
 use geo::Point;
+use log::info;
 use serde::Deserialize;
+use anyhow::Result;
 
 mod coverage;
 mod datalayer;
@@ -73,10 +75,14 @@ async fn overlay(
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    setup_logger().expect("failed to initialize logger");
+
+    info!("starting openlineplanner backend");
+
     let settings = Config::builder()
         .add_source(config::File::with_name("Settings"))
         .build()
-        .expect("failed to load config file");
+        .expect("failed to read config");
     let data_file_paths: DataFilePaths = settings
         .get("data")
         .expect("missing data file paths in config");
@@ -86,7 +92,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Cors::permissive())
             .app_data(web::Data::new(
                 datalayer::load_data_layer_files(data_file_paths.clone())
-                    .expect("Failed to read data layer data"),
+                    .expect("failed to read data layer data"),
             ))
             .route("/station-info", web::post().to(station_info))
             .route("/coverage-info", web::post().to(coverage_info))
@@ -96,4 +102,23 @@ async fn main() -> std::io::Result<()> {
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
+}
+
+fn setup_logger() -> Result<()> {
+    let colors = fern::colors::ColoredLevelConfig::new();
+
+    fern::Dispatch::new()
+        .format(move |out, message, record| {
+            out.finish(format_args!(
+                "[{}][{}] {}",
+                record.target(),
+                colors.color(record.level()),
+                message
+            ))
+        })
+        .level(log::LevelFilter::Debug)
+        .chain(std::io::stdout())
+        .chain(fern::log_file("output.log")?)
+        .apply()?;
+    Ok(())
 }
