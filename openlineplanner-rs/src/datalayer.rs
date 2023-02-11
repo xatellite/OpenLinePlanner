@@ -132,18 +132,21 @@ impl Responder for DataLayer {
     }
 }
 
-static RESIDENCE_PATH: &str = "../residents.geojson";
-static SCHOOLS_PATH: &str = "../residents.geojson";
-static JOBS_PATH: &str = "../residents.geojson";
+#[derive(Deserialize, Clone)]
+pub struct DataFilePaths {
+    residence: String,
+    schools: String,
+    jobs: String,
+}
 
-pub fn load_data_layer_files() -> Result<DataLayers> {
-    let residence_file = File::open(RESIDENCE_PATH)?;
+pub fn load_data_layer_files(paths: DataFilePaths) -> Result<DataLayers> {
+    let residence_file = File::open(paths.residence)?;
     let residence = DataLayer(deserialize_feature_collection_to_vec(residence_file)?);
 
-    let schools_file = File::open(SCHOOLS_PATH)?;
+    let schools_file = File::open(paths.schools)?;
     let schools = DataLayer(deserialize_feature_collection_to_vec(schools_file)?);
 
-    let jobs_file = File::open(JOBS_PATH)?;
+    let jobs_file = File::open(paths.jobs)?;
     let jobs = DataLayer(deserialize_feature_collection_to_vec(jobs_file)?);
 
     Ok(DataLayers {

@@ -4,7 +4,11 @@ use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responde
 use geo::{Densify, HaversineDistance, LineString, Point};
 use serde::Deserialize;
 
-use crate::{coverage::get_houses_in_coverage, coverage::StationCoverageInfo, datalayer::House};
+use crate::{
+    coverage::StationCoverageInfo,
+    coverage::{get_houses_in_coverage, Method},
+    datalayer::House,
+};
 
 static DEFAULT_COVERAGE: f64 = 300f64;
 
@@ -30,13 +34,17 @@ pub fn find_optimal_station(
     coverage: f64,
     houses: &[House],
     other_stations: &[Station],
+    method: &Method,
 ) -> OptimalStationResult {
     let linestring = Into::<LineString>::into(line).densify(10f64);
     let others: Vec<&Station> = other_stations.iter().map(|x| x.borrow()).collect();
     OptimalStationResult(linestring.points().max_by_key(|point| {
         // TODO is max_by_key use like this efficient?
-        StationCoverageInfo::from(get_houses_in_coverage(&point, coverage, houses, &others))
-            .inhabitants
+        StationCoverageInfo::from_houses_with_method(
+            get_houses_in_coverage(&point, coverage, houses, &others),
+            method,
+        )
+        .inhabitants
     }))
 }
 

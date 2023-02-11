@@ -16,12 +16,15 @@ pub struct StationCoverageInfo<'a> {
     pub inhabitants: u32,
 }
 
-impl<'a> From<Vec<HouseInfo<'a>>> for StationCoverageInfo<'a> {
-    fn from(value: Vec<HouseInfo<'a>>) -> Self {
+impl<'a> StationCoverageInfo<'a> {
+    pub fn from_houses_with_method(value: Vec<HouseInfo<'a>>, method: &Method) -> Self {
         StationCoverageInfo {
             inhabitants: value
                 .iter()
-                .map(|hi| (hi.house.pop as f64 * (1f64 / hi.distance.sqrt())) as u32) // TODO currently hardcoded method
+                .map(|hi| match method {
+                    Method::Absolute => hi.house.pop,
+                    Method::Relative => (hi.house.pop as f64 * (1f64 / hi.distance.sqrt())) as u32,
+                })
                 .sum(),
             houses: value,
         }
@@ -90,7 +93,10 @@ pub fn houses_for_stations<'a, 'b>(
             houses,
             &possible_collision_stations,
         );
-        inhabitants_map.insert(station.id.as_str(), StationCoverageInfo::from(houses));
+        inhabitants_map.insert(
+            station.id.as_str(),
+            StationCoverageInfo::from_houses_with_method(houses, method),
+        );
     }
 
     CoverageMap(inhabitants_map)

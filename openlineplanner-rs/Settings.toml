@@ -1,0 +1,4 @@
+[data]
+residence = "./residents.geojson"
+schools = "./residents.geojson"
+jobs = "./residents.geojson"
