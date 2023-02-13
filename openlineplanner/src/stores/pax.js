@@ -7,6 +7,7 @@ export const usePaxStore = defineStore({
     stationData: [],
     isCurrent: false,
     calculationMethod: "absolute",
+    routingMethod: "osm",
     currentRequestController: null,
   }),
   actions: {
@@ -23,6 +24,14 @@ export const usePaxStore = defineStore({
         return;
       }
       this.calculationMethod = "absolute";
+    },
+    toggleRoutingMethod() {
+      this.isCurrent = false;
+      if (this.routingMethod === "osm") {
+        this.routingMethod = "naive";
+        return;
+      }
+      this.routingMethod = "osm";
     },
     async loadStationData(linesStore) {
       const stations = {
@@ -41,6 +50,7 @@ export const usePaxStore = defineStore({
             ),
           })),
         method: this.calculationMethod,
+        routing: this.routingMethod
       };
       if (this.currentRequestController != null) {
         this.currentRequestController.abort();

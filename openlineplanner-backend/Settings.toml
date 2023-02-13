@@ -1,0 +1,3 @@
+[data]
+residence = "./data/Residence_Wien_Donaustadt.geojson"
+osm = "./data/Wien_Donaustadt.osm.pbf"
