@@ -1,13 +1,14 @@
-use std::borrow::Borrow;
+use std::{borrow::Borrow, collections::HashMap};
 
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{HaversineDistance, LineString, Point};
-use log::info;
+use osmpbfreader::NodeId;
+use petgraph::prelude::UnGraphMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     coverage::StationCoverageInfo,
-    coverage::{get_houses_in_coverage, Method},
+    coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
     datalayer::House,
     geometry::DensifyHaversine,
 };
@@ -37,16 +38,30 @@ pub fn find_optimal_station(
     houses: &[House],
     other_stations: &[Station],
     method: &Method,
+    routing: &Routing,
+    nodes: &HashMap<NodeId, Point>,
+    streetgraph: &UnGraphMap<NodeId, f64>,
 ) -> OptimalStationResult {
     let linestring = Into::<LineString>::into(line.clone()).densify_haversine(10.0);
-    info!("linestring: {:?}", linestring);
-    info!("line: {:?}", line);
     let others: Vec<&Station> = other_stations.iter().map(|x| x.borrow()).collect();
+    let original_coverage: Vec<&House> =
+        houses_for_stations(other_stations, houses, method, routing, nodes, streetgraph)
+            .0
+            .values()
+            .into_iter()
+            .flat_map(|elem| elem.houses.clone())
+            .map(|elem| elem.house)
+            .collect();
+    let leftover_houses: Vec<House> = houses
+        .iter()
+        .filter(|house| !original_coverage.contains(house))
+        .cloned()
+        .collect();
     let location = linestring
         .points()
         .max_by_key(|point| {
             StationCoverageInfo::from_houses_with_method(
-                get_houses_in_coverage(&point, coverage, houses, &others),
+                get_houses_in_coverage(&point, coverage, &leftover_houses, &others),
                 method,
             )
             .inhabitants

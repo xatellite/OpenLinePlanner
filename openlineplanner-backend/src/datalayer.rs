@@ -36,7 +36,7 @@ pub struct DataLayers {
     pub nodes: HashMap<NodeId, Point>,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, PartialEq)]
 pub struct House {
     #[serde(
         serialize_with = "serialize_geometry",

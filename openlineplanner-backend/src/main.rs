@@ -12,7 +12,7 @@ mod geometry;
 mod population;
 mod station;
 
-use coverage::{Distance, Method};
+use coverage::{Method, Routing};
 use datalayer::{DataFilePaths, DataLayerName, DataLayers};
 use station::Station;
 
@@ -21,7 +21,7 @@ struct StationInfoRequest {
     stations: Vec<Station>,
     _separation_distance: Option<i32>,
     method: Option<Method>,
-    routing: Option<Distance>,
+    routing: Option<Routing>,
 }
 
 #[derive(Deserialize)]
@@ -29,6 +29,7 @@ struct FindStationRequest {
     stations: Vec<Station>,
     route: Vec<Point>,
     method: Option<Method>,
+    routing: Option<Routing>,
 }
 
 async fn station_info(
@@ -40,7 +41,7 @@ async fn station_info(
         &request.stations,
         houses.get_houses(),
         &request.method.as_ref().unwrap_or(&Method::Relative),
-        &request.routing.as_ref().unwrap_or(&Distance::Osm),
+        &request.routing.as_ref().unwrap_or(&Routing::Osm),
         &datalayers.nodes,
         &datalayers.streetgraph,
     );
@@ -49,7 +50,7 @@ async fn station_info(
 
 async fn coverage_info(
     stations: web::Json<Vec<Station>>,
-    routing: web::Path<Distance>,
+    routing: web::Path<Routing>,
     datalayers: web::Data<DataLayers>,
 ) -> impl Responder {
     let houses = &datalayers.residence;
@@ -75,6 +76,9 @@ async fn find_station(
         &houses.get_houses(),
         &request.stations,
         &request.method.as_ref().unwrap_or(&Method::Relative),
+        &request.routing.as_ref().unwrap_or(&Routing::Osm),
+        &datalayers.nodes,
+        &datalayers.streetgraph,
     )
 }
 

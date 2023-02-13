@@ -21,7 +21,7 @@ pub struct StationCoverageInfo<'a> {
 }
 
 #[derive(Deserialize)]
-pub enum Distance {
+pub enum Routing {
     #[serde(rename = "naive")]
     Naive,
     #[serde(rename = "osm")]
@@ -43,7 +43,7 @@ impl<'a> StationCoverageInfo<'a> {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct HouseInfo<'a> {
     pub house: &'a House,
     pub distance: f64,
@@ -125,7 +125,7 @@ pub fn houses_for_stations<'a, 'b>(
     stations: &'a [Station],
     houses: &'b [House],
     method: &Method,
-    distance: &Distance,
+    routing: &Routing,
     nodes: &HashMap<NodeId, Point>,
     streetgraph: &UnGraphMap<NodeId, f64>,
 ) -> CoverageMap<'a, 'b> {
@@ -139,14 +139,14 @@ pub fn houses_for_stations<'a, 'b>(
                 other.haversine_distance(station) < (other.coverage() + station.coverage())
             })
             .collect();
-        let houses = match distance {
-            Distance::Naive => get_houses_in_coverage(
+        let houses = match routing {
+            Routing::Naive => get_houses_in_coverage(
                 &station.location,
                 station.coverage(),
                 houses,
                 &possible_collision_stations,
             ),
-            Distance::Osm => get_houses_in_coverage_with_real_distance(
+            Routing::Osm => get_houses_in_coverage_with_real_distance(
                 &station.location,
                 station.coverage(),
                 houses,
