@@ -185,8 +185,8 @@ export default {
           if (point.type === "station") {
             stations.push({
               location: {
-                y: station.lat,
-                x: station.lng,
+                y: point.lat,
+                x: point.lng,
               },
               id: point.id,
               // Add max coverage
@@ -223,10 +223,10 @@ export default {
           .then((data) => data.json())
           .then((stationProposal) => {
             const newPoint = this.linesStore.addPoint(
-              stationProposal.y,
-              stationProposal.x,
+              stationProposal.location.y,
+              stationProposal.location.x,
               this.line,
-              crypto.randomUUID()
+              stationProposal.index
             );
             newPoint.type = "station";
           })

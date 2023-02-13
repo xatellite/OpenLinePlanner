@@ -1,5 +1,0 @@
-[data]
-residence = "./residents.geojson"
-schools = "./residents.geojson"
-jobs = "./residents.geojson"
-osm = "./Gross-Enzersdorf.osm.pbf"

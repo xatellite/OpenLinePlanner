@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useLinesStore } from "./lines";
 import { randomColor } from "../helpers/random";
+import { usePaxStore } from "./pax";
 
 export const useOverlayStore = defineStore({
   id: "overlay",
@@ -24,7 +25,7 @@ export const useOverlayStore = defineStore({
         window.Piwik.getTracker().trackEvent("editing", "overlay_select", type);
       }
       if (type != "none") {
-        fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay/" + type , {
+        fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay/" + type, {
           method: "GET",
           headers: {
             "Content-type": "application/json",
@@ -53,7 +54,8 @@ export const useOverlayStore = defineStore({
     },
     loadCoverage() {
       const linesStore = useLinesStore();
-      const stations = 
+      const paxStore = usePaxStore();
+      const stations =
         linesStore.getPoints
           .filter((point) => point.type === "station")
           .map((station) => ({
@@ -82,7 +84,7 @@ export const useOverlayStore = defineStore({
           stations
         );
       }
-      fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info", {
+      fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info/" + paxStore.routingMethod, {
         method: "POST",
         body: JSON.stringify(stations),
         headers: {
