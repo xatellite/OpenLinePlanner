@@ -4,6 +4,12 @@
       <TooltipButton :handler="toggleColorPick" toolTip="Change line color">
         <IconLine :color="line.color" />
       </TooltipButton>
+      <TooltipButton
+        toolTip="Toggle line options"
+        :handler="toggleTypePicker"
+      >
+        <TypeIcon :type="line.type" />
+      </TooltipButton>
       <input
         v-if="editStore.isEditing == line"
         type="text"
@@ -33,13 +39,6 @@
       >
         <LoadingIcon v-if="findStationLoading" class="loader" />
         <BusStopIcon v-else />
-      </TooltipButton>
-      <TooltipButton
-        v-if="editStore.isEditing != line"
-        toolTip="Toggle line options"
-        :handler="toggleTypePicker"
-      >
-        <TypeIcon :type="line.type" />
       </TooltipButton>
       <TooltipButton
         v-if="editStore.isEditing == line"

@@ -287,6 +287,7 @@ export default {
   align-items: center;
   padding: $space-ssm;
   justify-content: space-between;
+  // background-color: $c-text-primary;
 
   * > {
     margin: $space-ssm;

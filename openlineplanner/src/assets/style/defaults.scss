@@ -118,8 +118,8 @@ select::-ms-expand {
 
 .tooltip {
   position: fixed;
-  background-color: $c-box;
-  color: $c-text-primary;
+  background-color: $c-text-primary;
+  color: $c-box;
   border-radius: $br-md;
   padding: $space-ssm;
   font-size: $font-sm;
