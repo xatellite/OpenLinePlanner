@@ -17,12 +17,11 @@
       >
         <LineElement :line="line" />
       </div>
-    </div>
-
-    <div class="line-list__item__row">
-      <button @click="addLine"><PlusIcon /></button>
-      <span class="grow">Add new Line</span>
-      <div />
+      <div class="line-list__item line-list__item__row">
+        <button @click="addLine"><PlusIcon /></button>
+        <span class="grow">Add new Line</span>
+        <div />
+      </div>
     </div>
     <hr />
     <ActionToolbar />
@@ -65,7 +64,7 @@ export default {
 
 <style lang="scss">
 .line-list {
-  margin: 0 $space-sm;
+  // margin: 0 $space-sm;
   padding-bottom: $space-sm;
 
   @media (max-width: 700px), (max-height: 600px) {
@@ -76,11 +75,13 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: $space-sm;
   }
 
   &__container {
     max-height: 300px;
     overflow-y: auto;
+    background-color: darken($c-box, 2);
 
     @media (max-width: 700px), (max-height: 600px) {
       max-height: none;
@@ -88,6 +89,11 @@ export default {
   }
 
   &__item {
+    background-color: $c-box;
+    margin: $space-sm;
+    border: 1px solid $c-button-background;
+    border-radius: $br-md;
+    overflow: hidden;
     &__row {
       display: flex;
       align-items: center;
@@ -99,7 +105,7 @@ export default {
       }
     }
     margin-bottom: $space-ssm;
-    border-bottom: 1px solid rgba($c-text-primary, 0.2);
+    // border-bottom: 1px solid rgba($c-text-primary, 0.2);
   }
 
   &__title {
@@ -111,6 +117,7 @@ export default {
     color: $c-text-primary;
     height: 0px;
     border: none;
+    margin: 0;
     border-top: 1px solid rgba($c-text-primary, 0.2);
   }
 }

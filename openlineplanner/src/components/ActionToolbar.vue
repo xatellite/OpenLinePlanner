@@ -17,11 +17,16 @@
       <BlurLinearIcon />
     </TooltipButton>
     <TooltipButton
-      v-if="editStore.isEditing"
-      :handler="disableEditing"
-      toolTip="Stop editing"
+      v-if="
+        (editStore.isEditing &&
+          editStore.isEditing.pointIds.length > 1) ||
+        findStationLoading
+      "
+      :handler="findStation"
+      toolTip="Automatically find ideal station"
     >
-      <span class="action-toolbar__stop"><PencilOffOutlineIcon /></span>
+      <LoadingIcon v-if="findStationLoading" class="loader" />
+      <BusStopIcon v-else />
     </TooltipButton>
   </div>
 </template>
@@ -30,8 +35,9 @@
 import TrayArrowDownIcon from "vue-material-design-icons/TrayArrowDown.vue";
 import BlurLinearIcon from "vue-material-design-icons/BlurLinear.vue";
 import FolderUploadOutlineIcon from "vue-material-design-icons/FolderUploadOutline.vue";
-import PencilOffOutlineIcon from "vue-material-design-icons/PencilOffOutline.vue";
 import FileExportOutlineIcon from "vue-material-design-icons/FileExportOutline.vue";
+import BusStopIcon from "vue-material-design-icons/BusStop.vue";
+import LoadingIcon from "vue-material-design-icons/Loading.vue";
 import { jsPDF } from "jspdf";
 import { useEditStore } from "../stores/editing";
 import { useLinesStore } from "../stores/lines";
@@ -45,10 +51,11 @@ export default {
   components: {
     TrayArrowDownIcon,
     FolderUploadOutlineIcon,
-    PencilOffOutlineIcon,
     FileExportOutlineIcon,
     TooltipButton,
     BlurLinearIcon,
+    BusStopIcon,
+    LoadingIcon,
   },
   setup() {
     const editStore = useEditStore();
@@ -61,16 +68,8 @@ export default {
       linesStore,
       paxStore,
       overlayStore,
+      findStationLoading: false,
     };
-  },
-  mounted() {
-    window.addEventListener("keydown", (e) => {
-      if (this.editStore.isExtending) {
-        if (e.key === "Enter") {
-          this.disableEditing();
-        }
-      }
-    });
   },
   methods: {
     disableEditing() {
@@ -276,6 +275,73 @@ export default {
         bubbles: true,
       });
       this.$el.dispatchEvent(event);
+    },
+    findStation() {
+      // Matomo Tracking
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "findStation");
+      }
+      if (!this.findStationLoading) {
+        this.findStationLoading = true;
+        const route = [];
+        const stations = [];
+        const points = Object.values(this.linesStore.points);
+        if (points.length <= 0) {
+          return;
+        }
+        // ToDo: Add max coverage
+        points.forEach((point) => {
+          if (point.type === "station") {
+            stations.push({
+              lat: point.lat,
+              lng: point.lng,
+              id: point.id,
+              // Add max coverage
+              coverage: Math.max(
+                ...point.lines.map((lineId) =>
+                  this.linesStore.getLineById(lineId).getCoverage()
+                )
+              ),
+            });
+          }
+        });
+        this.linesStore
+          .getLineById(this.editStore.isEditing.id)
+          .pointIds.forEach((pointRef) => {
+            const point = this.linesStore.getPointById(pointRef);
+            route.push({
+              lat: point.lat,
+              lng: point.lng,
+              id: point.id,
+            });
+          });
+
+        fetch(import.meta.env.VITE_API_ENDPOINT + "/find-station", {
+          method: "POST",
+          body: JSON.stringify({
+            route,
+            stations,
+            coverage: this.editStore.isEditing.getCoverage(),
+            method: this.paxStore.calculationMethod,
+          }),
+          headers: {
+            "Content-type": "application/json",
+          },
+        })
+          .then((data) => data.json())
+          .then((stationProposal) => {
+            const newPoint = this.linesStore.addPoint(
+              stationProposal.optimalStation.lat,
+              stationProposal.optimalStation.lng,
+              this.line,
+              stationProposal.optimalStation.index
+            );
+            newPoint.type = "station";
+          })
+          .finally(() => {
+            this.findStationLoading = false;
+          });
+      }
     },
   },
 };
