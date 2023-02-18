@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { useLinesStore } from "./lines";
 import { randomColor } from "../helpers/random";
+import { usePaxStore } from "./pax";
 
 export const useOverlayStore = defineStore({
   id: "overlay",
@@ -24,16 +25,15 @@ export const useOverlayStore = defineStore({
         window.Piwik.getTracker().trackEvent("editing", "overlay_select", type);
       }
       if (type != "none") {
-        fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay", {
-          method: "POST",
-          body: JSON.stringify({ layer_name: type }),
+        fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay/" + type, {
+          method: "GET",
           headers: {
             "Content-type": "application/json",
           },
         })
           .then((data) => data.json())
           .then((overlayData) => {
-            this.overlayData = JSON.parse(overlayData.layerGeoJson);
+            this.overlayData = overlayData;
           });
       }
     },
@@ -54,21 +54,22 @@ export const useOverlayStore = defineStore({
     },
     loadCoverage() {
       const linesStore = useLinesStore();
-      const stations = {
-        stations: linesStore.getPoints
+      const paxStore = usePaxStore();
+      const stations =
+        linesStore.getPoints
           .filter((point) => point.type === "station")
           .map((station) => ({
-            lat: station.lat,
-            lng: station.lng,
+            location: {
+              y: station.lat,
+              x: station.lng,
+            },
             id: station.id,
             coverage: Math.max(
               ...station.lines.map((lineId) =>
                 linesStore.getLineById(lineId).getCoverage()
               )
             ),
-          })),
-        method: this.calculationMethod,
-      };
+          }));
       // cancel request if duplicate exists
       if (this.currentRequestController != null) {
         this.currentRequestController.abort();
@@ -83,7 +84,7 @@ export const useOverlayStore = defineStore({
           stations
         );
       }
-      fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info", {
+      fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info/" + paxStore.routingMethod, {
         method: "POST",
         body: JSON.stringify(stations),
         headers: {
@@ -111,13 +112,13 @@ export const useOverlayStore = defineStore({
             }
           });
 
-          overlayData.coverage.features.forEach((point) => {
+          overlayData.features.forEach((point) => {
             point.properties["station_color"] =
               stationColorMapping[point.properties["closest_station"]];
             point.properties["distance_color"] =
               distanceColors[Math.floor(point.properties.distance / 100)];
           });
-          this.coverageData = overlayData.coverage;
+          this.coverageData = overlayData;
           this.currentRequestController = null;
         });
     },

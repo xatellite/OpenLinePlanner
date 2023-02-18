@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  openlineplanner_xat_io_api:
+    build: .
+    container_name: "openlineplanner_xat_io_api"
+    restart: always
+    volumes:
+      - "/srv/volumes/openlineplanner/data:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.openlineplanner_xat_io_api.rule=Host(`api.openlineplanner.xatellite.io`)"
+      - "traefik.http.routers.openlineplanner_xat_io_api.entrypoints=websecure"
+      - "traefik.http.routers.openlineplanner_xat_io_api.tls=true"
+      - "traefik.http.routers.openlineplanner_xat_io_api.tls.certResolver=lets_encrypt"

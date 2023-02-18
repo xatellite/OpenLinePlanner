@@ -8,7 +8,7 @@ on:
   push:
     branches: main
     paths:
-      - 'openlineplanner_backend/**'
+      - 'openlineplanner-backend/**'
 
 jobs:
   build:
@@ -31,5 +31,5 @@ jobs:
 
       - name: Deploy to Docker Host
         run: |
-          cd ./openlineplanner_backend
+          cd ./openlineplanner-backend
           /tmp/docker-compose -H ssh://${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} up --build -d

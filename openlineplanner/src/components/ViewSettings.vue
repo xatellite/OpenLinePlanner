@@ -56,8 +56,24 @@
           <CheckboxBlankCircleIcon v-else />
         </template>
         <template v-slot:text>
-          <span v-if="paxStore.calculationMethod == 'relative'">Relative calc.</span>
+          <span v-if="paxStore.calculationMethod == 'relative'"
+            >Relative calc.</span
+          >
           <span v-else>Absolute calc.</span>
+        </template>
+      </ToggleButton>
+      <ToggleButton
+        :active="paxStore.routingMethod == 'relative'"
+        :callback="paxStore.toggleRoutingMethod"
+        toolTip="Switch routing method"
+      >
+        <template v-slot:icon>
+          <MapIcon v-if="paxStore.routingMethod == 'osm'" />
+          <MapMarkerDistanceIcon v-else />
+        </template>
+        <template v-slot:text>
+          <span v-if="paxStore.routingMethod == 'naive'">Radius routing</span>
+          <span v-else>OSM routing</span>
         </template>
       </ToggleButton>
     </div>
@@ -68,6 +84,8 @@
 <script>
 import CogOutlineIcon from "vue-material-design-icons/CogOutline.vue";
 import BullseyeIcon from "vue-material-design-icons/Bullseye.vue";
+import MapMarkerDistanceIcon from "vue-material-design-icons/MapMarkerDistance.vue"
+import MapIcon from "vue-material-design-icons/Map.vue"
 import CheckboxBlankCircleIcon from "vue-material-design-icons/CheckboxBlankCircle.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import RulerIcon from "vue-material-design-icons/Ruler.vue";
@@ -86,6 +104,8 @@ export default {
     BusStopIcon,
     RulerIcon,
     BullseyeIcon,
+    MapIcon,
+    MapMarkerDistanceIcon,
     CheckboxBlankCircleIcon,
     CoverageSelect,
     SpeedometerIcon,
@@ -133,7 +153,6 @@ export default {
   cursor: pointer;
 
   transition: max-height 0.4s linear;
-
 
   @media (max-width: 700px), (max-height: 600px) {
     top: $space-sm;
