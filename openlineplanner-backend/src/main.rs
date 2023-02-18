@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{web, App, HttpServer, Responder};
+use actix_web::{web, http, App, HttpServer, Responder};
 use anyhow::Result;
 use config::Config;
 use geo::Point;
@@ -107,15 +107,25 @@ async fn main() -> std::io::Result<()> {
         .expect("Failed to read data layer data");
 
     HttpServer::new(move || {
+        let cors = Cors::default()
+              .allowed_origin("https://openlineplanner.xatellite.io")
+              .allowed_origin_fn(|origin, _req_head| {
+                  origin.as_bytes().ends_with(b".openlineplanner.xatellite.io")
+              })
+              .allowed_methods(vec!["GET", "POST"])
+              .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+              .allowed_header(http::header::CONTENT_TYPE)
+              .max_age(3600);
+
         App::new()
-            .wrap(Cors::permissive())
+            .wrap(cors)
             .app_data(web::Data::new(data_layer.clone()))
             .route("/station-info", web::post().to(station_info))
             .route("/coverage-info/{router}", web::post().to(coverage_info))
             .route("/find-station", web::post().to(find_station))
             .route("/overlay/{layer_name}", web::get().to(overlay))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("0.0.0.0", 8080))?
     .run()
     .await
 }
