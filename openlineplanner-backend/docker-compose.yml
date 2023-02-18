@@ -5,6 +5,8 @@ services:
     build: .
     container_name: "openlineplanner_xat_io_api"
     restart: always
+    volumes:
+      - "/srv/volumes/openlineplanner/data:/data"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.openlineplanner_xat_io_api.rule=Host(`api.openlineplanner.xatellite.io`)"

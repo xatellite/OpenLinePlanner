@@ -44,7 +44,6 @@ pub struct House {
     )]
     geometry: Point,
     flats: u32,
-    housenumbers: u32,
     pub pop: u32,
     pub street_graph_id: Option<NodeId>,
 }
@@ -141,6 +140,7 @@ pub struct DataFilePaths {
 }
 
 pub fn load_data_layer_files(paths: DataFilePaths) -> Result<DataLayers> {
+    // ToDo Load Datalayer if unchanged
     let residence_file = File::open(paths.residence)?;
     let residence_raw = deserialize_feature_collection_to_vec(residence_file)?;
 
