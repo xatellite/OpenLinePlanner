@@ -1,6 +1,0 @@
-numpy
-gunicorn
-geopandas
-falcon
-jsonschema
-geojson

@@ -7,6 +7,7 @@ export const usePaxStore = defineStore({
     stationData: [],
     isCurrent: false,
     calculationMethod: "absolute",
+    routingMethod: "osm",
     currentRequestController: null,
   }),
   actions: {
@@ -24,13 +25,23 @@ export const usePaxStore = defineStore({
       }
       this.calculationMethod = "absolute";
     },
+    toggleRoutingMethod() {
+      this.isCurrent = false;
+      if (this.routingMethod === "osm") {
+        this.routingMethod = "naive";
+        return;
+      }
+      this.routingMethod = "osm";
+    },
     async loadStationData(linesStore) {
       const stations = {
         stations: linesStore.getPoints
           .filter((point) => point.type === "station")
           .map((station) => ({
-            lat: station.lat,
-            lng: station.lng,
+            location: {
+              y: station.lat,
+              x: station.lng,
+            },
             id: station.id,
             coverage: Math.max(
               ...station.lines.map((lineId) =>
@@ -39,6 +50,7 @@ export const usePaxStore = defineStore({
             ),
           })),
         method: this.calculationMethod,
+        routing: this.routingMethod
       };
       if (this.currentRequestController != null) {
         this.currentRequestController.abort();
@@ -69,17 +81,17 @@ export const usePaxStore = defineStore({
     },
     async getPaxForAllStations(linesStore) {
       if (this.isCurrent) {
-        return this.stationData.stationInfo;
+        return this.stationData;
       }
       await this.loadStationData(linesStore);
-      return this.stationData.stationInfo;
+      return this.stationData;
     },
     async getPaxForStation(stationRef, linesStore) {
       if (this.isCurrent) {
-        return this.stationData.stationInfo[stationRef];
+        return this.stationData[stationRef];
       }
       await this.loadStationData(linesStore);
-      return this.stationData.stationInfo[stationRef];
+      return this.stationData[stationRef];
     },
   },
 });
