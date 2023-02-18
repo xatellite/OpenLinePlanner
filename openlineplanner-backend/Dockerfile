@@ -9,10 +9,10 @@ COPY Cargo.toml Cargo.lock ./
 RUN cargo build --release
 
 COPY src ./src
-RUN cargo install --target x86_64-unknown-linux-musl --path .
+RUN gcc --version
+RUN TARGET_CC=gcc cargo install --target x86_64-unknown-linux-musl --path .
 
 FROM scratch
 COPY --from=build /usr/local/cargo/bin/openlineplanner-backend .
-COPY data .
 USER 1000
 CMD ["./openlineplanner-backend"]

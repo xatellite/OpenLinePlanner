@@ -96,7 +96,7 @@ async fn main() -> std::io::Result<()> {
     info!("starting openlineplanner backend");
 
     let settings = Config::builder()
-        .add_source(config::File::with_name("Settings"))
+        .add_source(config::File::with_name("settings/Settings"))
         .build()
         .expect("failed to read config");
     let data_file_paths: DataFilePaths = settings
@@ -134,7 +134,7 @@ fn setup_logger() -> Result<()> {
         })
         .level(log::LevelFilter::Debug)
         .chain(std::io::stdout())
-        .chain(fern::log_file("output.log")?)
+        .chain(fern::log_file("log/output.log")?)
         .apply()?;
     Ok(())
 }
