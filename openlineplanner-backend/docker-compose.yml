@@ -15,3 +15,4 @@ services:
       - "traefik.http.routers.openlineplanner_xat_io_api.entrypoints=websecure"
       - "traefik.http.routers.openlineplanner_xat_io_api.tls=true"
       - "traefik.http.routers.openlineplanner_xat_io_api.tls.certResolver=lets_encrypt"
+      - "traefik.http.services.openlineplanner_xat_io_api.loadbalancer.server.port=8080"
