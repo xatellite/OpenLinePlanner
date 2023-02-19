@@ -43,15 +43,16 @@ export default {
       this.linesStore.points[this.point.id] = updatedPoint;
       this.paxStore.setCurrent(false);
     },
-    setStreetAddressName(lat, lng) {
-      fetch("https://nominatim.openstreetmap.org/reverse.php?lat="+lat+"&lon="+lng+"&zoom=18&format=jsonv2", {
+    // Duplicate with ActionToolbar
+    setStreetAddressName(point) {
+      fetch("https://nominatim.openstreetmap.org/reverse.php?lat="+point.lat+"&lon="+point.lng+"&zoom=18&format=jsonv2", {
           method: "GET"
         })
           .then((data) => data.json())
           .then((geocodingResult) => {
-            const point = this.linesStore.points[this.point.id];
-            point.name = geocodingResult.address.road;
-            this.linesStore.points[this.point.id] = point;
+            const updatedPoint = this.linesStore.points[point.id];
+            updatedPoint.name = geocodingResult.address.road;
+            this.linesStore.points[point.id] = updatedPoint;
           })
     },
     removePoint() {

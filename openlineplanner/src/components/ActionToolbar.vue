@@ -18,8 +18,7 @@
     </TooltipButton>
     <TooltipButton
       v-if="
-        (editStore.isEditing &&
-          editStore.isEditing.pointIds.length > 1) ||
+        (editStore.isEditing && editStore.isEditing.pointIds.length > 1) ||
         findStationLoading
       "
       :handler="findStation"
@@ -307,8 +306,10 @@ export default {
             });
           }
         });
+        const lineData = this.editStore.isEditing;
+
         this.linesStore
-          .getLineById(this.line.id)
+          .getLineById(lineData.id)
           .pointIds.forEach((pointRef) => {
             const point = this.linesStore.getPointById(pointRef);
             route.push({
@@ -334,15 +335,38 @@ export default {
             const newPoint = this.linesStore.addPoint(
               stationProposal.location.y,
               stationProposal.location.x,
-              this.line,
+              lineData,
               stationProposal.index
             );
             newPoint.type = "station";
+
+            this.setStreetAddressName(newPoint);
           })
           .finally(() => {
+            console.log(this.findStationLoading);
             this.findStationLoading = false;
+            console.log(this.findStationLoading);
           });
       }
+    },
+    // Duplicate with MapAddStationPopup
+    setStreetAddressName(point) {
+      fetch(
+        "https://nominatim.openstreetmap.org/reverse.php?lat=" +
+          point.lat +
+          "&lon=" +
+          point.lng +
+          "&zoom=18&format=jsonv2",
+        {
+          method: "GET",
+        }
+      )
+        .then((data) => data.json())
+        .then((geocodingResult) => {
+          const updatedPoint = this.linesStore.points[point.id];
+          updatedPoint.name = geocodingResult.address.road;
+          this.linesStore.points[point.id] = updatedPoint;
+        });
     },
   },
 };
