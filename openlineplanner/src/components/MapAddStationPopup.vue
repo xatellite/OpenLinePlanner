@@ -37,10 +37,22 @@ export default {
   },
   methods: {
     addStation() {
+      this.setStreetAddressName(this.point.lat, this.point.lng);
       const updatedPoint = this.point.copy();
       updatedPoint.type = "station";
       this.linesStore.points[this.point.id] = updatedPoint;
       this.paxStore.setCurrent(false);
+    },
+    setStreetAddressName(lat, lng) {
+      fetch("https://nominatim.openstreetmap.org/reverse.php?lat="+lat+"&lon="+lng+"&zoom=18&format=jsonv2", {
+          method: "GET"
+        })
+          .then((data) => data.json())
+          .then((geocodingResult) => {
+            const point = this.linesStore.points[this.point.id];
+            point.name = geocodingResult.address.road;
+            this.linesStore.points[this.point.id] = point;
+          })
     },
     removePoint() {
       // Matomo Tracking
