@@ -86,7 +86,7 @@ export default {
   &__item {
     background-color: $c-box;
     margin: $space-sm;
-    border: 1px solid $c-button-background;
+    border: 1px solid $c-button-border;
     border-radius: $br-md;
     overflow: hidden;
     &__row {
@@ -118,10 +118,10 @@ export default {
 }
 
 .line-list__title {
-  padding-bottom: 4px;
-  padding-top: 4px;
+  padding: 6px 26px 4px;
   color: $c-accent-one;
-  font-family: "Inter";
-  font-weight: 900;
+  font-family: "Poppins";
+  font-weight: 700;
+  font-size: 28px;
 }
 </style>

@@ -53,9 +53,9 @@
       @click="disableEditing"
     >
       <span class="line-element__warning__title"
-        >{{ line.name }} is being {{ editStore.isExtending ? "extended": "edited"}}!</span
+        >{{ line.name }} is being {{ editStore.isExtending ? "extended": "edited"}}</span
       >
-      <span>Click here to stop {{ editStore.isExtending ? "extending  (Enter)": "editing"}}</span>
+      <span>Click here to stop {{ editStore.isExtending ? "extending (⏎)": "editing"}}</span>
     </div>
   </div>
 </template>
@@ -187,7 +187,7 @@ export default {
     flex-direction: column;
     align-items: center;
     color: $c-text-inverted;
-    background-color: $c-accent-one;
+    background-color: $c-accent-two;
     cursor: pointer;
     padding: $space-ssm $space-ssm;
 
@@ -204,7 +204,9 @@ export default {
     border: none;
     background-color: transparent;
     text-decoration: underline;
+    font-family: "Poppins";
     font-size: $font-md;
+    color: $c-text-primary;
     width: 0;
   }
 
