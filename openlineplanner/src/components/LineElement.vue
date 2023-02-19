@@ -35,13 +35,13 @@
       </TooltipButton>
     </div>
     <ColorPicker
-      v-if="selectColor && selectType == false"
+      v-if="selectColor && selectType == false && editStore.isEditing == line"
       :initColor="line.color"
       :handleColorChange="updateColor"
       :closeAction="toggleColorPick"
     />
     <TypePicker
-      v-if="selectType && selectColor == false"
+      v-if="selectType && selectColor == false && editStore.isEditing == line"
       :line="line"
       :closeAction="toggleTypePicker"
     />
@@ -129,6 +129,10 @@ export default {
       this.editStore.isExtending = null;
     },
     toggleColorPick(e) {
+      if (this.editStore.isEditing != this.line) {
+        this.selectColor = false;
+      }
+      this.toggleEditing();
       // Matomo Tracking
       if (window && window.Piwik) {
         window.Piwik.getTracker().trackEvent("editing", "toggleColorPick");
@@ -140,6 +144,10 @@ export default {
       this.selectColor = !this.selectColor;
     },
     toggleTypePicker(e) {
+      if (this.editStore.isEditing != this.line) {
+        this.selectType = false;
+      }
+      this.toggleEditing();
       // Matomo Tracking
       if (window && window.Piwik) {
         window.Piwik.getTracker().trackEvent("editing", "toggleTypePick");

@@ -26,12 +26,12 @@ export const usePaxStore = defineStore({
       this.calculationMethod = "absolute";
     },
     toggleRoutingMethod() {
-      this.isCurrent = false;
       if (this.routingMethod === "osm") {
         this.routingMethod = "naive";
         return;
       }
       this.routingMethod = "osm";
+      this.setCurrent(false);
     },
     async loadStationData(linesStore) {
       const stations = {
