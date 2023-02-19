@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView } from "vue-router";
 import "@fontsource/roboto";
+import "@fontsource/inter/900.css";
 </script>
 
 <template>
