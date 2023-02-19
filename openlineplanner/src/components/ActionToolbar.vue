@@ -56,17 +56,12 @@ export default {
     BusStopIcon,
     LoadingIcon,
   },
-  setup() {
-    const editStore = useEditStore();
-    const linesStore = useLinesStore();
-    const paxStore = usePaxStore();
-    const overlayStore = useOverlayStore();
-
+  data() {
     return {
-      editStore,
-      linesStore,
-      paxStore,
-      overlayStore,
+      editStore: useEditStore(),
+      linesStore: useLinesStore(),
+      paxStore: usePaxStore(),
+      overlayStore: useOverlayStore(),
       findStationLoading: false,
     };
   },
@@ -343,9 +338,7 @@ export default {
             this.setStreetAddressName(newPoint);
           })
           .finally(() => {
-            console.log(this.findStationLoading);
             this.findStationLoading = false;
-            console.log(this.findStationLoading);
           });
       }
     },

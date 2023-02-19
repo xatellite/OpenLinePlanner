@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     addStation() {
-      this.setStreetAddressName(this.point.lat, this.point.lng);
+      this.setStreetAddressName(this.point);
       const updatedPoint = this.point.copy();
       updatedPoint.type = "station";
       this.linesStore.points[this.point.id] = updatedPoint;
