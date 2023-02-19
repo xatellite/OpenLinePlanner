@@ -175,6 +175,7 @@ export default {
     background-color: $c-box;
     border: 2px solid $c-text-primary;
     border-radius: $br-md;
+    z-index: 3;
   }
 }
 

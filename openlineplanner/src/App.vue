@@ -1,6 +1,7 @@
 <script setup>
 import { RouterView } from "vue-router";
-import "@fontsource/roboto";
+import "@fontsource/poppins";
+import "@fontsource/poppins/700.css";
 </script>
 
 <template>

@@ -8,7 +8,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "@fontsource/roboto": "^4.5.7",
+    "@fontsource/poppins": "^4.5.10",
     "apexcharts": "^3.35.3",
     "geographiclib-geodesic": "^2.0.0",
     "html2canvas": "^1.4.1",

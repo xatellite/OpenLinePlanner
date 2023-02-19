@@ -1,12 +1,7 @@
 <template>
   <div class="line-list">
     <div class="line-list__center-box">
-      <h1 class="line-list__title">Open-Line-Planner</h1>
-      <a
-        class="line-list__subtitle"
-        href="https://github.com/TheNewCivilian/OpenLinePlanner"
-        >Contribute on Github</a
-      >
+      <h1 class="line-list__title">OpenLinePlanner</h1>
     </div>
     <hr />
     <div class="line-list__container">
@@ -91,7 +86,7 @@ export default {
   &__item {
     background-color: $c-box;
     margin: $space-sm;
-    border: 1px solid $c-button-background;
+    border: 1px solid $c-button-border;
     border-radius: $br-md;
     overflow: hidden;
     &__row {
@@ -120,5 +115,13 @@ export default {
     margin: 0;
     border-top: 1px solid rgba($c-text-primary, 0.2);
   }
+}
+
+.line-list__title {
+  padding: 6px 26px 4px;
+  color: $c-accent-one;
+  font-family: "Poppins";
+  font-weight: 700;
+  font-size: 28px;
 }
 </style>

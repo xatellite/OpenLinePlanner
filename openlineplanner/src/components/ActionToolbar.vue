@@ -13,7 +13,7 @@
         ><FileExportOutlineIcon
       /></TooltipButton>
     </div>
-    <TooltipButton toolTip="Check Line Infos" href="/analysis">
+    <TooltipButton toolTip="Timetable" href="/analysis">
       <BlurLinearIcon />
     </TooltipButton>
     <TooltipButton
@@ -353,6 +353,7 @@ export default {
   display: flex;
   align-items: center;
   padding: $space-ssm;
+  padding-top: 20px;
   justify-content: space-between;
   // background-color: $c-text-primary;
 
