@@ -1,7 +1,7 @@
 <template>
   <div class="line-list">
     <div class="line-list__center-box">
-      <h1 class="line-list__title">OpenLinePlanner</h1>
+      <h1 class="line-list__title"><img class="line-list__title_logo" src="@/assets/logo.svg"/>OpenLinePlanner</h1>
     </div>
     <hr />
     <div class="line-list__container">
@@ -74,7 +74,7 @@ export default {
   }
 
   &__container {
-    max-height: 300px;
+    max-height: 70vh;
     overflow-y: auto;
     background-color: darken($c-box, 2);
 
@@ -104,8 +104,18 @@ export default {
   }
 
   &__title {
-    padding: 0 $space-sm;
+    padding: 6px 26px 4px;
+    color: $c-accent-one;
+    font-family: "Poppins";
+    font-weight: 700;
+    font-size: 28px;
     margin: $space-ssm $space-ssm 0;
+  }
+
+  &__title_logo {
+    height: 36px;
+    vertical-align: middle;
+    padding-right: 10px;
   }
 
   hr {
@@ -115,13 +125,5 @@ export default {
     margin: 0;
     border-top: 1px solid rgba($c-text-primary, 0.2);
   }
-}
-
-.line-list__title {
-  padding: 6px 26px 4px;
-  color: $c-accent-one;
-  font-family: "Poppins";
-  font-weight: 700;
-  font-size: 28px;
 }
 </style>

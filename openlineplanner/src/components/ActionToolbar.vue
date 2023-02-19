@@ -352,8 +352,8 @@ export default {
 .action-toolbar {
   display: flex;
   align-items: center;
-  padding: $space-ssm;
-  padding-top: 20px;
+  padding: 0 $space-ssm;
+  padding-top: $space-sm;
   justify-content: space-between;
   // background-color: $c-text-primary;
 

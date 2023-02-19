@@ -1,15 +1,13 @@
 <template>
   <div class="line-element">
     <div class="line-element__data">
-      <TooltipButton :handler="toggleColorPick" toolTip="Change line color">
-        <IconLine :color="line.color" />
-      </TooltipButton>
       <TooltipButton
         toolTip="Toggle line options"
         :handler="toggleTypePicker"
       >
         <TypeIcon :type="line.type" />
       </TooltipButton>
+      <IconLine @click="toggleColorPick" :color="line.color" />
       <input
         v-if="editStore.isEditing == line"
         type="text"
