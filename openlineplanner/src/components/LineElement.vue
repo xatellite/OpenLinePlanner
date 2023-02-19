@@ -186,6 +186,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    color: $c-text-inverted;
     background-color: $c-accent-one;
     cursor: pointer;
     padding: $space-ssm $space-ssm;

@@ -1,8 +1,8 @@
 @import "@/assets/style/variables.scss";
 
 button, .button {
-  border: 1px solid $c-button-background;
-  background-color: darken($c-box, 2);
+  border: none;
+  background-color: none;
   border-radius: $br-md;
   height: 2.5rem;
   width: 2.5rem;

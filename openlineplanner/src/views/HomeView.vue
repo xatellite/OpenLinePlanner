@@ -1,6 +1,7 @@
 <template>
   <main>
     <InteractiveMap />
+    <GithubCorner/>
     <div class="main-menu-pane box">
       <LineList />
     </div>
@@ -11,6 +12,7 @@
 </template>
 
 <script>
+import GithubCorner from "@/components/GithubCorner.vue"
 import InteractiveMap from "@/components/InteractiveMap.vue";
 import PageFooter from "@/components/PageFooter.vue";
 import LineList from "@/components/LineList.vue";
@@ -19,6 +21,7 @@ import ViewSettings from "@/components/ViewSettings.vue";
 
 export default {
   components: {
+    GithubCorner,
     InteractiveMap,
     PageFooter,
     LineList,

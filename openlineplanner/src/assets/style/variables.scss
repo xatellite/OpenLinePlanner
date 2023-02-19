@@ -13,16 +13,17 @@ $font-ssm: $space-ssm;
 $c-text-primary: #303030;
 $c-button-background: #d6d6d6;
 $c-text-inverted: #ffffff;
-$c-accent-one: #FEC80B;
+$c-accent-one: #64ceaa;
 $c-accent-two: #CB2727;
 $c-box: #ffffff;
 $c-primary-light: rgba($c-text-primary, 0.2);
 
-$br-md: 10px;
+$br-md: 5px;
 
 $bs-md: 0px 4px 24px 0px rgba($c-text-primary, 0.4);
 
 h1 {
+  font-family: "Inter";
   font-size: $space-lg;
   font-weight: 700;
 }

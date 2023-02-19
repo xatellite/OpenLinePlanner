@@ -13,9 +13,9 @@
         ><FileExportOutlineIcon
       /></TooltipButton>
     </div>
-    <TooltipButton toolTip="Check Line Infos" href="/analysis">
-      <BlurLinearIcon />
-    </TooltipButton>
+    <TextButton href="/analysis">
+      Timetable
+    </TextButton>
     <TooltipButton
       v-if="
         (editStore.isEditing &&
@@ -32,6 +32,7 @@
 </template>
 
 <script>
+import TextButton from "./TextButton.vue"
 import TrayArrowDownIcon from "vue-material-design-icons/TrayArrowDown.vue";
 import BlurLinearIcon from "vue-material-design-icons/BlurLinear.vue";
 import FolderUploadOutlineIcon from "vue-material-design-icons/FolderUploadOutline.vue";
@@ -49,6 +50,7 @@ import TooltipButton from "./TooltipButton.vue";
 
 export default {
   components: {
+    TextButton,
     TrayArrowDownIcon,
     FolderUploadOutlineIcon,
     FileExportOutlineIcon,
@@ -353,6 +355,7 @@ export default {
   display: flex;
   align-items: center;
   padding: $space-ssm;
+  padding-top: 20px;
   justify-content: space-between;
   // background-color: $c-text-primary;
 
