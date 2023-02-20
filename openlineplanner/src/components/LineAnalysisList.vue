@@ -26,5 +26,6 @@ export default {
   display: flex;
   flex-direction: column;
   margin-bottom: $space-lg;
+  background-color: $c-button-background;
 }
 </style>
