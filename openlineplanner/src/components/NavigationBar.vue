@@ -1,7 +1,7 @@
 <template>
   <div class="navigation-bar">
     <router-link class="button" to="/">
-      <ArrowUpLeftBoldIcon />
+      <ArrowLeftIcon />
     </router-link>
     <div class="navigation-bar__title">
       <h1 class="navigation-bar__title-text"><img class="navigation-bar__title_logo" src="@/assets/logo.svg"/>OpenLinePlanner</h1>
@@ -12,10 +12,10 @@
 </template>
 
 <script>
-import ArrowUpLeftBoldIcon from "vue-material-design-icons/ArrowUpLeftBold.vue";
+import ArrowLeftIcon from "vue-material-design-icons/ArrowLeftBold.vue";
 export default {
   components: {
-    ArrowUpLeftBoldIcon,
+    ArrowLeftIcon,
   },
 };
 </script>
