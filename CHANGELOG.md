@@ -1,21 +1,4 @@
 ## Changelog
-
-### VX.X - Future Releases
-#### Added or Changed
-- [ ] Add Process flow for detail levels
-- [ ] Add track placing level
-- [ ] Add bike infrastructure analyse 
-
-### V1.0 - "Bringing it to market"
-
-#### Added or Changed
-- [ ] Add background data management
-- [ ] Fix automatic residence processing
-- [ ] Add data present markings
-- [ ] Rework UX (graphs, menus, etc.)
-- [ ] ? Request more areas button
-- [ ] Add commercial banner
-
 ### V0.6 - "More functionality"
 #### Added or Changed
 - [x] Add different transportation types
