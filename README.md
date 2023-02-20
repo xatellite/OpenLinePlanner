@@ -72,7 +72,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![OpenLinePlanner Screen Shot][product-screenshot]](https://openlineplanner.xatellite.io/)
+![OpenLinePlanner Screen Shot][product-screenshot]
 
 Its main purpose is to prototype public transport lines on the open field, analyse the station coverage and find the optimal station position.
 
