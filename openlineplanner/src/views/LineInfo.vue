@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="line-info">
     <NavigationBar />
     <LineAnalysisList />
     <PageFooter />
@@ -14,3 +14,9 @@ export default {
     components: { NavigationBar, PageFooter, LineAnalysisList }
 }
 </script>
+
+<style lang="scss">
+.line-info {
+  height: 100%;
+}
+</style>

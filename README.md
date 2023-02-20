@@ -135,10 +135,11 @@ Further adjustment dialogs are planned to be implemented if requested.
 
 ## Screenshots
 
-![OpenLinePlanner coverage area visualization][coverage-screenshot]
 ![OpenLinePlanner coverage area visualization][station-info-screenshot]
-![OpenLinePlanner coverage area visualization][distance-screenshot]
+![OpenLinePlanner coverage area visualization][coverage-screenshot]
+![OpenLinePlanner coverage area visualization][coverage-station-screenshot]
 ![OpenLinePlanner coverage area visualization][data-screenshot]
+![OpenLinePlanner coverage area visualization][timetable-screenshot]
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -267,8 +268,9 @@ This project was created as part of the interdisciplinary project of the master 
 [product-screenshot]: ./doc/images/plain.png
 [coverage-screenshot]: ./doc/images/coverage.png
 [station-info-screenshot]: ./doc/images/station_info.png
-[distance-screenshot]: ./doc/images/distances.png
+[coverage-station-screenshot]: ./doc/images/coverage_station.png
 [data-screenshot]: ./doc/images/data.png
+[timetable-screenshot]: ./doc/images/timetable.png
 
 [Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
 [Vue-url]: https://vuejs.org/

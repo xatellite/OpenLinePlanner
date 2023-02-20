@@ -34,6 +34,11 @@ html {
   color: $c-text-primary;
   box-sizing: border-box;
   font-size: $font-md;
+  height: 100%;
+}
+
+body {
+  height: 100%;
 }
 
 .box {
