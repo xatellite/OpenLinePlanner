@@ -11,7 +11,7 @@ export default class TransportLine {
     customAcceleration = 1.0,
     customStopTime = 20,
     customMaxSpeed = 60,
-    customCoverage = 300,
+    customCoverage = 400,
     lineThickness = 5
   ) {
     this.id = id;

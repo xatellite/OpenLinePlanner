@@ -189,6 +189,7 @@ export default {
   justify-content: center;
   flex-direction: column;
   padding: $space-ssm;
+  z-index: 4;
 
   &__title {
     font-size: $font-lg;

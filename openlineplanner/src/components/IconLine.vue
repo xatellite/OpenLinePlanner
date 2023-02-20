@@ -1,16 +1,15 @@
 <template>
   <svg
-    width="20"
-    height="18"
+    class="icon-color"
+    width="25"
+    height="25"
     viewBox="0 0 20 18"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path
-      d="M2 16L4.16958 9.76245C5.07039 7.17264 8.24288 6.2253 10.4163 7.89712V7.89712C11.5734 8.78726 13.2303 8.58718 14.1423 7.44716L18.5 2"
-      :stroke="color"
-      stroke-width="3"
-      stroke-linecap="round"
+    <circle
+      cx="10" cy="8" r="8"
+      :fill="color"
     />
   </svg>
 </template>
@@ -22,3 +21,17 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" scoped>
+.icon-color {
+  padding: 0 8px;
+  :hover {
+    cursor: pointer;
+  }
+  circle:hover {
+    stroke-width: 2px;
+    stroke: $c-accent-one;
+  }
+}
+
+</style>

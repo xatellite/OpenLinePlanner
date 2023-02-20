@@ -200,6 +200,7 @@ export default {
   margin: $space-md $space-sm;
   border-radius: $br-md;
   border: 1px solid rgba($c-text-primary, 0.2);
+  background-color: $c-box;
 
   &__title {
     padding: $space-sm $space-sm 0;

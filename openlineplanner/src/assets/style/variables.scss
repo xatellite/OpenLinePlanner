@@ -10,11 +10,12 @@ $font-md: 16px;
 $font-sm: 12px;
 $font-ssm: $space-ssm;
 
-$c-text-primary: #303030;
-$c-button-background: #d6d6d6;
+$c-text-primary: #464646;
+$c-button-background: #f5f5f5;
+$c-button-border: #d6d6d6;
 $c-text-inverted: #ffffff;
-$c-accent-one: #FEC80B;
-$c-accent-two: #CB2727;
+$c-accent-one: #464646;
+$c-accent-two: #1B998B;
 $c-box: #ffffff;
 $c-primary-light: rgba($c-text-primary, 0.2);
 
@@ -23,15 +24,21 @@ $br-md: 10px;
 $bs-md: 0px 4px 24px 0px rgba($c-text-primary, 0.4);
 
 h1 {
+  font-family: "Poppins";
   font-size: $space-lg;
   font-weight: 700;
 }
 
 html {
-  font-family: 'Roboto';
+  font-family: 'Poppins';
   color: $c-text-primary;
   box-sizing: border-box;
   font-size: $font-md;
+  height: 100%;
+}
+
+body {
+  height: 100%;
 }
 
 .box {

@@ -157,6 +157,7 @@ export default {
   @media (max-width: 700px), (max-height: 600px) {
     top: $space-sm;
     bottom: auto;
+    left: $space-sm;
   }
 
   &--extended {

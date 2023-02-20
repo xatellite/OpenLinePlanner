@@ -1,19 +1,12 @@
 ## Changelog
-
-### VX.X - Future Releases
-#### Added or Changed
-- [ ] Add background data management
-- [ ] Add custom profiles
-- [ ] Add commercial banner
-- [ ] Mobile version?
-- [ ] ? Optimize for large scale networks
-
 ### V0.6 - "More functionality"
 #### Added or Changed
-- [ ] Fix automatic residence processing
-- [ ] Add data present markings
-- [ ] ? Request more areas button
-- [ ] Add different transportation types
+- [x] Add different transportation types
+- [x] Mobile version
+- [x] Add custom profiles
+- [x] Rewrite Backend in Rust
+- [x] Adding real walking distance calculation
+- [x] Starting UX overhaul
 ### V0.5 - "Make it public"
 #### Added or Changed
 

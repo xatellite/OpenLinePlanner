@@ -55,21 +55,20 @@ export const useOverlayStore = defineStore({
     loadCoverage() {
       const linesStore = useLinesStore();
       const paxStore = usePaxStore();
-      const stations =
-        linesStore.getPoints
-          .filter((point) => point.type === "station")
-          .map((station) => ({
-            location: {
-              y: station.lat,
-              x: station.lng,
-            },
-            id: station.id,
-            coverage: Math.max(
-              ...station.lines.map((lineId) =>
-                linesStore.getLineById(lineId).getCoverage()
-              )
-            ),
-          }));
+      const stations = linesStore.getPoints
+        .filter((point) => point.type === "station")
+        .map((station) => ({
+          location: {
+            y: station.lat,
+            x: station.lng,
+          },
+          id: station.id,
+          coverage: Math.max(
+            ...station.lines.map((lineId) =>
+              linesStore.getLineById(lineId).getCoverage()
+            )
+          ),
+        }));
       // cancel request if duplicate exists
       if (this.currentRequestController != null) {
         this.currentRequestController.abort();
@@ -84,14 +83,19 @@ export const useOverlayStore = defineStore({
           stations
         );
       }
-      fetch(import.meta.env.VITE_API_ENDPOINT + "/coverage-info/" + paxStore.routingMethod, {
-        method: "POST",
-        body: JSON.stringify(stations),
-        headers: {
-          "Content-type": "application/json",
-        },
-        signal: abortSignal,
-      })
+      fetch(
+        import.meta.env.VITE_API_ENDPOINT +
+          "/coverage-info/" +
+          paxStore.routingMethod,
+        {
+          method: "POST",
+          body: JSON.stringify(stations),
+          headers: {
+            "Content-type": "application/json",
+          },
+          signal: abortSignal,
+        }
+      )
         .then((data) => data.json())
         .then((overlayData) => {
           const distanceColors = [

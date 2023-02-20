@@ -24,7 +24,7 @@
   <h2 align="center">OpenLinePlanner</h3>
 
   <p align="center">
-    Great tool to prototype public transport networks
+    Fast and Easy public transport network prototyping
     <br />
     <a href="https://openlineplanner.xatellite.io/"><strong>Check out the Demo »</strong></a>
     <br />
@@ -72,7 +72,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![OpenLinePlanner Screen Shot][product-screenshot]](https://openlineplanner.xatellite.io/)
+![OpenLinePlanner Screen Shot][product-screenshot]
 
 Its main purpose is to prototype public transport lines on the open field, analyse the station coverage and find the optimal station position.
 
@@ -90,7 +90,7 @@ This project was build with:
 
 [![Vue][Vue.js]][Vue-url]
 [![Vite][Vite]][Vite-url]
-[![Falcon][Falcon]][Falcon-url]
+[![Rust][Rust]][Rust-url]
 [![Matomo][Matomo]][Matomo-url]
 
 And deployed with:
@@ -135,10 +135,11 @@ Further adjustment dialogs are planned to be implemented if requested.
 
 ## Screenshots
 
-![OpenLinePlanner coverage area visualization][coverage-screenshot]
 ![OpenLinePlanner coverage area visualization][station-info-screenshot]
-![OpenLinePlanner coverage area visualization][distance-screenshot]
+![OpenLinePlanner coverage area visualization][coverage-screenshot]
+![OpenLinePlanner coverage area visualization][coverage-station-screenshot]
 ![OpenLinePlanner coverage area visualization][data-screenshot]
+![OpenLinePlanner coverage area visualization][timetable-screenshot]
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -154,19 +155,32 @@ This is a short guide to setup your own development environment of OpenLinePlann
 
 ### Backend Setup
 
-All dependencies are stated in requirement file.
-The following example uses gunicorn to start a dev-server.
+The backend can be build running
 
-2. Install all pip packages
+2. Build backend
     ```sh
-    $ cd openlineplanner_backend
-    $ pip install -r requirements.txt
+    $ cd openlineplanner-backend
+    $ cargo build --release
     ```
 
-3. Start gunicorn server
-   ```js
-    $ gunicorn server
+3. Gather data files from [OpenPopulationEstimator](https://github.com/TheNewCivilian/OpenPopulationEstimator) (inhabitants geojson) and e.g. [Protomaps](https://app.protomaps.com/downloads/osm) (pbf file of region)
+
+7. Add ./settings/Settings.toml e.g.
+   ```toml
+    [data]
+    residence = "./data/residence.geojson"
+    osm = "./data/Wien_Donaustadt.osm.pbf"
    ```
+  
+8. Install backend binaries
+    ```sh
+    $ cargo install --path .
+    ```
+9. Startup Backend (Takes some minutes on first startup)
+    ```sh
+    $ openlineplanner-backend
+    ```
+
 ### Frontend Setup
 All environment variables are automatically loaded by VITE from the available .env files. If you need to adjust ports or endpoints check these files.
 
@@ -211,14 +225,15 @@ Distributed under the GNU GPL V3 License. See `LICENSE.txt` for more information
 
 <!-- CONTACT -->
 ## Contact
-
-TheNewCivilian - [openlineplanner@xatellite.io](mailto:openlineplanner@xatellite.io) 
+Email: [openlineplanner@xatellite.io](mailto:openlineplanner@xatellite.io) 
 
 Project Link: [https://github.com/TheNewCivilian/OpenLinePlanner](https://github.com/TheNewCivilian/OpenLinePlanner)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
+## Contributors
 
+[TheNewCivilian](https://github.com/TheNewCivilian), [zdmx](https://github.com/zandemax)
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
@@ -253,17 +268,19 @@ This project was created as part of the interdisciplinary project of the master 
 [product-screenshot]: ./doc/images/plain.png
 [coverage-screenshot]: ./doc/images/coverage.png
 [station-info-screenshot]: ./doc/images/station_info.png
-[distance-screenshot]: ./doc/images/distances.png
+[coverage-station-screenshot]: ./doc/images/coverage_station.png
 [data-screenshot]: ./doc/images/data.png
+[timetable-screenshot]: ./doc/images/timetable.png
 
 [Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
 [Vue-url]: https://vuejs.org/
 [Vite]: https://img.shields.io/badge/Vite-35495E?style=for-the-badge&logo=Vite&logoColor=646CFF
 [Vite-url]: https://vitejs.dev/
-[Falcon]: https://img.shields.io/badge/Falcon-35495E?style=for-the-badge&logo=Falcon&logoColor=F0AD4E
-[Falcon-url]: https://falconframework.org/
 [Docker]: https://img.shields.io/badge/Docker-35495E?style=for-the-badge&logo=Docker&logoColor=2496ED
 [Docker-url]: https://www.docker.com/
+[Rust]: https://img.shields.io/badge/Rust-35495E?style=for-the-badge&logo=Rust&logoColor=000000
+[Rust-url]: https://www.rust-lang.org/
+
 
 [Matomo]: https://img.shields.io/badge/Matomo-35495E?style=for-the-badge&logo=Matomo&logoColor=3152A0
 [Matomo-url]: https://matomo.org/

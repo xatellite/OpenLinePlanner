@@ -1,8 +1,8 @@
 @import "@/assets/style/variables.scss";
 
 button, .button {
-  border: 1px solid $c-button-background;
-  background-color: darken($c-box, 2);
+  border: 1px solid $c-button-border;
+  background-color: $c-button-background;
   border-radius: $br-md;
   height: 2.5rem;
   width: 2.5rem;
@@ -14,11 +14,11 @@ button, .button {
   color: $c-text-primary;
 
   &:hover {
-    background-color: darken($c-box, 4);
+    background-color: darken($c-button-background, 4);
   }
 
   &:active {
-    background-color: darken($c-box, 8);
+    background-color: darken($c-button-background, 8);
   }
 }
 
@@ -118,8 +118,8 @@ select::-ms-expand {
 
 .tooltip {
   position: fixed;
-  background-color: $c-box;
-  color: $c-text-primary;
+  background-color: $c-text-primary;
+  color: $c-box;
   border-radius: $br-md;
   padding: $space-ssm;
   font-size: $font-sm;

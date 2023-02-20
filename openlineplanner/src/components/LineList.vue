@@ -1,12 +1,7 @@
 <template>
   <div class="line-list">
     <div class="line-list__center-box">
-      <h1 class="line-list__title">Open-Line-Planner</h1>
-      <a
-        class="line-list__subtitle"
-        href="https://github.com/TheNewCivilian/OpenLinePlanner"
-        >Contribute on Github</a
-      >
+      <h1 class="line-list__title"><img class="line-list__title_logo" src="@/assets/logo.svg"/>OpenLinePlanner</h1>
     </div>
     <hr />
     <div class="line-list__container">
@@ -17,12 +12,11 @@
       >
         <LineElement :line="line" />
       </div>
-    </div>
-
-    <div class="line-list__item__row">
-      <button @click="addLine"><PlusIcon /></button>
-      <span class="grow">Add new Line</span>
-      <div />
+      <div class="line-list__item line-list__item__row">
+        <button @click="addLine"><PlusIcon /></button>
+        <span class="grow">Add new Line</span>
+        <div />
+      </div>
     </div>
     <hr />
     <ActionToolbar />
@@ -65,7 +59,7 @@ export default {
 
 <style lang="scss">
 .line-list {
-  margin: 0 $space-sm;
+  // margin: 0 $space-sm;
   padding-bottom: $space-sm;
 
   @media (max-width: 700px), (max-height: 600px) {
@@ -76,11 +70,13 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: $space-sm;
   }
 
   &__container {
-    max-height: 300px;
+    max-height: 70vh;
     overflow-y: auto;
+    background-color: darken($c-box, 2);
 
     @media (max-width: 700px), (max-height: 600px) {
       max-height: none;
@@ -88,6 +84,11 @@ export default {
   }
 
   &__item {
+    background-color: $c-box;
+    margin: $space-sm;
+    border: 1px solid $c-button-border;
+    border-radius: $br-md;
+    overflow: hidden;
     &__row {
       display: flex;
       align-items: center;
@@ -99,18 +100,29 @@ export default {
       }
     }
     margin-bottom: $space-ssm;
-    border-bottom: 1px solid rgba($c-text-primary, 0.2);
+    // border-bottom: 1px solid rgba($c-text-primary, 0.2);
   }
 
   &__title {
-    padding: 0 $space-sm;
+    padding: 6px 26px 4px;
+    color: $c-accent-one;
+    font-family: "Poppins";
+    font-weight: 700;
+    font-size: 28px;
     margin: $space-ssm $space-ssm 0;
+  }
+
+  &__title_logo {
+    height: 36px;
+    vertical-align: middle;
+    padding-right: 10px;
   }
 
   hr {
     color: $c-text-primary;
     height: 0px;
     border: none;
+    margin: 0;
     border-top: 1px solid rgba($c-text-primary, 0.2);
   }
 }
