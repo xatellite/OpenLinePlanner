@@ -1,6 +1,7 @@
 @import "@/assets/style/variables.scss";
 
 button, .button {
+  font-family: "Poppins";
   border: 1px solid $c-button-border;
   background-color: $c-button-background;
   border-radius: $br-md;

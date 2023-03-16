@@ -101,13 +101,16 @@ export default {
   }
 
   .mobile-nav {
-    display: flex;
+    display: none;
     font-weight: bold;
     cursor: pointer;
     font-size: $font-md;
     background-color: transparent;
     width: auto;
     border: none;
+    @media (max-width: 700px), (max-height: 600px) {
+      display: flex;
+    }
   }
 
   &__navigation {
