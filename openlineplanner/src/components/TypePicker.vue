@@ -1,5 +1,5 @@
 <template>
-  <div id="type-picker" class="box--desktop type-picker">
+  <div id="type-picker" class="box type-picker">
     <div class="type-picker__base">
       <span class="type-picker__title"
         >Select type of line: <b>{{ line.name }}</b></span

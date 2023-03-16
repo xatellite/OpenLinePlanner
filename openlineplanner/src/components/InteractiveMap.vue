@@ -518,7 +518,12 @@ export default {
   height: 100%;
   width: 100%;
   border: 1px solid $c-button-border;
-  border-radius: $br-md; 
+  border-radius: $br-md;
+  overflow: hidden;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    min-height: 550px;
+  }
 }
 
 .print {
