@@ -195,7 +195,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .line-analysis {
   margin: $space-md $space-sm;
   border-radius: $br-md;

@@ -215,8 +215,9 @@ $themeColor: $c-text-primary;
 
 .type-picker {
   position: absolute;
-  top: 0;
-  left: 100%;
+  font-size: $font-md;
+  top: $space-sm;
+  left: 0;
   z-index: 100;
   margin: 0 $space-sm;
 
@@ -234,10 +235,12 @@ $themeColor: $c-text-primary;
 
   &__options {
     display: flex;
+    gap: $space-sm;
+    justify-content: space-between;
   }
 
   &__title {
-    margin: $space-ssm;
+    margin: $space-ssm 0;
   }
   &__sliders {
     padding: $space-sm $space-sm;

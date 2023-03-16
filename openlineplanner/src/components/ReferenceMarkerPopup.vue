@@ -95,7 +95,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .ref-marker-popup {
   width: 240px;
   padding: $space-sm $space-sm $space-sm $space-sm;

@@ -63,10 +63,11 @@ export default {
 <style lang="scss" scoped>
 .color-picker {
   position: absolute;
-  top: 0;
-  left: 100%;
-  margin: 0 $space-sm;
+  font-size: $font-md;
+  top: $space-sm;
+  left: 0;
   z-index: 100;
+  margin: 0 $space-sm;
 
   @media (max-width: 700px), (max-height: 600px) {
     position: relative;

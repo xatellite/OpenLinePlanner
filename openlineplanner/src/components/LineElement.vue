@@ -21,7 +21,7 @@
         toolTip="Remove line (permanent)"
         :handler="removeLine"
       >
-        <span class="line-element__remove"><TrashCanOutlineIcon /></span>
+        <span class="remove"><TrashCanOutlineIcon /></span>
       </TooltipButton>
       <TooltipButton
         v-if="editStore.isEditing != line"
@@ -33,18 +33,34 @@
           <PencilOutlineIcon />
         </span>
       </TooltipButton>
+
+      <TooltipButton
+        v-if="
+          (editStore.isEditing == line &&
+            linesStore.lines[line.id].pointIds.length > 1) ||
+          findStationLoading
+        "
+        :handler="findStation"
+        toolTip="Automatically find ideal station"
+      >
+        <LoadingIcon v-if="findStationLoading" class="loader" />
+        <BusStopIcon v-else />
+      </TooltipButton>
     </div>
-    <ColorPicker
-      v-if="selectColor && selectType == false && editStore.isEditing == line"
-      :initColor="line.color"
-      :handleColorChange="updateColor"
-      :closeAction="toggleColorPick"
-    />
-    <TypePicker
-      v-if="selectType && selectColor == false && editStore.isEditing == line"
-      :line="line"
-      :closeAction="toggleTypePicker"
-    />
+    <Teleport to="#map" v-if="editStore.isEditing == line && (selectColor || selectType)">
+      <ColorPicker
+        v-if="selectColor && selectType == false"
+        :initColor="line.color"
+        :handleColorChange="updateColor"
+        :closeAction="toggleColorPick"
+      />
+      <TypePicker
+        v-if="selectType && selectColor == false"
+        :line="line"
+        :closeAction="toggleTypePicker"
+      />
+    </Teleport>
+
     <div
       class="line-element__warning"
       v-if="editStore.isEditing === line"
@@ -61,6 +77,8 @@
 <script>
 import PencilOutlineIcon from "vue-material-design-icons/PencilOutline.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
+import BusStopIcon from "vue-material-design-icons/BusStop.vue";
+import LoadingIcon from "vue-material-design-icons/Loading.vue";
 import TooltipButton from "./TooltipButton.vue";
 import IconLine from "./IconLine.vue";
 import { useLinesStore } from "../stores/lines";
@@ -76,7 +94,9 @@ export default {
   },
   components: {
     IconLine,
+    LoadingIcon,
     PencilOutlineIcon,
+    BusStopIcon,
     ColorPicker,
     TooltipButton,
     TypePicker,
@@ -90,6 +110,7 @@ export default {
       paxStore: usePaxStore(),
       selectColor: false,
       selectType: false,
+      findStationLoading: false,
     };
   },
   mounted() {
@@ -167,11 +188,78 @@ export default {
       this.editStore.isExtending = null;
       this.linesStore.removeLine(this.line);
     },
+    findStation() {
+      // Matomo Tracking
+      if (window && window.Piwik) {
+        window.Piwik.getTracker().trackEvent("editing", "findStation");
+      }
+      if (!this.findStationLoading) {
+        this.findStationLoading = true;
+        const route = [];
+        const stations = [];
+        const points = Object.values(this.linesStore.points);
+        if (points.length <= 0) {
+          return;
+        }
+        // ToDo: Add max coverage
+        points.forEach((point) => {
+          if (point.type === "station") {
+            stations.push({
+              location: {
+                y: point.lat,
+                x: point.lng,
+              },
+              id: point.id,
+              // Add max coverage
+              coverage: Math.max(
+                ...point.lines.map((lineId) =>
+                  this.linesStore.getLineById(lineId).getCoverage()
+                )
+              ),
+            });
+          }
+        });
+        this.linesStore
+          .getLineById(this.line.id)
+          .pointIds.forEach((pointRef) => {
+            const point = this.linesStore.getPointById(pointRef);
+            route.push({
+              y: point.lat,
+              x: point.lng,
+            });
+          });
+        fetch(import.meta.env.VITE_API_ENDPOINT + "/find-station", {
+          method: "POST",
+          body: JSON.stringify({
+            route,
+            stations,
+            coverage: this.editStore.isEditing.getCoverage(),
+            method: this.paxStore.calculationMethod,
+          }),
+          headers: {
+            "Content-type": "application/json",
+          },
+        })
+          .then((data) => data.json())
+          .then((stationProposal) => {
+            const newPoint = this.linesStore.addPoint(
+              stationProposal.location.y,
+              stationProposal.location.x,
+              this.line,
+              stationProposal.index
+            );
+            newPoint.type = "station";
+          })
+          .finally(() => {
+            this.findStationLoading = false;
+          });
+      }
+    },
   },
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .line-element {
   display: flex;
   flex-direction: column;
@@ -180,6 +268,7 @@ export default {
     display: flex;
     align-items: center;
     padding: $space-ssm $space-ssm;
+    gap: $space-ssm;
 
     &:hover {
       .line-element__edit {
@@ -219,10 +308,6 @@ export default {
   .grow {
     flex-grow: 1;
     padding: $space-ssm;
-  }
-
-  &__remove {
-    color: red;
   }
 
   &__edit {

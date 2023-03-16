@@ -1,8 +1,8 @@
 <template>
   <div class="footer">
-    <span>This tool was created as part of the interdisciplinary project  of the master class Rail Technology and Management of Railway Systems @FH-St.Pölten</span>
-    <span class="footer__center">V0.6</span>
-    <span class="footer__right">Map by ©Mapbox ©OpenStreetMap</span>
+    <span>OpenLinePlanner is a product for all!</span>
+    <span class="footer__center">V0.7-00</span>
+    <span class="footer__right">Launched by @xatellite, Supported by FH St. Pölten</span>
   </div>
 </template>
 
@@ -10,11 +10,8 @@
 export default {};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .footer {
-  position: fixed;
-  bottom: 0;
-  z-index: 100;
   background: $c-text-primary;
   color: $c-text-inverted;
   font-size: $space-sm;

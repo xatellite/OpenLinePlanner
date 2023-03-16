@@ -77,14 +77,14 @@
         </template>
       </ToggleButton>
     </div>
-    <CogOutlineIcon v-else class="view-settings__icon" />
+    <LayersOutlineIcon v-else class="view-settings__icon" />
   </div>
 </template>
 
 <script>
-import CogOutlineIcon from "vue-material-design-icons/CogOutline.vue";
+import LayersOutlineIcon from "vue-material-design-icons/LayersOutline.vue";
 import BullseyeIcon from "vue-material-design-icons/Bullseye.vue";
-import MapMarkerDistanceIcon from "vue-material-design-icons/MapMarkerDistance.vue"
+import MapMarkerDistanceIcon from "vue-material-design-icons/MapMarkerDistance.vue";
 import MapIcon from "vue-material-design-icons/Map.vue"
 import CheckboxBlankCircleIcon from "vue-material-design-icons/CheckboxBlankCircle.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
@@ -98,7 +98,7 @@ import CoverageSelect from "./CoverageSelect.vue";
 
 export default {
   components: {
-    CogOutlineIcon,
+    LayersOutlineIcon,
     OverlaySelect,
     ToggleButton,
     BusStopIcon,
@@ -142,14 +142,15 @@ export default {
 .view-settings {
   position: absolute;
   z-index: 10;
-  bottom: $space-slg;
-  right: $space-md;
+  bottom: $space-md;
+  right: $space-sm;
   padding: $space-sm $space-sm;
   max-width: $space-md;
   max-height: $space-md;
   background-color: $c-box;
   border-radius: $br-md;
   box-shadow: $bs-md;
+  font-size: $font-md;
   cursor: pointer;
 
   transition: max-height 0.4s linear;

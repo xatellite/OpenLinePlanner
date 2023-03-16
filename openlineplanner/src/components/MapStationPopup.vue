@@ -25,7 +25,7 @@
         >
           <PlusIcon />
         </TooltipButton>
-        <button class="trash" @click="removePoint">
+        <button class="remove" @click="removePoint">
           <TrashCanOutlineIcon />
         </button>
       </div>
@@ -210,6 +210,7 @@ export default {
   &__actions {
     display: flex;
     align-items: center;
+    gap: $space-ssm;
   }
 
   &__lazy {
@@ -241,9 +242,5 @@ export default {
       animation: infinite-blur-change 1s linear infinite;
     }
   }
-}
-
-.trash {
-  color: red;
 }
 </style>

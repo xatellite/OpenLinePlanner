@@ -1,32 +1,31 @@
 <template>
   <div class="line-analysis-list">
-    <LineAnalysisEntry
-      v-for="(line, index) in lineStore.lines"
-      :line="line"
-      :key="`${index}-line`"
-    />
+    <ListContainer title="Planned Lines">
+      <LineAnalysisEntry
+        v-for="(line, index) in lineStore.lines"
+        :line="line"
+        :key="`${index}-line`"
+      />
+    </ListContainer>
   </div>
 </template>
 
 <script>
 import { useLinesStore } from "../stores/lines";
 import LineAnalysisEntry from "./LineAnalysisEntry.vue";
+import ListContainer from "./ListContainer.vue";
 export default {
   data() {
     return {
       lineStore: useLinesStore(),
     };
   },
-  components: { LineAnalysisEntry },
+  components: { LineAnalysisEntry, ListContainer },
 };
 </script>
 
 <style lang="scss" scoped>
 .line-analysis-list {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: $space-lg;
-  height: 100%;
-  background-color: $c-button-background;
+  flex-grow: 1;
 }
 </style>

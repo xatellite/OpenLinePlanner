@@ -101,6 +101,7 @@ export default {
   height: fit-content;
   align-items: center;
   justify-content: center;
+  gap: $space-ssm;
 }
 
 .trash {

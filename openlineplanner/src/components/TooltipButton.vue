@@ -59,6 +59,7 @@ export default {
     button {
       background-color: $c-text-primary;
       color: $c-text-inverted;
+      border: none;
 
       &:hover {
         background-color: lighten($c-text-primary, 8);

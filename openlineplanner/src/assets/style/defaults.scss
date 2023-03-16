@@ -9,7 +9,6 @@ button, .button {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 $space-ssm;
   cursor: pointer;
   color: $c-text-primary;
 
@@ -20,6 +19,26 @@ button, .button {
   &:active {
     background-color: darken($c-button-background, 8);
   }
+}
+
+main {
+  display: flex;
+  box-sizing: border-box;
+  padding: 0 $space-sm $space-sm;
+  flex-grow: 1;
+  gap: $space-sm;
+  max-height: 100%;
+
+  @media (max-width: 700px), (max-height: 600px) {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.material-design-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 input[type="number"] {
@@ -114,6 +133,18 @@ select::-ms-expand {
       border-right: 1px solid #696969;
     }
   }
+}
+
+.station {
+  border-radius: 100%;
+  border: 2px solid $c-text-primary;
+  background-color: $c-box;
+  width: 15px;
+  height: 15px;
+}
+
+.remove {
+  color: red;
 }
 
 .tooltip {

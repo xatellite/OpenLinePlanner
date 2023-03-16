@@ -1,10 +1,6 @@
 <template>
   <div class="line-list">
-    <div class="line-list__center-box">
-      <h1 class="line-list__title"><img class="line-list__title_logo" src="@/assets/logo.svg"/>OpenLinePlanner</h1>
-    </div>
-    <hr />
-    <div class="line-list__container">
+    <ListContainer title="Planned Lines">
       <div
         class="line-list__item"
         v-for="line in linesStore.lines"
@@ -17,9 +13,7 @@
         <span class="grow">Add new Line</span>
         <div />
       </div>
-    </div>
-    <hr />
-    <ActionToolbar />
+    </ListContainer>
   </div>
 </template>
 
@@ -28,15 +22,15 @@ import PlusIcon from "vue-material-design-icons/Plus.vue";
 
 import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
-import ActionToolbar from "./ActionToolbar.vue";
 import LineElement from "./LineElement.vue";
+import ListContainer from "./ListContainer.vue";
 
 export default {
   components: {
     PlusIcon,
-    ActionToolbar,
     LineElement,
-  },
+    ListContainer,
+},
   data() {
     return {
       linesStore: useLinesStore(),
@@ -57,11 +51,11 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .line-list {
-  // margin: 0 $space-sm;
-  padding-bottom: $space-sm;
-
+  height: 100%;
+  width: 30%;
+  min-width: 320px;
   @media (max-width: 700px), (max-height: 600px) {
     width: 100%;
   }

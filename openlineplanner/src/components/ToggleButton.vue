@@ -51,7 +51,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .toggle-button {
   @extend button;
   position: relative;

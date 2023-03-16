@@ -1,5 +1,7 @@
 <template>
-  <div id="map" class="map" />
+  <div id="map" class="map">
+    <ViewSettings />
+  </div>
 </template>
 
 <script>
@@ -16,8 +18,10 @@ import { useOverlayStore } from "../stores/overlay";
 import html2canvas from "html2canvas";
 import ReferenceMarker from "./ReferenceMarker.vue";
 import router from "../router";
+import ViewSettings from './ViewSettings.vue';
 
 export default {
+  components: { ViewSettings },
   setup() {
     const editStore = useEditStore();
     const linesStore = useLinesStore();
@@ -125,7 +129,7 @@ export default {
           this.updateLine(result);
         });
       }
-      if (name === "loadState") {
+      if (name === "loadState") { 
         after(() => {
           this.loadState();
         });
@@ -508,11 +512,13 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .map {
   position: relative;
-  height: calc(100vh);
-
+  height: 100%;
+  width: 100%;
+  border: 1px solid $c-button-border;
+  border-radius: $br-md; 
 }
 
 .print {

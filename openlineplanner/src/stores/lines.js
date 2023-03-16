@@ -7,6 +7,7 @@ import { usePaxStore } from "./pax";
 export const useLinesStore = defineStore({
   id: "lines",
   state: () => ({
+    projectName: "MyProject",
     lines: {},
     parallels: [], // { points:, count: }
     points: {},
@@ -164,6 +165,7 @@ export const useLinesStore = defineStore({
 
       this.lineIdCounter = savedState.lineIdCounter;
       this.parallels = savedState.parallels;
+      this.projectName = savedState.projectName;
     },
     /*
      * Check if a parallel exists with the new merged point.

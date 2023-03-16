@@ -153,7 +153,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .map-marker {
   border: 10px solid transparent;
   border-radius: 100%;
@@ -177,14 +177,6 @@ export default {
     border-radius: $br-md;
     z-index: 3;
   }
-}
-
-.station {
-  border-radius: 100%;
-  border: 2px solid $c-text-primary;
-  background-color: $c-box;
-  width: 15px;
-  height: 15px;
 }
 
 .line {
