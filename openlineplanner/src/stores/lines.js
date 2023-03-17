@@ -7,7 +7,7 @@ import { usePaxStore } from "./pax";
 export const useLinesStore = defineStore({
   id: "lines",
   state: () => ({
-    projectName: "MyProject",
+    projectName: "New Project",
     lines: {},
     parallels: [], // { points:, count: }
     points: {},

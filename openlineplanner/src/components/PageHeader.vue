@@ -9,13 +9,16 @@
     </button>
     <nav :class="`page-header__navigation ${menuActive ? 'active' : ''}`">
       <router-link to="/" class="page-header__navigation__item"
+        >Project</router-link
+      >
+      <router-link to="/data" class="page-header__navigation__item"
+        >Data</router-link
+      >
+      <router-link to="/planning" class="page-header__navigation__item"
         >Planning</router-link
       >
       <router-link to="/timetable" class="page-header__navigation__item"
         >Timetable</router-link
-      >
-      <router-link to="/project" class="page-header__navigation__item"
-        >Project</router-link
       >
     </nav>
     <GithubCorner />
