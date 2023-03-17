@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{web, http, App, HttpServer, Responder};
+use actix_web::{http, web, App, HttpServer, Responder};
 use anyhow::Result;
 use config::Config;
 use geo::Point;
@@ -108,18 +108,18 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         let cors = Cors::default()
-              .allowed_origin("https://openlineplanner.xatellite.io")
-              .allowed_origin("http://localhost:3000")
-              .allowed_origin_fn(|origin, _req_head| {
-                  origin.as_bytes().ends_with(b".openlineplanner.xatellite.io")
-              })
-              .allowed_origin_fn(|origin, _req_head| {
-                origin.as_bytes().ends_with(b"localhost:3000")
-              })
-              .allowed_methods(vec!["GET", "POST"])
-              .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
-              .allowed_header(http::header::CONTENT_TYPE)
-              .max_age(3600);
+            .allowed_origin("https://openlineplanner.xatellite.io")
+            .allowed_origin("http://localhost:3000")
+            .allowed_origin_fn(|origin, _req_head| {
+                origin
+                    .as_bytes()
+                    .ends_with(b".openlineplanner.xatellite.io")
+            })
+            .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b"localhost:3000"))
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
+            .allowed_header(http::header::CONTENT_TYPE)
+            .max_age(3600);
 
         App::new()
             .wrap(cors)
@@ -148,7 +148,6 @@ fn setup_logger() -> Result<()> {
         })
         .level(log::LevelFilter::Debug)
         .chain(std::io::stdout())
-        .chain(fern::log_file("log/output.log")?)
         .apply()?;
     Ok(())
 }

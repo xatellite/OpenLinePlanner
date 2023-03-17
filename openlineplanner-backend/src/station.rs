@@ -10,7 +10,7 @@ use crate::{
     coverage::StationCoverageInfo,
     coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
     datalayer::House,
-    geometry::DensifyHaversine,
+    geometry::{DensifyHaversine, OsmHouseDistanceCalculator},
 };
 
 static DEFAULT_COVERAGE: f64 = 300f64;
@@ -61,7 +61,13 @@ pub fn find_optimal_station(
         .points()
         .max_by_key(|point| {
             StationCoverageInfo::from_houses_with_method(
-                get_houses_in_coverage(&point, coverage, &leftover_houses, &others),
+                get_houses_in_coverage(
+                    &point,
+                    coverage,
+                    &leftover_houses,
+                    OsmHouseDistanceCalculator::new(nodes, streetgraph),
+                    &others,
+                ),
                 method,
             )
             .inhabitants

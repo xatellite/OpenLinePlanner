@@ -1,4 +1,11 @@
-use geo::{CoordFloat, HaversineLength, Line, LineInterpolatePoint, LineString, Point};
+use geo::{
+    CoordFloat, HaversineDistance, HaversineLength, Line, LineInterpolatePoint, LineString, Point,
+};
+
+use crate::datalayer::House;
+use osmpbfreader::NodeId;
+use petgraph::{algo::dijkstra, prelude::UnGraphMap};
+use std::collections::HashMap;
 
 pub trait DensifyHaversine<F: CoordFloat> {
     type Output;
@@ -44,5 +51,59 @@ where
         // we're done, push the last coordinate on to finish
         new_line.push(self.points().last().unwrap());
         LineString::from(new_line)
+    }
+}
+
+pub trait HouseDistanceCalculator {
+    fn distance(&self, a: &House, b: &Point) -> f64;
+}
+
+pub struct HaversineHouseDistanceCalculator;
+
+impl HouseDistanceCalculator for HaversineHouseDistanceCalculator {
+    fn distance(&self, a: &House, b: &Point) -> f64 {
+        a.haversine_distance(b)
+    }
+}
+
+impl HaversineHouseDistanceCalculator {
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+pub struct OsmHouseDistanceCalculator<'a> {
+    nodes: &'a HashMap<NodeId, Point>,
+    osm_streetgraph: &'a UnGraphMap<NodeId, f64>,
+}
+
+impl<'a> HouseDistanceCalculator for OsmHouseDistanceCalculator<'a> {
+    fn distance(&self, a: &House, b: &Point) -> f64 {
+        let (origin_node, diff_distance) = self.find_closest_node_to_point(b);
+        let osm_distance_matrix = dijkstra(self.osm_streetgraph, origin_node, None, |e| *e.2);
+        osm_distance_matrix
+            .get(&a.street_graph_id.unwrap())
+            .unwrap_or(&f64::MAX)
+            + diff_distance
+    }
+}
+
+impl<'a> OsmHouseDistanceCalculator<'a> {
+    pub fn new(
+        nodes: &'a HashMap<NodeId, Point>,
+        osm_streetgraph: &'a UnGraphMap<NodeId, f64>,
+    ) -> Self {
+        Self {
+            nodes,
+            osm_streetgraph,
+        }
+    }
+
+    fn find_closest_node_to_point(&self, origin: &Point) -> (NodeId, f64) {
+        self.nodes
+            .iter()
+            .min_by_key(|(_, node)| node.haversine_distance(&origin) as u32)
+            .map(|(id, node)| (id.clone(), node.haversine_distance(&origin)))
+            .unwrap()
     }
 }
