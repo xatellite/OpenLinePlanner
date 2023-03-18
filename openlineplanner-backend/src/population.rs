@@ -5,44 +5,28 @@ use actix_web::Responder;
 use serde::Serialize;
 
 use crate::coverage::CoverageMap;
+use crate::layers::LayerType;
 
 use std::collections::HashMap;
 
 #[derive(Serialize)]
-pub struct InhabitantsInfo {
-    ped: u32,
-    bike: u32,
-    total: u32,
-    residential: u32,
-    work: u32,
-    school: u32,
+pub struct InhabitantsInfo{
+    layer_type: LayerType,
+    value: u32,
 }
 
 #[derive(Serialize)]
-pub struct InhabitantsMap(HashMap<String, InhabitantsInfo>);
+pub struct InhabitantsMap(HashMap<String, Vec<InhabitantsInfo>>);
 
-impl From<CoverageMap<'_, '_>> for InhabitantsMap {
-    fn from(value: CoverageMap<'_, '_>) -> Self {
-        InhabitantsMap(
-            value
-                .0
-                .into_iter()
-                .map(|(key, coverage)| {
-                    (
-                        key.to_owned(),
-                        InhabitantsInfo {
-                            // TODO: check if bike, work, school still needed
-                            ped: coverage.inhabitants,
-                            bike: 0,
-                            total: coverage.inhabitants,
-                            residential: coverage.inhabitants,
-                            work: 0,
-                            school: 0,
-                        },
-                    )
-                })
-                .collect(),
-        )
+impl From<&[(LayerType, CoverageMap<'_, '_>)]> for InhabitantsMap {
+    fn from(value: &[(LayerType, CoverageMap<'_, '_>)]) -> Self {
+        let mut map: HashMap<String, Vec<InhabitantsInfo>> = HashMap::new();
+        for (layer_type, coverage_map) in value {
+            for (station, coverage) in &coverage_map.0 {
+                map.entry(station.to_string()).or_default().push(InhabitantsInfo { layer_type: layer_type.clone(), value: coverage.inhabitants });
+            }
+        }
+        InhabitantsMap(map)
     }
 }
 

@@ -4,16 +4,18 @@ use anyhow::Result;
 use config::Config;
 use geo::Point;
 use log::info;
+use osm::Streets;
 use serde::Deserialize;
 
 mod coverage;
-mod datalayer;
 mod geometry;
+mod layers;
 mod population;
 mod station;
+mod osm;
 
-use coverage::{Method, Routing};
-use datalayer::{DataFilePaths, DataLayerName, DataLayers};
+use coverage::{Method, Routing, CoverageMap};
+use layers::{Layers, LayerType};
 use station::Station;
 
 #[derive(Deserialize)]
@@ -34,59 +36,36 @@ struct FindStationRequest {
 
 async fn station_info(
     request: web::Json<StationInfoRequest>,
-    datalayers: web::Data<DataLayers>,
+    layers: web::Data<Layers>,
+    streets: web::Data<Streets>,
 ) -> impl Responder {
-    let houses = &datalayers.residence;
-    let coverage_info = coverage::houses_for_stations(
+    let merged_layers = layers.all_merged_by_type();
+    let coverage_info: Vec<(LayerType, CoverageMap)> = merged_layers.iter().map(|layer| (layer.get_type().clone(), coverage::houses_for_stations(
         &request.stations,
-        houses.get_houses(),
+        &layer.get_centroids(),
         &request.method.as_ref().unwrap_or(&Method::Relative),
         &request.routing.as_ref().unwrap_or(&Routing::Osm),
-        &datalayers.nodes,
-        &datalayers.streetgraph,
-    );
-    population::InhabitantsMap::from(coverage_info)
-}
-
-async fn coverage_info(
-    stations: web::Json<Vec<Station>>,
-    routing: web::Path<Routing>,
-    datalayers: web::Data<DataLayers>,
-) -> impl Responder {
-    let houses = &datalayers.residence;
-    let coverage_info = coverage::houses_for_stations(
-        &stations,
-        houses.get_houses(),
-        &Method::Absolute,
-        &routing,
-        &datalayers.nodes,
-        &datalayers.streetgraph,
-    );
-    datalayer::HouseCoverageDataLayer::from(coverage_info)
+        &streets
+    ))).collect();
+    let coverage_slice: &[(LayerType, CoverageMap)] = &coverage_info;
+    population::InhabitantsMap::from(coverage_slice)
 }
 
 async fn find_station(
     request: web::Json<FindStationRequest>,
-    datalayers: web::Data<DataLayers>,
+    layers: web::Data<Layers>,
+    streets: web::Data<Streets>,
 ) -> impl Responder {
-    let houses = &datalayers.residence;
+    let layer = layers.all_merged();
     station::find_optimal_station(
         request.route.clone(),
         300f64,
-        &houses.get_houses(),
+        &layer.get_centroids(),
         &request.stations,
         &request.method.as_ref().unwrap_or(&Method::Relative),
         &request.routing.as_ref().unwrap_or(&Routing::Osm),
-        &datalayers.nodes,
-        &datalayers.streetgraph,
+        &streets,
     )
-}
-
-async fn overlay(
-    layer_name: web::Path<DataLayerName>,
-    datalayers: web::Data<DataLayers>,
-) -> impl Responder {
-    datalayers.get_by_name(layer_name.as_ref())
 }
 
 #[actix_web::main]
@@ -99,12 +78,6 @@ async fn main() -> std::io::Result<()> {
         .add_source(config::File::with_name("settings/Settings"))
         .build()
         .expect("failed to read config");
-    let data_file_paths: DataFilePaths = settings
-        .get("data")
-        .expect("missing data file paths in config");
-
-    let data_layer = datalayer::load_data_layer_files(data_file_paths.clone())
-        .expect("Failed to read data layer data");
 
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -123,11 +96,10 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
-            .app_data(web::Data::new(data_layer.clone()))
             .route("/station-info", web::post().to(station_info))
-            .route("/coverage-info/{router}", web::post().to(coverage_info))
+            .route("/coverage-info/{router}", web::post().to(coverage::coverage_info))
             .route("/find-station", web::post().to(find_station))
-            .route("/overlay/{layer_name}", web::get().to(overlay))
+            .service(layers::layers())
     })
     .bind(("0.0.0.0", 8080))?
     .run()

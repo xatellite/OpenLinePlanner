@@ -1,14 +1,22 @@
+use actix_web::body::BoxBody;
+use actix_web::http::header::ContentType;
+use actix_web::web;
+use actix_web::HttpResponse;
+use actix_web::Responder;
 use geo::Point;
-use osmpbfreader::NodeId;
-use petgraph::prelude::UnGraphMap;
+use geojson::de::deserialize_geometry;
+use geojson::ser::serialize_geometry;
+use geojson::ser::to_feature_collection_string;
 use serde::Deserialize;
 use serde::Serialize;
 
-use crate::datalayer::House;
-use crate::geometry::HaversineHouseDistanceCalculator;
-use crate::geometry::HouseDistanceCalculator;
-use crate::geometry::OsmHouseDistanceCalculator;
+use crate::geometry::HaversinePopulatedCentroidDistanceCalculator;
+use crate::geometry::OsmPopulatedCentroidDistanceCalculator;
+use crate::geometry::PopulatedCentroidDistanceCalculator;
+use crate::layers::Layers;
+use crate::layers::PopulatedCentroid;
 use crate::Station;
+use crate::osm::Streets;
 
 use std::collections::HashMap;
 
@@ -17,7 +25,7 @@ pub struct CoverageMap<'a, 'b>(pub HashMap<&'a str, StationCoverageInfo<'b>>);
 
 #[derive(Serialize)]
 pub struct StationCoverageInfo<'a> {
-    pub houses: Vec<HouseInfo<'a>>,
+    pub houses: Vec<PopulatedCentroidInfo<'a>>,
     pub inhabitants: u32,
 }
 
@@ -30,13 +38,15 @@ pub enum Routing {
 }
 
 impl<'a> StationCoverageInfo<'a> {
-    pub fn from_houses_with_method(value: Vec<HouseInfo<'a>>, method: &Method) -> Self {
+    pub fn from_houses_with_method(value: Vec<PopulatedCentroidInfo<'a>>, method: &Method) -> Self {
         StationCoverageInfo {
             inhabitants: value
                 .iter()
                 .map(|hi| match method {
-                    Method::Absolute => hi.house.pop,
-                    Method::Relative => (hi.house.pop as f64 * (1f64 / hi.distance.sqrt())) as u32,
+                    Method::Absolute => hi.centroid.pop,
+                    Method::Relative => {
+                        (hi.centroid.pop as f64 * (1f64 / hi.distance.sqrt())) as u32
+                    }
                 })
                 .sum(),
             houses: value,
@@ -45,8 +55,8 @@ impl<'a> StationCoverageInfo<'a> {
 }
 
 #[derive(Serialize, Clone)]
-pub struct HouseInfo<'a> {
-    pub house: &'a House,
+pub struct PopulatedCentroidInfo<'a> {
+    pub centroid: &'a PopulatedCentroid,
     pub distance: f64,
 }
 
@@ -59,28 +69,28 @@ pub enum Method {
 }
 
 /// Gets all houses which are in the coverage area of a station and which are not closer to another station
-pub fn get_houses_in_coverage<'a, D: HouseDistanceCalculator>(
+pub fn get_houses_in_coverage<'a, D: PopulatedCentroidDistanceCalculator>(
     origin: &Point,
     coverage: f64,
-    houses: &'a [House],
+    houses: &'a [PopulatedCentroid],
     distance_calculator: D,
     possible_collision_stations: &[&Station],
-) -> Vec<HouseInfo<'a>> {
+) -> Vec<PopulatedCentroidInfo<'a>> {
     houses
         .iter()
         .filter_map(|house| {
             let distance = distance_calculator.distance(house, origin);
             if distance < coverage {
-                Some(HouseInfo{house, distance})
+                Some(PopulatedCentroidInfo{centroid: house, distance})
             } else {
                 None
             }
-        }) // House is in the radius of our station
+        }) // PopulatedCentroid is in the radius of our station
         .filter(|hi| {
             possible_collision_stations.iter().all(|other| {
-                distance_calculator.distance(hi.house, &other.location) > other.coverage() // House is not in the coverage area of the other station or
-                    || distance_calculator.distance(hi.house, &origin) < distance_calculator.distance(hi.house, &other.location)
-                // House is closer to the current station
+                distance_calculator.distance(hi.centroid, &other.location) > other.coverage() // PopulatedCentroid is not in the coverage area of the other station or
+                    || distance_calculator.distance(hi.centroid, &origin) < distance_calculator.distance(hi.centroid, &other.location)
+                // PopulatedCentroid is closer to the current station
             })
         })
         .collect()
@@ -88,11 +98,10 @@ pub fn get_houses_in_coverage<'a, D: HouseDistanceCalculator>(
 
 pub fn houses_for_stations<'a, 'b>(
     stations: &'a [Station],
-    houses: &'b [House],
+    houses: &'b [PopulatedCentroid],
     method: &Method,
     routing: &Routing,
-    nodes: &HashMap<NodeId, Point>,
-    streetgraph: &UnGraphMap<NodeId, f64>,
+    streets: &Streets
 ) -> CoverageMap<'a, 'b> {
     let mut inhabitants_map = HashMap::new();
 
@@ -109,14 +118,14 @@ pub fn houses_for_stations<'a, 'b>(
                 &station.location,
                 station.coverage(),
                 houses,
-                HaversineHouseDistanceCalculator::new(),
+                HaversinePopulatedCentroidDistanceCalculator::new(),
                 &possible_collision_stations,
             ),
             Routing::Osm => get_houses_in_coverage(
                 &station.location,
                 station.coverage(),
                 houses,
-                OsmHouseDistanceCalculator::new(nodes, streetgraph),
+                OsmPopulatedCentroidDistanceCalculator::new(streets),
                 &possible_collision_stations,
             ),
         };
@@ -127,4 +136,69 @@ pub fn houses_for_stations<'a, 'b>(
     }
 
     CoverageMap(inhabitants_map)
+}
+
+#[derive(Serialize)]
+pub struct PopulatedCentroidCoverageLayer(Vec<PopulatedCentroidCoverage>);
+
+impl From<CoverageMap<'_, '_>> for PopulatedCentroidCoverageLayer {
+    fn from(value: CoverageMap<'_, '_>) -> Self {
+        Self(
+            value
+                .0
+                .into_iter()
+                .flat_map(|(station, sci)| {
+                    sci.houses.into_iter().map(|hi| PopulatedCentroidCoverage {
+                        geometry: hi.centroid.geometry,
+                        data_layer: "dl".to_owned(), // TODO: maybe remove this
+                        distance: hi.distance,
+                        closest_station: station.to_owned(),
+                    })
+                })
+                .collect(),
+        )
+    }
+}
+
+impl Responder for PopulatedCentroidCoverageLayer {
+    type Body = BoxBody;
+
+    fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
+        match to_feature_collection_string(&self.0) {
+            Ok(body) => HttpResponse::Ok()
+                .content_type(ContentType::json())
+                .body(body),
+            Err(error) => HttpResponse::InternalServerError()
+                .body(format!("failed to get coverage collection: {}", error)),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct PopulatedCentroidCoverage {
+    #[serde(
+        serialize_with = "serialize_geometry",
+        deserialize_with = "deserialize_geometry"
+    )]
+    geometry: Point,
+    data_layer: String,
+    distance: f64,
+    closest_station: String,
+}
+
+pub async fn coverage_info(
+    stations: web::Json<Vec<Station>>,
+    routing: web::Path<Routing>,
+    layers: web::Data<Layers>,
+    streets: web::Data<Streets>,
+) -> impl Responder {
+    let layer = layers.all_merged();
+    let coverage_info = houses_for_stations(
+        &stations,
+        layer.get_centroids(),
+        &Method::Absolute,
+        &routing,
+        &streets,
+    );
+    PopulatedCentroidCoverageLayer::from(coverage_info)
 }

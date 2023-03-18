@@ -1,16 +1,14 @@
-use std::{borrow::Borrow, collections::HashMap};
+use std::borrow::Borrow;
 
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{HaversineDistance, LineString, Point};
-use osmpbfreader::NodeId;
-use petgraph::prelude::UnGraphMap;
 use serde::{Deserialize, Serialize};
 
 use crate::{
     coverage::StationCoverageInfo,
     coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
-    datalayer::House,
-    geometry::{DensifyHaversine, OsmHouseDistanceCalculator},
+    geometry::{DensifyHaversine, OsmPopulatedCentroidDistanceCalculator},
+    layers::PopulatedCentroid, osm::Streets,
 };
 
 static DEFAULT_COVERAGE: f64 = 300f64;
@@ -35,24 +33,23 @@ impl Station {
 pub fn find_optimal_station(
     line: Vec<Point>,
     coverage: f64,
-    houses: &[House],
+    houses: &[PopulatedCentroid],
     other_stations: &[Station],
     method: &Method,
     routing: &Routing,
-    nodes: &HashMap<NodeId, Point>,
-    streetgraph: &UnGraphMap<NodeId, f64>,
+    streets: &Streets
 ) -> OptimalStationResult {
     let linestring = Into::<LineString>::into(line.clone()).densify_haversine(10.0);
     let others: Vec<&Station> = other_stations.iter().map(|x| x.borrow()).collect();
-    let original_coverage: Vec<&House> =
-        houses_for_stations(other_stations, houses, method, routing, nodes, streetgraph)
+    let original_coverage: Vec<&PopulatedCentroid> =
+        houses_for_stations(other_stations, houses, method, routing, streets)
             .0
             .values()
             .into_iter()
             .flat_map(|elem| elem.houses.clone())
-            .map(|elem| elem.house)
+            .map(|elem| elem.centroid)
             .collect();
-    let leftover_houses: Vec<House> = houses
+    let leftover_houses: Vec<PopulatedCentroid> = houses
         .iter()
         .filter(|house| !original_coverage.contains(house))
         .cloned()
@@ -65,7 +62,7 @@ pub fn find_optimal_station(
                     &point,
                     coverage,
                     &leftover_houses,
-                    OsmHouseDistanceCalculator::new(nodes, streetgraph),
+                    OsmPopulatedCentroidDistanceCalculator::new(streets),
                     &others,
                 ),
                 method,
