@@ -2,10 +2,29 @@ use std::{collections::HashMap, path::Path};
 
 use actix_web::Responder;
 use geo::{Point, HaversineDistance};
+use geojson::FeatureCollection;
 use osmpbfreader::{NodeId, OsmObj};
 use petgraph::prelude::UnGraphMap;
+use serde::{Serialize, Deserialize};
+use tinytemplate::TinyTemplate;
+
+use anyhow::Result;
 
 use crate::layers::PopulatedCentroid;
+
+static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
+is_in({}, {}) -> .a;
+(
+  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"7\"](pivot.a);
+  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
+  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"9\"](pivot.a);
+  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"10\"](pivot.a);
+);
+
+out body;
+>;
+out skel qt;";
+
 
 async fn get_admin_bounds(lat: f64, lon: f64) -> impl Responder {
     ""
@@ -92,4 +111,43 @@ pub fn read_osm_nodes(
     let graph = UnGraphMap::from_edges(edges);
 
     (graph, houses, nodes)
+}
+
+struct AdminBoundary {
+
+}
+
+#[derive(Serialize)]
+struct Context {
+    lat: f64,
+    lon: f64
+}
+
+pub fn render_ovp_query_template(point: Point) -> Result<String> {
+    let mut tt = TinyTemplate::new();
+    tt.add_template("query", OVP_QUERY_TEMPLATE)?;
+
+    let context = Context {
+        lat: point.x(),
+        lon: point.y()
+    };
+
+    Ok(tt.render("query", &context)?)
+}
+
+#[derive(Deserialize)]
+struct OverpassResponse {
+    version: f32,
+    generator: String,
+    elements: FeatureCollection,
+}
+
+pub async fn find_admin_boundaries_for_point(point: Point) -> Result<Vec<AdminBoundary>> {
+    let ovp_query = render_ovp_query_template(point).expect("Failed to render overpass template");
+
+    let client = reqwest::Client::new();
+    let ovp_response: OverpassResponse = client.post("https://overpass-api.de/api/interpreter").body(ovp_query).send().await?.json().await?;
+
+
+    Ok(vec![])
 }
