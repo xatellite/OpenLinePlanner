@@ -7,7 +7,7 @@
       <span>Section max Speed: </span
       >
     </div>
-    <div class="ref-marker-popup__sliders">
+    <div class="ref-marker-popup__input">
       <input
         type="number"
         :value="
@@ -105,7 +105,7 @@ export default {
     font-size: $font-md;
     margin-bottom: $space-ssm;
   }
-  &__sliders {
+  &__input {
     display: flex;
     align-items: center;
     justify-content: flex-start;

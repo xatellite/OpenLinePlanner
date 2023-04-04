@@ -20,6 +20,12 @@ button, .button {
   &:active {
     background-color: darken($c-button-background, 8);
   }
+
+  &:disabled {
+    color: $c-button-border;
+    cursor: default;
+    background-color: $c-button-background;
+  }
 }
 
 main {
@@ -44,7 +50,6 @@ main {
 }
 
 input[type="number"] {
-  border: 1px solid $c-button-background;
   height: 2.5rem;
   width: 100px;
   text-align: center;

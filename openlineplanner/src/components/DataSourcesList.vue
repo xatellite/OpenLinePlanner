@@ -9,7 +9,7 @@
         <LineElement :line="line" />
       </div> -->
       <div class="data-list__item data-list__item__row">
-        right click map to add data layer
+        click map to add data layer
       </div>
     </ListContainer>
   </div>

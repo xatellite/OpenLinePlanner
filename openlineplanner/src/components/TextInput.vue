@@ -3,7 +3,7 @@
     <span class="text-input__title">{{ title }}</span>
     <input
       class="text-input__field"
-      type="text"
+      :type="type"
       :value="value"
       :placeholder="placeholder"
       @input="(e) => callback(e.target.value)"
@@ -21,6 +21,10 @@ export default {
     value: String,
     title: String,
     placeholder: String,
+    type: {
+      type: String,
+      default: "text",
+    }
   },
   components: {
     PencilOutlineIcon,
@@ -50,7 +54,7 @@ export default {
   &__title {
     position: absolute;
     top: -0.8em;
-    color: $c-button-border;
+    color: $c-text-primary;
     background-color: $c-box;
     left: $space-sm;
     padding: 0 $space-ssm;
@@ -60,6 +64,8 @@ export default {
     border: none;
     flex-grow: 1;
     font-size: $font-md;
+    min-width: 200px;
+    margin-right: $space-sm;
 
     &:focus {
       outline: none;

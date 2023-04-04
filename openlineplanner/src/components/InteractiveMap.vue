@@ -54,6 +54,10 @@ export default {
       zoom: 12,
       preserveDrawingBuffer: true,
     });
+    // disable map rotation using right click + drag
+    this.map.dragRotate.disable();
+    // disable map rotation using touch rotation gesture
+    this.map.touchZoomRotate.disableRotation();
     this.map.on("load", () => {
       this.loadState();
       for (const layer of this.map.getStyle().layers) {
