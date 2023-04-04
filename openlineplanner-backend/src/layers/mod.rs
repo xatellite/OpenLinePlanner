@@ -7,11 +7,17 @@ use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
 };
+use osmgraphing::multi_ch_constructor::build;
 use osmpbfreader::{NodeId, OsmId};
 use serde::{Deserialize, Serialize};
 
 mod merge;
+pub mod osm;
+mod overpass;
+pub mod protomaps;
 pub use merge::*;
+
+use self::osm::AdminArea;
 
 pub fn layers() -> Scope {
     web::scope("layer")
@@ -135,8 +141,6 @@ impl Responder for Layer {
     }
 }
 
-
-
 #[derive(PartialEq, Debug, Serialize, Deserialize, Eq, Hash, Clone)]
 pub enum LayerType {
     Residential,
@@ -157,19 +161,18 @@ async fn get_layer_types() -> impl Responder {
 #[derive(Serialize, Deserialize)]
 struct Answer {
     name: String,
-    value: AnswerValue
+    value: AnswerValue,
 }
 
 #[derive(Serialize, Deserialize)]
-
 enum AnswerValue {
     IntAnswer(u64),
-    BoolAnswer(bool)
+    BoolAnswer(bool),
 }
 
 #[derive(Deserialize)]
 struct CalculateLayerRequest {
-    area: OsmId,
+    area: AdminArea,
     layer_type: LayerType,
     answers: Vec<Answer>,
 }
@@ -178,9 +181,19 @@ async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
     layers: web::Data<Layers>,
 ) -> impl Responder {
+    let request = request.into_inner();
+    let layer_type = request.layer_type;
+    let answers = request.answers;
+    let pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
+    //let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
+
     ""
 }
 
 async fn get_layer(id: web::Path<String>, layers: web::Data<Layers>) -> impl Responder {
-    layers.0.iter().find(|layer| &layer.id == id.as_ref()).cloned()
+    layers
+        .0
+        .iter()
+        .find(|layer| &layer.id == id.as_ref())
+        .cloned()
 }

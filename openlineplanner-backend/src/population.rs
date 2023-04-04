@@ -10,7 +10,7 @@ use crate::layers::LayerType;
 use std::collections::HashMap;
 
 #[derive(Serialize)]
-pub struct InhabitantsInfo{
+pub struct InhabitantsInfo {
     layer_type: LayerType,
     value: u32,
 }
@@ -23,7 +23,12 @@ impl From<&[(LayerType, CoverageMap<'_, '_>)]> for InhabitantsMap {
         let mut map: HashMap<String, Vec<InhabitantsInfo>> = HashMap::new();
         for (layer_type, coverage_map) in value {
             for (station, coverage) in &coverage_map.0 {
-                map.entry(station.to_string()).or_default().push(InhabitantsInfo { layer_type: layer_type.clone(), value: coverage.inhabitants });
+                map.entry(station.to_string())
+                    .or_default()
+                    .push(InhabitantsInfo {
+                        layer_type: layer_type.clone(),
+                        value: coverage.inhabitants,
+                    });
             }
         }
         InhabitantsMap(map)

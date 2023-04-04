@@ -1,21 +1,20 @@
 use actix_cors::Cors;
 use actix_web::{http, web, App, HttpServer, Responder};
 use anyhow::Result;
-use config::Config;
 use geo::Point;
 use log::info;
 use osm::Streets;
 use serde::Deserialize;
 
 mod coverage;
+mod error;
 mod geometry;
 mod layers;
 mod population;
 mod station;
-mod osm;
 
-use coverage::{Method, Routing, CoverageMap};
-use layers::{Layers, LayerType};
+use coverage::{CoverageMap, Method, Routing};
+use layers::{osm, LayerType, Layers};
 use station::Station;
 
 #[derive(Deserialize)]
@@ -40,13 +39,21 @@ async fn station_info(
     streets: web::Data<Streets>,
 ) -> impl Responder {
     let merged_layers = layers.all_merged_by_type();
-    let coverage_info: Vec<(LayerType, CoverageMap)> = merged_layers.iter().map(|layer| (layer.get_type().clone(), coverage::houses_for_stations(
-        &request.stations,
-        &layer.get_centroids(),
-        &request.method.as_ref().unwrap_or(&Method::Relative),
-        &request.routing.as_ref().unwrap_or(&Routing::Osm),
-        &streets
-    ))).collect();
+    let coverage_info: Vec<(LayerType, CoverageMap)> = merged_layers
+        .iter()
+        .map(|layer| {
+            (
+                layer.get_type().clone(),
+                coverage::houses_for_stations(
+                    &request.stations,
+                    &layer.get_centroids(),
+                    &request.method.as_ref().unwrap_or(&Method::Relative),
+                    &request.routing.as_ref().unwrap_or(&Routing::Osm),
+                    &streets,
+                ),
+            )
+        })
+        .collect();
     let coverage_slice: &[(LayerType, CoverageMap)] = &coverage_info;
     population::InhabitantsMap::from(coverage_slice)
 }
@@ -74,11 +81,6 @@ async fn main() -> std::io::Result<()> {
 
     info!("starting openlineplanner backend");
 
-    let settings = Config::builder()
-        .add_source(config::File::with_name("settings/Settings"))
-        .build()
-        .expect("failed to read config");
-
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("https://openlineplanner.xatellite.io")
@@ -97,9 +99,13 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .route("/station-info", web::post().to(station_info))
-            .route("/coverage-info/{router}", web::post().to(coverage::coverage_info))
+            .route(
+                "/coverage-info/{router}",
+                web::post().to(coverage::coverage_info),
+            )
             .route("/find-station", web::post().to(find_station))
             .service(layers::layers())
+            .service(layers::osm::osm())
     })
     .bind(("0.0.0.0", 8080))?
     .run()

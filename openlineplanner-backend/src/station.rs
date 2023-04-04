@@ -8,7 +8,8 @@ use crate::{
     coverage::StationCoverageInfo,
     coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
     geometry::{DensifyHaversine, OsmPopulatedCentroidDistanceCalculator},
-    layers::PopulatedCentroid, osm::Streets,
+    layers::PopulatedCentroid,
+    osm::Streets,
 };
 
 static DEFAULT_COVERAGE: f64 = 300f64;
@@ -37,7 +38,7 @@ pub fn find_optimal_station(
     other_stations: &[Station],
     method: &Method,
     routing: &Routing,
-    streets: &Streets
+    streets: &Streets,
 ) -> OptimalStationResult {
     let linestring = Into::<LineString>::into(line.clone()).densify_haversine(10.0);
     let others: Vec<&Station> = other_stations.iter().map(|x| x.borrow()).collect();

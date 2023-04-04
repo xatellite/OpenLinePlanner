@@ -72,7 +72,7 @@ impl HaversinePopulatedCentroidDistanceCalculator {
 }
 
 pub struct OsmPopulatedCentroidDistanceCalculator<'a> {
-    streets: &'a Streets
+    streets: &'a Streets,
 }
 
 impl<'a> PopulatedCentroidDistanceCalculator for OsmPopulatedCentroidDistanceCalculator<'a> {
@@ -87,16 +87,13 @@ impl<'a> PopulatedCentroidDistanceCalculator for OsmPopulatedCentroidDistanceCal
 }
 
 impl<'a> OsmPopulatedCentroidDistanceCalculator<'a> {
-    pub fn new(
-        streets: &'a Streets
-    ) -> Self {
-        Self {
-            streets
-        }
+    pub fn new(streets: &'a Streets) -> Self {
+        Self { streets }
     }
 
     fn find_closest_node_to_point(&self, origin: &Point) -> (NodeId, f64) {
-        self.streets.nodes
+        self.streets
+            .nodes
             .iter()
             .min_by_key(|(_, node)| node.haversine_distance(&origin) as u32)
             .map(|(id, node)| (id.clone(), node.haversine_distance(&origin)))

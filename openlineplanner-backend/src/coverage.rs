@@ -15,8 +15,8 @@ use crate::geometry::OsmPopulatedCentroidDistanceCalculator;
 use crate::geometry::PopulatedCentroidDistanceCalculator;
 use crate::layers::Layers;
 use crate::layers::PopulatedCentroid;
-use crate::Station;
 use crate::osm::Streets;
+use crate::Station;
 
 use std::collections::HashMap;
 
@@ -101,7 +101,7 @@ pub fn houses_for_stations<'a, 'b>(
     houses: &'b [PopulatedCentroid],
     method: &Method,
     routing: &Routing,
-    streets: &Streets
+    streets: &Streets,
 ) -> CoverageMap<'a, 'b> {
     let mut inhabitants_map = HashMap::new();
 
