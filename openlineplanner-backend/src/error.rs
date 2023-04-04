@@ -4,6 +4,7 @@ use actix_web::{body::BoxBody, HttpResponse, Responder};
 
 pub enum OLPError {
     OverpassError(anyhow::Error),
+    GeometryError
 }
 
 impl Display for OLPError {

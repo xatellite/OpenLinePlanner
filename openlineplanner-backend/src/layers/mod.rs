@@ -18,6 +18,8 @@ pub mod protomaps;
 pub use merge::*;
 
 use self::osm::AdminArea;
+use crate::error::OLPError;
+use openhousepopulator::{Building,GenericGeometry};
 
 pub fn layers() -> Scope {
     web::scope("layer")
@@ -42,6 +44,22 @@ pub struct PopulatedCentroid {
     pub pop: u32,
     pub street_graph_id: Option<NodeId>,
 }
+
+impl TryFrom<Building> for PopulatedCentroid {
+    type Error = OLPError;
+    fn try_from(value: Building) -> Result<Self, Self::Error> {
+        if let GenericGeometry::GenericPoint(point) = value.geometry {
+            return Ok(Self {
+                geometry: point,
+                flats: value.flats as u32,
+                pop: value.pop as u32,
+                street_graph_id: None
+            });
+        }
+        return Err(OLPError::GeometryError);
+    }
+}
+
 
 impl PopulatedCentroid {
     pub fn haversine_distance(&self, rhs: &Point) -> f64 {
