@@ -20,8 +20,8 @@
       <router-link to="/timetable" class="page-header__navigation__item"
         >Timetable</router-link
       >
+      <GithubCorner />
     </nav>
-    <GithubCorner />
   </div>
 </template>
 
