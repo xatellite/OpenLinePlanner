@@ -1,15 +1,15 @@
 use std::{collections::HashMap, fmt::Display};
 
-use actix_web::{body::BoxBody, http::header::ContentType, web, HttpResponse, Responder, Scope};
+use actix_web::{body::BoxBody, http::header::ContentType, web::{self, Data}, HttpResponse, Responder, Scope};
 
 use geo::{BooleanOps, HaversineDistance, MultiPolygon, Point};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
 };
-use osmgraphing::multi_ch_constructor::build;
 use osmpbfreader::{NodeId, OsmId};
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 
 mod merge;
 pub mod osm;
@@ -22,15 +22,22 @@ use crate::error::OLPError;
 use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
-    web::scope("layer")
+    web::scope("/layer")
+        .app_data(Data::new(Layers::new()))
         .route("/{layer_id}", web::get().to(get_layer))
         .route("/calculate", web::post().to(calculate_new_layer))
-        .route("/types", web::get().to(get_layer_types))
+        .route("/methods", web::get().to(get_layer_methods))
         .route(
             "/by_type/{layer_type}",
             web::get().to(get_merged_layers_by_type),
         )
-        .route("", web::get().to(get_merged_layers))
+        .route("", web::get().to(summarize_layers))
+}
+
+pub async fn summarize_layers(layers: web::Data<Layers>) -> impl Responder {
+    HttpResponse::Ok()
+            .content_type(ContentType::json())
+            .json(layers.0.iter().map(|layer| layer.serialize_info()).collect::<Vec<_>>())
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -107,6 +114,15 @@ impl Layers {
     }
 
     pub fn all_merged(&self) -> Layer {
+        if self.0.is_empty() {
+            // Return empty layer to stay restful
+            return Layer {
+                id: "all".to_string(),
+                bbox: MultiPolygon::new(vec![]),
+                centroids: Vec::new(),
+                layer_type: LayerType::Residential,
+            };
+        }
         let centroids: Vec<PopulatedCentroid> = self
             .0
             .iter()
@@ -126,6 +142,10 @@ impl Layers {
             layer_type: LayerType::Residential,
         }
     }
+
+    pub fn new() -> Self {
+        Self(Vec::new())
+    }
 }
 
 #[derive(Clone)]
@@ -143,6 +163,13 @@ impl Layer {
     pub fn get_type(&self) -> &LayerType {
         &self.layer_type
     }
+
+    pub fn serialize_info(&self) -> Value {
+        json! ({
+            "id": self.id,
+            "layer_type": self.layer_type
+        })
+    }
 }
 
 impl Responder for Layer {
@@ -150,11 +177,12 @@ impl Responder for Layer {
 
     fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
         match to_feature_collection_string(&self.centroids) {
-            Ok(body) => HttpResponse::Ok()
-                .content_type(ContentType::json())
-                .body(body),
-            Err(error) => HttpResponse::InternalServerError()
-                .body(format!("failed to get data layers: {}", error)),
+            Ok(body) =>  HttpResponse::Ok()
+            .content_type(ContentType::json())
+            .body(body),
+            Err(error) => {
+                HttpResponse::InternalServerError().finish()
+            }
         }
     }
 }
@@ -172,8 +200,24 @@ impl Display for LayerType {
     }
 }
 
-async fn get_layer_types() -> impl Responder {
-    ""
+async fn get_layer_methods() -> impl Responder {
+    // ToDo: Replace this with actual method list
+    let tmp_json = json! ({
+        "title": "OpenHousePopulator",
+        "description": "Using OSM Data and population count",
+        "layer_type": "residential",
+        "method": "population",
+        "questions": [
+            {
+            "id": "population",
+            "type": "number",
+            "text": "Total population in this area",
+            },
+        ],
+    });
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .json(tmp_json)
 }
 
 #[derive(Serialize, Deserialize)]
@@ -192,6 +236,7 @@ enum AnswerValue {
 struct CalculateLayerRequest {
     area: AdminArea,
     layer_type: LayerType,
+    method: String,
     answers: Vec<Answer>,
 }
 
@@ -201,11 +246,12 @@ async fn calculate_new_layer(
 ) -> impl Responder {
     let request = request.into_inner();
     let layer_type = request.layer_type;
+    let method = request.method;
     let answers = request.answers;
     let pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
-    //let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
-
-    ""
+    /// WIP: ToDo.. decide what to do with it (:
+    let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
+    HttpResponse::Ok()
 }
 
 async fn get_layer(id: web::Path<String>, layers: web::Data<Layers>) -> impl Responder {
