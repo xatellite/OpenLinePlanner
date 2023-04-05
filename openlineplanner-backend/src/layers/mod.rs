@@ -31,7 +31,7 @@ pub fn layers() -> Scope {
             "/by_type/{layer_type}",
             web::get().to(get_merged_layers_by_type),
         )
-        .route("", web::get().to(summarize_layers))
+        .route("/", web::get().to(summarize_layers))
 }
 
 pub async fn summarize_layers(layers: web::Data<Layers>) -> impl Responder {
@@ -250,7 +250,7 @@ async fn calculate_new_layer(
     let answers = request.answers;
     let pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
     /// WIP: ToDo.. decide what to do with it (:
-    let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
+    //let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
     HttpResponse::Ok()
 }
 
