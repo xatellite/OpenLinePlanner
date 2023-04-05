@@ -19,7 +19,7 @@ pub use merge::*;
 
 use self::osm::AdminArea;
 use crate::error::OLPError;
-use openhousepopulator::{Building,GenericGeometry};
+use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
     web::scope("layer")

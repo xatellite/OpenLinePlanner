@@ -28,10 +28,12 @@ out body;
 >;
 out skel qt;";
 
+/// Defining /osm endpoint for arcix-web router
 pub fn osm() -> Scope {
     web::scope("osm").route("/admin_bounds/{lat}/{lon}", web::get().to(get_admin_bounds))
 }
 
+/// Handler for admin_bounds endpoint
 async fn get_admin_bounds(lat: web::Path<f64>, lon: web::Path<f64>) -> impl Responder {
     let admin_areas =
         find_admin_boundaries_for_point(Point::new(lon.into_inner(), lat.into_inner())).await;
@@ -43,6 +45,7 @@ pub struct Streets {
     pub streetgraph: UnGraphMap<NodeId, f64>,
 }
 
+/// Generates a street graph for a given area and maps new houses
 pub fn read_osm_nodes(
     file: &Path,
     mut houses: Vec<PopulatedCentroid>,
