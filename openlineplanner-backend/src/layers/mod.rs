@@ -24,14 +24,14 @@ use openhousepopulator::{Building, GenericGeometry};
 pub fn layers() -> Scope {
     web::scope("/layer")
         .app_data(Data::new(Layers::new()))
-        .route("/{layer_id}", web::get().to(get_layer))
         .route("/calculate", web::post().to(calculate_new_layer))
         .route("/methods", web::get().to(get_layer_methods))
         .route(
             "/by_type/{layer_type}",
             web::get().to(get_merged_layers_by_type),
         )
-        .route("/", web::get().to(summarize_layers))
+        .route("/{layer_id}", web::get().to(get_layer))
+        .route("", web::get().to(summarize_layers))
 }
 
 pub async fn summarize_layers(layers: web::Data<Layers>) -> impl Responder {
