@@ -146,12 +146,11 @@ impl Responder for AdminAreas {
     fn respond_to(self, req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
         let body: Vec<serde_json::Value> = self.0.into_iter().map(|admin_area|
             serde_json::json!({
-                "type": "Feature",
                 "name": admin_area.name,
                 "id": admin_area.id,
                 "level": admin_area.level,
                 "bounding_box": admin_area.bounding_box,
-                "geometry": admin_area.geometry
+                "geometry": geojson::Geometry::new(geojson::Value::from(&admin_area.geometry))
             })).collect();
         HttpResponse::Ok()
             .content_type(ContentType::json())
