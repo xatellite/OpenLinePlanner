@@ -6,6 +6,8 @@ use anyhow::Result;
 use osmpbfreader::OsmPbfReader;
 use serde::{Deserialize, Serialize};
 
+use acc_reader::AccReader;
+
 use super::osm::AdminArea;
 
 #[derive(Serialize)]
@@ -69,7 +71,7 @@ impl ProtomapsDownload {
     }
 }
 
-pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<BufReader<Reader<Bytes>>>> {
+pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<AccReader<Reader<Bytes>>>> {
     let client = reqwest::Client::new();
 
     let request = ProtomapsDownloadRequest {
@@ -89,6 +91,6 @@ pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<BufReade
         .download()
         .await?;
 
-    let pbf_reader = OsmPbfReader::new(BufReader::new(pbf.reader()));
+    let pbf_reader = OsmPbfReader::new(AccReader::new(pbf.reader()));
     Ok(pbf_reader)
 }
