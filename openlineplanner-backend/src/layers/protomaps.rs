@@ -79,13 +79,15 @@ pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<AccReade
         region: ProtomapsDownloadRegion::from_admin_area(admin_area),
     };
 
-    let pbf = client
+    let area_req = client
         .post("https://app.protomaps.com/downloads/osm")
         .json(&request)
         .send()
         .await?
-        .json::<ProtomapsAreaRequest>()
-        .await?
+        .text()
+        .await?;
+    println!("{}", area_req);
+    let pbf = serde_json::from_str::<ProtomapsAreaRequest>(&area_req)?
         .wait_until_ready()
         .await?
         .download()

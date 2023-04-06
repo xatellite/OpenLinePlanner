@@ -2,7 +2,7 @@ use std::{collections::HashMap, fmt::Display};
 
 use actix_web::{body::BoxBody, http::header::ContentType, web::{self, Data}, HttpResponse, Responder, Scope};
 
-use geo::{BooleanOps, HaversineDistance, MultiPolygon, Point};
+use geo::{BooleanOps, HaversineDistance, MultiPolygon, Point, Polygon, LineString};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
@@ -18,7 +18,7 @@ pub mod protomaps;
 pub use merge::*;
 
 use self::osm::AdminArea;
-use crate::error::OLPError;
+use crate::error::{OLPError, self};
 use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
@@ -90,7 +90,7 @@ impl Layers {
             .filter(|layer| layer.layer_type == layer_type)
             .map(|layer| layer.bbox.clone())
             .reduce(|acc, bbox| acc.union(&bbox))
-            .unwrap();
+            .unwrap_or(MultiPolygon::new(vec![Polygon::new(LineString::from(vec![(0., 0.)]),vec![])]));
         Layer {
             id: layer_type.to_string(),
             bbox,
@@ -248,9 +248,8 @@ async fn calculate_new_layer(
     let layer_type = request.layer_type;
     let method = request.method;
     let answers = request.answers;
-    let pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
-    /// WIP: ToDo.. decide what to do with it (:
-    //let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
+    let mut pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
+    let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
     HttpResponse::Ok()
 }
 

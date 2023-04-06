@@ -65,8 +65,7 @@ pub async fn query_overpass(query: String) -> Result<OverpassResponse> {
         .body(query)
         .send()
         .await?
-        .text()
+        .json::<OverpassResponse>()
         .await?;
-    println!("{}", &response);
-    Ok(serde_json::from_str(&response)?)
+    Ok(response)
 }

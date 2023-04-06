@@ -2,9 +2,10 @@ use std::{collections::HashMap, path::Path};
 
 use actix_web::{
     web::{self, Json},
-    Responder, Scope,
+    Responder, Scope, body::BoxBody, http::header::ContentType, HttpResponse,
 };
 use geo::{HaversineDistance, Point, Polygon};
+use geojson::ser::{to_feature_collection_string, to_feature_string};
 use osmpbfreader::{NodeId, OsmObj};
 use petgraph::prelude::UnGraphMap;
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,7 @@ use anyhow::Result;
 
 use super::overpass::{query_overpass, OverpassResponseElement};
 use crate::layers::PopulatedCentroid;
+use crate::error::OLPError;
 
 static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
 is_in({lat}, {lon}) -> .a;
@@ -36,7 +38,7 @@ async fn get_admin_bounds(coords: web::Path<(f64, f64)>) -> impl Responder {
     let (lat, lon) = coords.into_inner();
     let admin_areas =
         find_admin_boundaries_for_point(Point::new(lon, lat)).await;
-    Json(admin_areas.unwrap())
+    admin_areas.map_err(|err| OLPError::GenericError(err.to_string()))
 }
 
 pub struct Streets {
@@ -136,6 +138,27 @@ pub struct AdminArea {
     pub geometry: Polygon,
 }
 
+pub struct AdminAreas(Vec<AdminArea>);
+
+impl Responder for AdminAreas {
+    type Body = BoxBody;
+
+    fn respond_to(self, req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
+        let body: Vec<serde_json::Value> = self.0.into_iter().map(|admin_area|
+            serde_json::json!({
+                "type": "Feature",
+                "name": admin_area.name,
+                "id": admin_area.id,
+                "level": admin_area.level,
+                "bounding_box": admin_area.bounding_box,
+                "geometry": admin_area.geometry
+            })).collect();
+        HttpResponse::Ok()
+            .content_type(ContentType::json())
+            .json(body)
+    }
+}
+
 impl From<OverpassResponseElement> for AdminArea {
     fn from(value: OverpassResponseElement) -> Self {
         Self {
@@ -180,14 +203,14 @@ pub fn render_ovp_query_template(point: Point) -> Result<String> {
     Ok(tt.render("query", &context)?)
 }
 
-pub async fn find_admin_boundaries_for_point(point: Point) -> Result<Vec<AdminArea>> {
+pub async fn find_admin_boundaries_for_point(point: Point) -> Result<AdminAreas> {
     let ovp_query = render_ovp_query_template(point).expect("Failed to render overpass template");
 
     let ovp_response = query_overpass(ovp_query).await?;
 
-    Ok(ovp_response
+    Ok(AdminAreas(ovp_response
         .elements
         .into_iter()
         .map(Into::<AdminArea>::into)
-        .collect())
+        .collect()))
 }
