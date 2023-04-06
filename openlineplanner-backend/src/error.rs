@@ -1,4 +1,7 @@
-use std::{fmt::{Display, write}, error::Error};
+use std::{
+    error::Error,
+    fmt::{Display},
+};
 
 use actix_web::{body::BoxBody, HttpResponse, Responder, ResponseError};
 
@@ -6,7 +9,7 @@ use actix_web::{body::BoxBody, HttpResponse, Responder, ResponseError};
 pub enum OLPError {
     OverpassError(anyhow::Error),
     GeometryError,
-    GenericError(String)
+    GenericError(String),
 }
 
 impl Error for OLPError {}
@@ -24,7 +27,7 @@ impl Display for OLPError {
 impl Responder for OLPError {
     type Body = BoxBody;
 
-    fn respond_to(self, req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
+    fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
         HttpResponse::InternalServerError().body(self.to_string())
     }
 }

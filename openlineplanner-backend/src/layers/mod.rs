@@ -1,13 +1,18 @@
 use std::{collections::HashMap, fmt::Display};
 
-use actix_web::{body::BoxBody, http::header::ContentType, web::{self, Data}, HttpResponse, Responder, Scope};
+use actix_web::{
+    body::BoxBody,
+    http::header::ContentType,
+    web::{self, Data},
+    HttpResponse, Responder, Scope,
+};
 
-use geo::{BooleanOps, HaversineDistance, MultiPolygon, Point, Polygon, LineString};
+use geo::{BooleanOps, HaversineDistance, LineString, MultiPolygon, Point, Polygon};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
 };
-use osmpbfreader::{NodeId, OsmId};
+use osmpbfreader::{NodeId};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -18,7 +23,7 @@ pub mod protomaps;
 pub use merge::*;
 
 use self::osm::AdminArea;
-use crate::error::{OLPError, self};
+use crate::error::{OLPError};
 use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
@@ -35,9 +40,13 @@ pub fn layers() -> Scope {
 }
 
 pub async fn summarize_layers(layers: web::Data<Layers>) -> impl Responder {
-    HttpResponse::Ok()
-            .content_type(ContentType::json())
-            .json(layers.0.iter().map(|layer| layer.serialize_info()).collect::<Vec<_>>())
+    HttpResponse::Ok().content_type(ContentType::json()).json(
+        layers
+            .0
+            .iter()
+            .map(|layer| layer.serialize_info())
+            .collect::<Vec<_>>(),
+    )
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -60,13 +69,12 @@ impl TryFrom<Building> for PopulatedCentroid {
                 geometry: point,
                 flats: value.flats as u32,
                 pop: value.pop as u32,
-                street_graph_id: None
+                street_graph_id: None,
             });
         }
         return Err(OLPError::GeometryError);
     }
 }
-
 
 impl PopulatedCentroid {
     pub fn haversine_distance(&self, rhs: &Point) -> f64 {
@@ -90,7 +98,10 @@ impl Layers {
             .filter(|layer| layer.layer_type == layer_type)
             .map(|layer| layer.bbox.clone())
             .reduce(|acc, bbox| acc.union(&bbox))
-            .unwrap_or(MultiPolygon::new(vec![Polygon::new(LineString::from(vec![(0., 0.)]),vec![])]));
+            .unwrap_or(MultiPolygon::new(vec![Polygon::new(
+                LineString::from(vec![(0., 0.)]),
+                vec![],
+            )]));
         Layer {
             id: layer_type.to_string(),
             bbox,
@@ -177,12 +188,10 @@ impl Responder for Layer {
 
     fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
         match to_feature_collection_string(&self.centroids) {
-            Ok(body) =>  HttpResponse::Ok()
-            .content_type(ContentType::json())
-            .body(body),
-            Err(error) => {
-                HttpResponse::InternalServerError().finish()
-            }
+            Ok(body) => HttpResponse::Ok()
+                .content_type(ContentType::json())
+                .body(body),
+            Err(_error) => HttpResponse::InternalServerError().finish(),
         }
     }
 }
@@ -242,14 +251,19 @@ struct CalculateLayerRequest {
 
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
-    layers: web::Data<Layers>,
+    _layers: web::Data<Layers>,
 ) -> impl Responder {
     let request = request.into_inner();
-    let layer_type = request.layer_type;
-    let method = request.method;
-    let answers = request.answers;
+    let _layer_type = request.layer_type;
+    let _method = request.method;
+    let _answers = request.answers;
     let mut pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
-    let populated_buildings = openhousepopulator::populate_houses(&mut pbf_reader, &None, true, &openhousepopulator::Config::builder().build());
+    let _populated_buildings = openhousepopulator::populate_houses(
+        &mut pbf_reader,
+        &None,
+        true,
+        &openhousepopulator::Config::builder().build(),
+    );
     HttpResponse::Ok()
 }
 

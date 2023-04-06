@@ -1,4 +1,4 @@
-use std::io::BufReader;
+
 
 use bytes::{buf::Reader, Buf, Bytes};
 
@@ -39,13 +39,17 @@ struct ProtomapsAreaRequest {
 }
 
 impl ProtomapsAreaRequest {
-    async fn ready(&self) -> Result<ProtomapsDownload> {
-        let resp = reqwest::get(&self.url).await?;
+    async fn ready(&self, client: &reqwest::Client) -> Result<ProtomapsDownload> {
+        let resp = client
+            .get(&self.url)
+            .header("Referer", "https://app.protomaps.com/")
+            .send()
+            .await?;
         Ok(resp.json().await?)
     }
-    async fn wait_until_ready(self) -> Result<ProtomapsDownload> {
+    async fn wait_until_ready(self, client: &reqwest::Client) -> Result<ProtomapsDownload> {
         loop {
-            let download = self.ready().await?;
+            let download = self.ready(client).await?;
             if download.complete.unwrap_or(false) {
                 return Ok(download);
             }
@@ -60,19 +64,24 @@ struct ProtomapsDownload {
 }
 
 impl ProtomapsDownload {
-    async fn download(self) -> Result<Bytes> {
-        let response = reqwest::get(format!(
-            "https://app.protomaps.com/downloads/{}/download",
-            self.uuid
-                .ok_or(anyhow::anyhow!("did not get valid uuid for download"))?
-        ))
-        .await?;
+    async fn download(self, client: &reqwest::Client) -> Result<Bytes> {
+        let response = client
+            .get(format!(
+                "https://app.protomaps.com/downloads/{}/download",
+                self.uuid
+                    .ok_or(anyhow::anyhow!("did not get valid uuid for download"))?
+            ))
+            .header("Referer", "https://app.protomaps.com/")
+            .send()
+            .await?;
         Ok(response.bytes().await?)
     }
 }
 
 pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<AccReader<Reader<Bytes>>>> {
-    let client = reqwest::Client::new();
+    let client = reqwest::Client::builder().cookie_store(true).build()?;
+
+    let resp = client.get("https://app.protomaps.com/downloads/osm").send().await;
 
     let request = ProtomapsDownloadRequest {
         name: "".to_string(),
@@ -81,6 +90,8 @@ pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<AccReade
 
     let area_req = client
         .post("https://app.protomaps.com/downloads/osm")
+        .header("Referer", "https://app.protomaps.com/")
+        .header("Origin", "https://app.protomaps.com")
         .json(&request)
         .send()
         .await?
@@ -88,9 +99,9 @@ pub async fn download_pbf(admin_area: AdminArea) -> Result<OsmPbfReader<AccReade
         .await?;
     println!("{}", area_req);
     let pbf = serde_json::from_str::<ProtomapsAreaRequest>(&area_req)?
-        .wait_until_ready()
+        .wait_until_ready(&client)
         .await?
-        .download()
+        .download(&client)
         .await?;
 
     let pbf_reader = OsmPbfReader::new(AccReader::new(pbf.reader()));
