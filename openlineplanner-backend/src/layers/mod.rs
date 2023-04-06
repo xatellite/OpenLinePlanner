@@ -202,7 +202,7 @@ impl Display for LayerType {
 
 async fn get_layer_methods() -> impl Responder {
     // ToDo: Replace this with actual method list
-    let tmp_json = json! ({
+    let tmp_json = json! ([{
         "title": "OpenHousePopulator",
         "description": "Using OSM Data and population count",
         "layer_type": "residential",
@@ -214,7 +214,7 @@ async fn get_layer_methods() -> impl Responder {
             "text": "Total population in this area",
             },
         ],
-    });
+    }]);
     HttpResponse::Ok()
         .content_type(ContentType::json())
         .json(tmp_json)

@@ -16,7 +16,7 @@ use super::overpass::{query_overpass, OverpassResponseElement};
 use crate::layers::PopulatedCentroid;
 
 static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
-is_in({}, {}) -> .a;
+is_in({lat}, {lon}) -> .a;
 (
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"7\"](pivot.a);
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
@@ -24,19 +24,18 @@ is_in({}, {}) -> .a;
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"10\"](pivot.a);
 );
 
-out body;
->;
-out skel qt;";
+out geom;";
 
 /// Defining /osm endpoint for arcix-web router
 pub fn osm() -> Scope {
-    web::scope("osm").route("/admin_bounds/{lat}/{lon}", web::get().to(get_admin_bounds))
+    web::scope("/osm").route("/admin_bounds/{lat}/{lon}", web::get().to(get_admin_bounds))
 }
 
 /// Handler for admin_bounds endpoint
-async fn get_admin_bounds(lat: web::Path<f64>, lon: web::Path<f64>) -> impl Responder {
+async fn get_admin_bounds(coords: web::Path<(f64, f64)>) -> impl Responder {
+    let (lat, lon) = coords.into_inner();
     let admin_areas =
-        find_admin_boundaries_for_point(Point::new(lon.into_inner(), lat.into_inner())).await;
+        find_admin_boundaries_for_point(Point::new(lon, lat)).await;
     Json(admin_areas.unwrap())
 }
 
@@ -145,7 +144,7 @@ impl From<OverpassResponseElement> for AdminArea {
             bounding_box: value.bounds.into(),
             level: value
                 .tags
-                .get("level")
+                .get("admin_level")
                 .and_then(|v| str::parse::<u16>(v).ok())
                 .unwrap_or_default(),
             geometry: Polygon::new(
@@ -154,7 +153,7 @@ impl From<OverpassResponseElement> for AdminArea {
                     .into_iter()
                     .filter(|elem| elem.ovp_type == "way")
                     .filter(|elem| elem.role == "outer")
-                    .flat_map(|elem| elem.geometry)
+                    .flat_map(|elem| elem.geometry.unwrap())
                     .map(Into::<Point>::into)
                     .collect(),
                 vec![],
@@ -174,8 +173,8 @@ pub fn render_ovp_query_template(point: Point) -> Result<String> {
     tt.add_template("query", OVP_QUERY_TEMPLATE)?;
 
     let context = Context {
-        lat: point.x(),
-        lon: point.y(),
+        lon: point.x(),
+        lat: point.y(),
     };
 
     Ok(tt.render("query", &context)?)

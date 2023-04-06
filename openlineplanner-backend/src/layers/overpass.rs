@@ -14,6 +14,7 @@ pub struct OverpassResponse {
 
 #[derive(Deserialize)]
 pub struct OverpassResponseElement {
+    #[serde(rename = "type")]
     pub ovp_type: String,
     pub id: u64,
     pub tags: HashMap<String, String>,
@@ -37,10 +38,12 @@ impl From<OverpassElementBounds> for Vec<f64> {
 
 #[derive(Deserialize)]
 pub struct OverpassGeometryElement {
+    #[serde(rename = "type")]
     pub ovp_type: String,
     pub role: String,
+    #[serde(rename = "ref")]
     pub ovp_ref: u64,
-    pub geometry: Vec<OverpassGeometryPoint>,
+    pub geometry: Option<Vec<OverpassGeometryPoint>>,
 }
 
 #[derive(Deserialize)]
@@ -57,11 +60,13 @@ impl From<OverpassGeometryPoint> for Point {
 
 pub async fn query_overpass(query: String) -> Result<OverpassResponse> {
     let client = reqwest::Client::new();
-    Ok(client
+    let response = client
         .post("https://overpass-api.de/api/interpreter")
         .body(query)
         .send()
         .await?
-        .json::<OverpassResponse>()
-        .await?)
+        .text()
+        .await?;
+    println!("{}", &response);
+    Ok(serde_json::from_str(&response)?)
 }
