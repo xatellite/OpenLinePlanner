@@ -10,6 +10,7 @@ use geojson::ser::to_feature_collection_string;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::error::OLPError;
 use crate::geometry::HaversinePopulatedCentroidDistanceCalculator;
 use crate::geometry::OsmPopulatedCentroidDistanceCalculator;
 use crate::geometry::PopulatedCentroidDistanceCalculator;
@@ -19,6 +20,7 @@ use crate::osm::Streets;
 use crate::Station;
 
 use std::collections::HashMap;
+use std::sync::RwLock;
 
 #[derive(Serialize)]
 pub struct CoverageMap<'a, 'b>(pub HashMap<&'a str, StationCoverageInfo<'b>>);
@@ -189,10 +191,10 @@ pub struct PopulatedCentroidCoverage {
 pub async fn coverage_info(
     stations: web::Json<Vec<Station>>,
     routing: web::Path<Routing>,
-    layers: web::Data<Layers>,
+    layers: web::Data<RwLock<Layers>>,
     streets: web::Data<Streets>,
-) -> impl Responder {
-    let layer = layers.all_merged();
+) -> Result<PopulatedCentroidCoverageLayer, OLPError> {
+    let layer = layers.read().map_err(OLPError::from_error)?.all_merged();
     let coverage_info = houses_for_stations(
         &stations,
         layer.get_centroids(),
@@ -200,5 +202,5 @@ pub async fn coverage_info(
         &routing,
         &streets,
     );
-    PopulatedCentroidCoverageLayer::from(coverage_info)
+    Ok(PopulatedCentroidCoverageLayer::from(coverage_info))
 }

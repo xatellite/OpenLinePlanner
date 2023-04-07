@@ -3,12 +3,12 @@ use geo::{Point, Polygon};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
-    GeoJson, Geometry,
+    GeoJson,
 };
 use serde::{Deserialize, Serialize};
 use tinytemplate::TinyTemplate;
 
-use crate::{error::OLPError, geometry};
+use crate::error::OLPError;
 
 use super::overpass::query_overpass;
 

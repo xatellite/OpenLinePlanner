@@ -12,7 +12,7 @@ pub struct Streets {
 }
 
 /// Generates a street graph for a given area and maps new houses
-pub fn read_osm_nodes(
+pub fn _read_osm_nodes(
     file: &Path,
     mut houses: Vec<PopulatedCentroid>,
 ) -> (

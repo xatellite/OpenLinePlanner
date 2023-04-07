@@ -1,9 +1,13 @@
+use std::sync::RwLock;
+
 use actix_cors::Cors;
-use actix_web::{http, web, App, HttpServer, Responder};
+use actix_web::{http, web, App, HttpServer};
 use anyhow::Result;
+use error::OLPError;
 use geo::Point;
 use log::info;
 use osm::Streets;
+use population::InhabitantsMap;
 use serde::Deserialize;
 
 mod coverage;
@@ -15,7 +19,7 @@ mod station;
 
 use coverage::{CoverageMap, Method, Routing};
 use layers::{osm, LayerType, Layers};
-use station::Station;
+use station::{OptimalStationResult, Station};
 
 #[derive(Deserialize)]
 struct StationInfoRequest {
@@ -35,10 +39,13 @@ struct FindStationRequest {
 
 async fn station_info(
     request: web::Json<StationInfoRequest>,
-    layers: web::Data<Layers>,
+    layers: web::Data<RwLock<Layers>>,
     streets: web::Data<Streets>,
-) -> impl Responder {
-    let merged_layers = layers.all_merged_by_type();
+) -> Result<InhabitantsMap, OLPError> {
+    let merged_layers = layers
+        .read()
+        .map_err(OLPError::from_error)?
+        .all_merged_by_type();
     let coverage_info: Vec<(LayerType, CoverageMap)> = merged_layers
         .iter()
         .map(|layer| {
@@ -55,16 +62,16 @@ async fn station_info(
         })
         .collect();
     let coverage_slice: &[(LayerType, CoverageMap)] = &coverage_info;
-    population::InhabitantsMap::from(coverage_slice)
+    Ok(population::InhabitantsMap::from(coverage_slice))
 }
 
 async fn find_station(
     request: web::Json<FindStationRequest>,
-    layers: web::Data<Layers>,
+    layers: web::Data<RwLock<Layers>>,
     streets: web::Data<Streets>,
-) -> impl Responder {
-    let layer = layers.all_merged();
-    station::find_optimal_station(
+) -> Result<OptimalStationResult, OLPError> {
+    let layer = layers.read().map_err(OLPError::from_error)?.all_merged();
+    Ok(station::find_optimal_station(
         request.route.clone(),
         300f64,
         &layer.get_centroids(),
@@ -72,7 +79,7 @@ async fn find_station(
         &request.method.as_ref().unwrap_or(&Method::Relative),
         &request.routing.as_ref().unwrap_or(&Routing::Osm),
         &streets,
-    )
+    ))
 }
 
 #[actix_web::main]
@@ -98,6 +105,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
+            .app_data(web::Data::new(RwLock::new(Layers::new())))
             .route("/station-info", web::post().to(station_info))
             .route(
                 "/coverage-info/{router}",

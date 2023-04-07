@@ -1,9 +1,9 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, sync::RwLock};
 
 use actix_web::{
     body::BoxBody,
     http::header::ContentType,
-    web::{self, Data},
+    web::{self, Data, Json},
     HttpResponse, Responder, Scope,
 };
 
@@ -39,14 +39,18 @@ pub fn layers() -> Scope {
         .route("", web::get().to(summarize_layers))
 }
 
-pub async fn summarize_layers(layers: web::Data<Layers>) -> impl Responder {
-    HttpResponse::Ok().content_type(ContentType::json()).json(
+pub async fn summarize_layers(
+    layers: web::Data<RwLock<Layers>>,
+) -> Result<Json<Vec<Value>>, OLPError> {
+    Ok(Json(
         layers
+            .read()
+            .map_err(OLPError::from_error)?
             .0
             .iter()
             .map(|layer| layer.serialize_info())
             .collect::<Vec<_>>(),
-    )
+    ))
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq)]
@@ -157,6 +161,10 @@ impl Layers {
     pub fn new() -> Self {
         Self(Vec::new())
     }
+
+    pub fn push(&mut self, layer: Layer) {
+        self.0.push(layer)
+    }
 }
 
 #[derive(Clone)]
@@ -251,26 +259,36 @@ struct CalculateLayerRequest {
 
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
-    _layers: web::Data<Layers>,
-) -> impl Responder {
+    layers: web::Data<RwLock<Layers>>,
+) -> Result<HttpResponse, OLPError> {
     let request = request.into_inner();
-    let _layer_type = request.layer_type;
+    let layer_type = request.layer_type;
     let _method = request.method;
     let _answers = request.answers;
-    /*
-    let _populated_buildings = openhousepopulator::populate_houses(
+    /*let populated_buildings = openhousepopulator::populate_houses(
         &mut pbf_reader,
         &None,
         true,
         &openhousepopulator::Config::builder().build(),
     );*/
-    HttpResponse::Ok()
+    layers.write().map_err(OLPError::from_error)?.push(Layer {
+        id: String::new(),
+        bbox: MultiPolygon::new(vec![request.area.geometry]),
+        centroids: vec![],
+        layer_type: layer_type,
+    });
+    Ok(HttpResponse::Ok().finish())
 }
 
-async fn get_layer(id: web::Path<String>, layers: web::Data<Layers>) -> impl Responder {
-    layers
+async fn get_layer(
+    id: web::Path<String>,
+    layers: web::Data<RwLock<Layers>>,
+) -> Result<Option<Layer>, OLPError> {
+    Ok(layers
+        .read()
+        .map_err(OLPError::from_error)?
         .0
         .iter()
         .find(|layer| &layer.id == id.as_ref())
-        .cloned()
+        .cloned())
 }

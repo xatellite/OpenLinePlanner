@@ -4,7 +4,6 @@ use actix_web::{body::BoxBody, HttpResponse, Responder, ResponseError};
 
 #[derive(Debug)]
 pub enum OLPError {
-    OverpassError(anyhow::Error),
     GeometryError,
     GenericError(String),
 }
@@ -20,7 +19,6 @@ impl Error for OLPError {}
 impl Display for OLPError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            OLPError::OverpassError(err) => write!(f, "{}", err.to_string()),
             OLPError::GeometryError => write!(f, "an error occurred when converting geometries"),
             OLPError::GenericError(err) => write!(f, "{}", err.to_string()),
         }
