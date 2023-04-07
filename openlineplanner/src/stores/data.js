@@ -13,6 +13,7 @@ export const useDataStore = () => {
       selectedArea: null,
       mapBounds: [],
       mapHighligh: null,
+      loadingLayer: false,
     }),
     getters: {
       questionsResolved(state) {

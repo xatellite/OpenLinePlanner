@@ -49,6 +49,7 @@
             <span class="data-overlay__import-entry__text__title">{{
               area.properties.name
             }}</span>
+            {{ getLevelDescription(area.properties.admin_level) }}
           </div>
         </div>
       </ListContainer>
@@ -86,7 +87,12 @@
       </div>
       <div class="data-overlay__actions">
         <button @click="dataStore.selectedArea = null">Back</button>
-        <button :disabled="!dataStore.questionsResolved">Request</button>
+        <button
+          :disabled="!dataStore.questionsResolved"
+          @click="dataStore.loadingLayer = true"
+        >
+          Request
+        </button>
       </div>
     </div>
   </div>
@@ -119,6 +125,25 @@ export default {
     selectArea(area) {
       this.dataStore.highlightArea(area);
       this.selectedArea = area;
+    },
+    // Gives a descriptive text to each admin_level according to https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative#10_admin_level_values_for_specific_countries
+    getLevelDescription(level) {
+      console.log(level);
+      const levelDescriptions = [
+        "Supernational",
+        "Nation",
+        "Subnation",
+        "Region",
+        "State-District",
+        "County",
+        "Administrative division",
+        "Town",
+        "Part of municipality",
+        "Part of municipality",
+      ];
+      console.log(levelDescriptions[level - 1]);
+      if (!levelDescriptions[level - 1]) return "";
+      return levelDescriptions[level - 1];
     },
   },
 };
@@ -162,6 +187,7 @@ export default {
     border-radius: $br-md;
     background-color: $c-box;
     border: 1px solid $c-button-border;
+    min-width: 200px;
 
     &__selected {
       color: $c-accent-two;

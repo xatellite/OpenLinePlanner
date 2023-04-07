@@ -37,7 +37,7 @@ export default {
   position: relative;
   background-color: $c-box;
   display: block;
-  padding: $space-sm $space-md;
+  padding: $space-ssm $space-md;
   border: 1px solid $c-button-border;
   border-radius: $br-md;
   display: flex;

@@ -1,6 +1,7 @@
 <template>
   <div id="map" class="data-map">
     <DataSourceMapOverlay />
+    <DataSourceMapLoading />
   </div>
 </template>
 
@@ -10,6 +11,7 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import DataSourceMapOverlay from "./DataSourceMapOverlay.vue";
 import { useDataStore } from "../stores/data";
+import DataSourceMapLoading from "./DataSourceMapLoading.vue";
 
 export default {
   data() {
@@ -21,7 +23,7 @@ export default {
       displayedBounds: [],
     };
   },
-  components: { DataSourceMapOverlay },
+  components: { DataSourceMapOverlay, DataSourceMapLoading },
   mounted() {
     mapboxgl.accessToken =
       "pk.eyJ1IjoidGhlbmV3Y2l2aWxpYW4iLCJhIjoiY2pncDJwYWl0MDBvdTMzbWxpcHBoc24wNCJ9.kUw_kFeEUVVqE6-1l4VsIw";
