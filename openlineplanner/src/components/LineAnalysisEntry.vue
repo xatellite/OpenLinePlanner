@@ -199,8 +199,8 @@ export default {
 .line-analysis {
   margin: $space-md $space-sm;
   border-radius: $br-md;
-  border: 1px solid rgba($c-text-primary, 0.2);
-  background-color: $c-box;
+  border: 1px solid rgba(var(--c-primary-light), 0.2);
+  background-color: var(--c-box);
 
   &__title {
     padding: $space-sm $space-sm 0;
@@ -237,14 +237,14 @@ export default {
       flex-direction: column;
       margin: $space-md 0;
       margin-left: 7px;
-      border-left: 1px solid rgba($c-text-primary, 0.2);
+      border-left: 1px solid rgba(var(--c-primary-light), 0.2);
       padding-left: $space-sm;
       width: 100px;
     }
   }
 
   &__totals {
-    border-top: 1px solid rgba($c-text-primary, 0.2);
+    border-top: 1px solid rgba(var(--c-primary-light), 0.2);
     padding: $space-sm;
     display: flex;
     justify-content: space-evenly;

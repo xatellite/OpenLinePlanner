@@ -71,7 +71,7 @@ export default {
     font-weight: 700;
     left: -$space-md;
     top: $space-sm;
-    background: $c-box;
+    background: var(--c-box);
     border-radius: $br-md;
     padding: 0 $space-ssm;
   }
@@ -81,7 +81,7 @@ export default {
     font-weight: 700;
     left: -$space-md;
     top: -($space-sm + $space-sm);
-    background: $c-box;
+    background: var(--c-box);
     border-radius: $br-md;
     padding: 0 $space-ssm;
   }
@@ -99,7 +99,7 @@ export default {
     height: 8px;
     width: 8px;
     border-radius: 100%;
-    background-color: rgba($c-box, 0.5);
+    background-color: rgba(var(--c-box), 0.5);
   }
 }
 </style>

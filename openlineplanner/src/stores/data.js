@@ -1,5 +1,10 @@
 import { defineStore } from "pinia";
-import { getMethods, getAdminBounds, getLayers } from "../helpers/api";
+import {
+  getMethods,
+  getAdminBounds,
+  getLayers,
+  deleteLayer,
+} from "../helpers/api";
 
 export const useDataStore = () => {
   const innerStore = defineStore({
@@ -7,6 +12,7 @@ export const useDataStore = () => {
     state: () => ({
       methods: null,
       addPoint: null,
+      layers: [],
       areas: [],
       noAreas: false,
       selectedMethod: null,
@@ -66,6 +72,9 @@ export const useDataStore = () => {
       },
       async loadLayers() {
         this.layers = await getLayers();
+      },
+      removeLayer(layer) {
+        deleteLayer(layer);
       },
       resetSelection() {
         this.selectedArea = null;

@@ -1,7 +1,8 @@
 <template>
   <div class="page-header" id="page-header">
     <div class="page-header__box">
-      <img class="page-header__logo" src="@/assets/logo.svg" />
+      <img v-if="uiStore.mode == 'light'" class="page-header__logo" src="@/assets/logo.svg" />
+      <img v-else class="page-header__logo" src="@/assets/logo-dark.svg" />
       <h1 class="page-header__title">OpenLinePlanner</h1>
     </div>
     <button class="mobile-nav" @click="menuActive = !menuActive">
@@ -22,18 +23,28 @@
       >
       <GithubCorner />
     </nav>
+    <button @click="uiStore.toggleMode" class="page-header__mode-toggle">
+      <WhiteBalanceSunnyIcon v-if="uiStore.mode == 'light'"/>
+      <WeatherNightIcon v-else/>
+    </button>
   </div>
 </template>
 
 <script>
 import GithubCorner from "@/components/GithubCorner.vue";
 import MenuDownIcon from "vue-material-design-icons/MenuDown.vue";
+import WhiteBalanceSunnyIcon from "vue-material-design-icons/WhiteBalanceSunny.vue";
+import WeatherNightIcon from "vue-material-design-icons/WeatherNight.vue";
+
 import { RouterLink } from "vue-router";
+import { useUIStore } from '../stores/ui';
+
 export default {
-  components: { GithubCorner, RouterLink, MenuDownIcon },
+  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon},
   data() {
     return {
       menuActive: false,
+      uiStore: useUIStore(),
     };
   },
   mounted() {
@@ -82,7 +93,7 @@ export default {
   }
 
   &__title {
-    color: $c-accent-one;
+    color: var(--c-accent-one);
     font-family: "Poppins";
     font-weight: 700;
     font-size: 28px;
@@ -100,7 +111,7 @@ export default {
   }
 
   .router-link-active {
-    border-bottom: 5px solid $c-accent-three;
+    border-bottom: 5px solid var(--c-accent-three);
   }
 
   .mobile-nav {
@@ -128,7 +139,7 @@ export default {
       & > * {
         text-align: center;
         padding: $space-sm;
-        border-bottom: 1px solid $c-button-border;
+        border-bottom: 1px solid var(--c-button-border);
       }
 
       .router-link-active {
@@ -146,11 +157,15 @@ export default {
       margin-left: 0;
       z-index: 100;
       flex-direction: column;
-      background-color: $c-box;
+      background-color: var(--c-box);
       width: 100%;
       gap: 0;
-      border-top: 1px solid $c-button-border;
+      border-top: 1px solid var(--c-button-border);
     }
+  }
+
+  &__mode-toggle {
+    margin: 0  $space-sm 4px auto;
   }
 }
 </style>

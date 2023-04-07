@@ -57,16 +57,16 @@ export default {
 
   &--active {
     button {
-      background-color: $c-text-primary;
-      color: $c-text-inverted;
+      background-color: var(--c-primary-light);
+      color: var(--c-text-inverted);
       border: none;
 
       &:hover {
-        background-color: lighten($c-text-primary, 8);
+        background-color: var(--c-primary-light);
       }
 
       &:active {
-        background-color: lighten($c-text-primary, 16);
+        background-color: var(--c-text-primary);
       }
     }
   }

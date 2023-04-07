@@ -35,8 +35,8 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: rgba($c-text-primary, 0.3);
-  color: $c-text-inverted;
+  background-color: rgba(var(--c-primary-light), 0.3);
+  color: var(--c-text-inverted);
 
   &__message {
     padding-bottom: $space-md;

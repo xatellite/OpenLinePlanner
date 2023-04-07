@@ -224,7 +224,7 @@ export default {
       font-size: $font-md;
       z-index: 10;
       justify-content: center;
-      border: 1px solid $c-primary-light;
+      border: 1px solid var(--c-primary-light);
       border-radius: $br-md;
       margin: $space-ssm;
       width: 300px;

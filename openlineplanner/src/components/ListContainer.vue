@@ -15,9 +15,9 @@ export default {
 
 <style lang="scss" scoped>
 .list-container {
-  border: 1px solid $c-button-border;
+  border: 1px solid var(--c-button-border);
   border-radius: $br-md;
-  background-color: darken($c-box, 2);
+  background-color: var(--c-box-darkened);
   height: 100%;
   width: 100%;
   max-height: 100%;
@@ -25,7 +25,7 @@ export default {
 
   &__title {
     font-size: $font-md;
-    color: $c-button-border;
+    color: var(--c-button-border);
     margin: $space-sm;
   }
 }

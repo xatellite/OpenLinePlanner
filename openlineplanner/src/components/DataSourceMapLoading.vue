@@ -23,7 +23,7 @@ export default {
 };
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .loading-overlay {
   position: absolute;
   top: 0;
@@ -37,7 +37,7 @@ export default {
   z-index: 10;
 
   &__content {
-    box-shadow: $bs-md;
+    box-shadow: var(--bs-md);
     display: flex;
     flex-direction: column;
     align-items: center;

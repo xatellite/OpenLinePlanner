@@ -281,8 +281,8 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    color: $c-text-inverted;
-    background-color: $c-accent-two;
+    color: var(--c-text-inverted);
+    background-color: var(--c-accent-two);
     cursor: pointer;
     padding: $space-ssm $space-ssm;
 
@@ -301,7 +301,7 @@ export default {
     text-decoration: underline;
     font-family: "Poppins";
     font-size: $font-md;
-    color: $c-text-primary;
+    color: var(--c-primary-light);
     width: 0;
   }
 

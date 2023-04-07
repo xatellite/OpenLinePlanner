@@ -1,13 +1,13 @@
 <template>
   <div class="data-list">
     <ListContainer title="Loaded Data Layers">
-      <!-- <div
+      <div
         class="data-list__item"
-        v-for="line in linesStore.lines"
-        :key="`${line.name}-list-entry`"
+        v-for="layer in dataStore.layers"
+        :key="`${layer.properties.id}-list-entry`"
       >
-        <LineElement :line="line" />
-      </div> -->
+        <DataSourcesListEntry :layer="layer" />
+      </div>
       <div class="data-list__item data-list__item__row">
         click map to add data layer
       </div>
@@ -16,30 +16,19 @@
 </template>
 
 <script>
-import { useLinesStore } from "../stores/lines";
-import { useEditStore } from "../stores/editing";
 import ListContainer from "./ListContainer.vue";
+import DataSourcesListEntry from "./DataSourcesListEntry.vue";
+import { useDataStore } from '../stores/data';
 
 export default {
   components: {
     ListContainer,
+    DataSourcesListEntry
 },
   data() {
     return {
-      linesStore: useLinesStore(),
-      editStore: useEditStore(),
+      dataStore: useDataStore(),
     };
-  },
-  methods: {
-    addLine() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "addLine");
-      }
-      const line = this.linesStore.addLine();
-      this.editStore.isEditing = line;
-      this.editStore.isExtending = -1;
-    },
   },
 };
 </script>
@@ -63,7 +52,7 @@ export default {
   &__container {
     max-height: 70vh;
     overflow-y: auto;
-    background-color: darken($c-box, 2);
+    background-color: var(--c-box-darkened);
 
     @media (max-width: 700px), (max-height: 600px) {
       max-height: none;
@@ -71,9 +60,9 @@ export default {
   }
 
   &__item {
-    background-color: $c-box;
+    background-color: var(--c-box);
     margin: $space-sm;
-    border: 1px solid $c-button-border;
+    border: 1px solid var(--c-button-border);
     border-radius: $br-md;
     overflow: hidden;
     &__row {
@@ -81,12 +70,12 @@ export default {
       text-align: center;
     }
     margin-bottom: $space-ssm;
-    // border-bottom: 1px solid rgba($c-text-primary, 0.2);
+    // border-bottom: 1px solid rgba(var(--c-primary-light), 0.2);
   }
 
   &__title {
     padding: 6px 26px 4px;
-    color: $c-accent-one;
+    color: var(--c-accent-one);
     font-family: "Poppins";
     font-weight: 700;
     font-size: 28px;
@@ -100,11 +89,11 @@ export default {
   }
 
   hr {
-    color: $c-text-primary;
+    color: var(--c-primary-light);
     height: 0px;
     border: none;
     margin: 0;
-    border-top: 1px solid rgba($c-text-primary, 0.2);
+    border-top: 1px solid rgba(var(--c-primary-light), 0.2);
   }
 }
 </style>

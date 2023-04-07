@@ -210,7 +210,7 @@ export default {
 </script>
 
 <style lang="scss">
-$themeColor: $c-text-primary;
+$themeColor: var(--c-primary-light);
 @import "vue-slider-component/lib/theme/default.scss";
 
 .type-picker {
@@ -230,7 +230,7 @@ $themeColor: $c-text-primary;
     display: flex;
     flex-direction: column;
     padding: $space-sm;
-    border-bottom: 1px solid rgba($c-text-primary, 0.2);
+    border-bottom: 1px solid rgba(var(--c-primary-light), 0.2);
   }
 
   &__options {

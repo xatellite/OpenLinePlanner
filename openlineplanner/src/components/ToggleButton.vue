@@ -74,15 +74,15 @@ export default {
   }
 
   &--active {
-    background-color: $c-text-primary;
-    color: $c-text-inverted;
+    background-color: var(--c-primary-light);
+    color: var(--c-text-inverted);
 
     &:hover {
-      background-color: lighten($c-text-primary, 8);
+      background-color: var(--c-primary-light);
     }
 
     &:active {
-      background-color: lighten($c-text-primary, 16);
+      background-color: var(--c-tex-primary);
     }
     .toggle-button__icon {
       border-right: 1px solid #696969;

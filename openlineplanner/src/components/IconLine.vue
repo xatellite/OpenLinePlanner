@@ -30,7 +30,7 @@ export default {
   }
   circle:hover {
     stroke-width: 2px;
-    stroke: $c-accent-one;
+    stroke: var(--c-accent-one);
   }
 }
 

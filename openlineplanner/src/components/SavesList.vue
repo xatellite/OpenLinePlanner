@@ -83,9 +83,9 @@ export default {
 
 <style lang="scss" scoped>
 .upload-item {
-  background-color: $c-box;
+  background-color: var(--c-box);
   margin: $space-sm;
-  border: 1px solid $c-button-border;
+  border: 1px solid var(--c-button-border);
   border-radius: $br-md;
   margin-bottom: $space-ssm;
   display: flex;
@@ -93,21 +93,21 @@ export default {
   width: 350px;
   padding: $space-ssm;
   gap: $space-sm;
-  // border-bottom: 1px solid rgba($c-text-primary, 0.2);
+  // border-bottom: 1px solid rgba(var(--c-primary-light), 0.2);
 }
 
 .save-item {
   display: flex;
   flex-direction: column;
-  background-color: $c-box;
+  background-color: var(--c-box);
   margin: $space-sm;
   padding: $space-ssm;
-  border: 1px solid $c-button-border;
+  border: 1px solid var(--c-button-border);
   border-radius: $br-md;
 
   &__title {
     padding: $space-ssm $space-sm;
-    border-bottom: 1px solid $c-button-border;
+    border-bottom: 1px solid var(--c-button-border);
   }
 
   &__bottom {

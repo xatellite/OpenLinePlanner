@@ -19,20 +19,17 @@ import html2canvas from "html2canvas";
 import ReferenceMarker from "./ReferenceMarker.vue";
 import router from "../router";
 import ViewSettings from './ViewSettings.vue';
+import { useUIStore } from '../stores/ui';
 
 export default {
   components: { ViewSettings },
   setup() {
-    const editStore = useEditStore();
-    const linesStore = useLinesStore();
-    const paxStore = usePaxStore();
-    const overlayStore = useOverlayStore();
-
     return {
-      editStore,
-      linesStore,
-      paxStore,
-      overlayStore,
+      editStore: useEditStore(),
+      linesStore: useLinesStore(),
+      paxStore: usePaxStore(),
+      overlayStore: useOverlayStore(),
+      uiStore: useUIStore(),
     };
   },
   data() {
@@ -49,7 +46,7 @@ export default {
       "pk.eyJ1IjoidGhlbmV3Y2l2aWxpYW4iLCJhIjoiY2pncDJwYWl0MDBvdTMzbWxpcHBoc24wNCJ9.kUw_kFeEUVVqE6-1l4VsIw";
     this.map = new mapboxgl.Map({
       container: "map",
-      style: "mapbox://styles/mapbox/light-v9",
+      style: this.uiStore.mapStyle,
       center: [16.4585, 48.2284],
       zoom: 12,
       preserveDrawingBuffer: true,
@@ -187,6 +184,13 @@ export default {
         });
       }
     });
+
+    watch(
+      () => this.uiStore.mode,
+      () => {
+        this.map.setStyle(this.uiStore.mapStyle);
+      }
+    );
 
     watch(
       () => this.editStore.isEditing,
@@ -521,7 +525,7 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
-  border: 1px solid $c-button-border;
+  border: 1px solid var(--c-button-border);
   border-radius: $br-md;
   overflow: hidden;
 

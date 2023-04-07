@@ -185,12 +185,12 @@ export default {
     padding: $space-ssm $space-sm;
     margin: $space-ssm;
     border-radius: $br-md;
-    background-color: $c-box;
-    border: 1px solid $c-button-border;
+    background-color: var(--c-box);
+    border: 1px solid var(--c-button-border);
     min-width: 200px;
 
     &__selected {
-      color: $c-accent-two;
+      color: var(--c-accent-two);
     }
 
     &__text {

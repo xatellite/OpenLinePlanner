@@ -70,7 +70,7 @@ export default {
   &__container {
     max-height: 70vh;
     overflow-y: auto;
-    background-color: darken($c-box, 2);
+    background-color: var(--c-box-darkened);
 
     @media (max-width: 700px), (max-height: 600px) {
       max-height: none;
@@ -78,9 +78,9 @@ export default {
   }
 
   &__item {
-    background-color: $c-box;
+    background-color: var(--c-box);
     margin: $space-sm;
-    border: 1px solid $c-button-border;
+    border: 1px solid var(--c-button-border);
     border-radius: $br-md;
     overflow: hidden;
     &__row {
@@ -94,12 +94,12 @@ export default {
       }
     }
     margin-bottom: $space-ssm;
-    // border-bottom: 1px solid rgba($c-text-primary, 0.2);
+    // border-bottom: 1px solid rgba(var(--c-primary-light), 0.2);
   }
 
   &__title {
     padding: 6px 26px 4px;
-    color: $c-accent-one;
+    color: var(--c-accent-one);
     font-family: "Poppins";
     font-weight: 700;
     font-size: 28px;
@@ -113,11 +113,11 @@ export default {
   }
 
   hr {
-    color: $c-text-primary;
+    color: var(--c-primary-light);
     height: 0px;
     border: none;
     margin: 0;
-    border-top: 1px solid rgba($c-text-primary, 0.2);
+    border-top: 1px solid rgba(var(--c-primary-light), 0.2);
   }
 }
 </style>

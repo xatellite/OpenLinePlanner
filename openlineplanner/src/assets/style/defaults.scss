@@ -2,8 +2,8 @@
 
 button, .button {
   font-family: "Poppins";
-  border: 1px solid $c-button-border;
-  background-color: $c-button-background;
+  border: 1px solid var(--c-button-border);
+  background-color: var(--c-button-background);
   border-radius: $br-md;
   height: 2.5rem;
   width: 2.5rem;
@@ -11,20 +11,20 @@ button, .button {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: $c-text-primary;
+  color: var(--c-primary-light);
 
   &:hover {
-    background-color: darken($c-button-background, 4);
+    background-color: var(--c-button-background--darkened-light);
   }
 
   &:active {
-    background-color: darken($c-button-background, 8);
+    background-color: var(--c-button-background--darkened-strong);
   }
 
   &:disabled {
-    color: $c-button-border;
+    color: var(--c-button-border);
     cursor: default;
-    background-color: $c-button-background;
+    background-color: var(--c-button-background);
   }
 }
 
@@ -49,6 +49,11 @@ main {
   justify-content: center;
 }
 
+input {
+  background-color: transparent;
+  color: var(--c-primary-light);
+}
+
 input[type="number"] {
   height: 2.5rem;
   width: 100px;
@@ -66,7 +71,7 @@ select {
   flex: 1;
   font-size: $font-md;
   padding: 0 1em;
-  color: $c-text-primary;
+  color: var(--c-primary-light);
   background-color: transparent;
   cursor: pointer;
 }
@@ -111,7 +116,7 @@ select::-ms-expand {
   margin: 0;
 
   & > span {
-    border-right: 1px solid $c-button-background;
+    border-right: 1px solid var(--c-button-background);
     padding: $space-ssm;
     & > span {
       display: flex;
@@ -122,19 +127,19 @@ select::-ms-expand {
   }
 
   &--active {
-    background-color: $c-text-primary;
-    color: $c-text-inverted;
+    background-color: var(--c-primary-light);
+    color: var(--c-text-inverted);
 
     select {
-      color: $c-text-inverted;
+      color: var(--c-text-inverted);
     }
 
     &:hover {
-      background-color: lighten($c-text-primary, 8);
+      background-color: var(--c-primary-light--lightened-light);
     }
 
     &:active {
-      background-color: lighten($c-text-primary, 16);
+      background-color: var(--c-primary-light--lightened-strong);
     }
     .toggle-button__icon {
       border-right: 1px solid #696969;
@@ -144,8 +149,8 @@ select::-ms-expand {
 
 .station {
   border-radius: 100%;
-  border: 2px solid $c-text-primary;
-  background-color: $c-box;
+  border: 2px solid var(--c-primary-light);
+  background-color: var(--c-box);
   width: 15px;
   height: 15px;
 }
@@ -156,8 +161,8 @@ select::-ms-expand {
 
 .tooltip {
   position: fixed;
-  background-color: $c-text-primary;
-  color: $c-box;
+  background-color: var(--c-primary-light);
+  color: var(--c-box);
   border-radius: $br-md;
   padding: $space-ssm;
   font-size: $font-sm;

@@ -68,7 +68,7 @@ export default {
 
   &__container {
     font-size: $font-md;
-    border: 1px solid $c-primary-light;
+    border: 1px solid var(--c-primary-light);
     border-radius: $br-md;
     margin: $space-ssm;
   }

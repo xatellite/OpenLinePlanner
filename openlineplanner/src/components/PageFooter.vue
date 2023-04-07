@@ -12,8 +12,8 @@ export default {};
 
 <style lang="scss" scoped>
 .footer {
-  background: $c-text-primary;
-  color: $c-text-inverted;
+  background: var(--c-background-inverted);
+  color: var(--c-text-inverted);
   font-size: $space-sm;
   width: 100%;
   display: grid;

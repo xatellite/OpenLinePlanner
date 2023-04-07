@@ -10,19 +10,43 @@ $font-md: 16px;
 $font-sm: 12px;
 $font-ssm: $space-ssm;
 
-$c-text-primary: #464646;
-$c-button-background: #f5f5f5;
-$c-button-border: #dadada;
-$c-text-inverted: #ffffff;
-$c-accent-one: #464646;
-$c-accent-two: #1B998B;
-$c-accent-three: #FEC80B;
-$c-box: #ffffff;
-$c-primary-light: rgba($c-text-primary, 0.2);
+[data-theme="light"] {
+  --c-text-primary: #464646;
+  --c-primary-light: #4d4d4d;
+  --c-button-background: #f5f5f5;
+  --c-button-background--darkened-light: #f0f0f0;
+  --c-button-background--darkened-strong: #e0e0e0;
+  --c-button-border: #cacaca;
+  --c-text-inverted: #ffffff;
+  --c-accent-one: #464646;
+  --c-accent-two: #1B998B;
+  --c-accent-three: #FEC80B;
+  --c-box: #ffffff;
+  --c-box-darkened: #f8f8f8;
+  --c-background-primary: #ffffff;
+  --c-background-inverted: #464646;
+  --bs-md: 0px 4px 24px 0px #e9e9e9;
+}
+
+[data-theme="dark"] {
+  --c-text-primary: #ffffff;
+  --c-primary-light: #f5f5f5;
+  --c-button-background: #464646;
+  --c-button-background--darkened-light: #3a3a3a;
+  --c-button-background--darkened-strong: #222222;
+  --c-button-border: #6d6d6d;
+  --c-text-inverted: #f1f1f1;
+  --c-accent-one: #f8f8f8;
+  --c-accent-two: #1B998B;
+  --c-accent-three: #FEC80B;
+  --c-box: #464646;
+  --c-box-darkened: #3f3f3f;
+  --c-background-primary: #464646;
+  --c-background-inverted: #1f1f1f;
+  --bs-md: 0px 4px 24px 0px #242424;
+}
 
 $br-md: 10px;
-
-$bs-md: 0px 4px 24px 0px rgba($c-text-primary, 0.2);
 
 h1 {
   font-family: "Poppins";
@@ -32,10 +56,11 @@ h1 {
 
 html {
   font-family: 'Poppins';
-  color: $c-text-primary;
+  color: var(--c-primary-light);
   box-sizing: border-box;
   font-size: $font-md;
   height: 100%;
+  background-color: var(--c-background-primary);
 }
 
 body {
@@ -44,16 +69,16 @@ body {
 }
 
 .box {
-  background-color: $c-box;
-  box-shadow: $bs-md;
+  background-color: var(--c-box);
+  box-shadow: var(--bs-md);
   border-radius: $br-md;
   box-sizing: border-box;  
 }
 
 @media (min-width: 700px) and (min-height: 600px) {
   .box--desktop {
-    background-color: $c-box;
-    box-shadow: $bs-md;
+    background-color: var(--c-box);
+    box-shadow: var(--bs-md);
     border-radius: $br-md;
     box-sizing: border-box;  
   }
@@ -61,7 +86,7 @@ body {
 
 a {
   text-decoration: none;
-  color: $c-text-primary
+  color: var(--c-primary-light)
 }
 
 

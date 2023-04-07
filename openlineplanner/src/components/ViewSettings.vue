@@ -147,9 +147,9 @@ export default {
   padding: $space-sm $space-sm;
   max-width: $space-md;
   max-height: $space-md;
-  background-color: $c-box;
+  background-color: var(--c-box);
   border-radius: $br-md;
-  box-shadow: $bs-md;
+  box-shadow: var(--bs-md);
   font-size: $font-md;
   cursor: pointer;
 

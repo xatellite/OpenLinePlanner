@@ -35,27 +35,27 @@ export default {
 <style lang="scss" scoped>
 .text-input {
   position: relative;
-  background-color: $c-box;
+  background-color: var(--c-box);
   display: block;
   padding: $space-ssm $space-md;
-  border: 1px solid $c-button-border;
+  border: 1px solid var(--c-button-border);
   border-radius: $br-md;
   display: flex;
   margin-top: $space-sm;
 
   &:focus-within {
-    outline: 1px solid $c-accent-two;
+    outline: 1px solid var(--c-accent-two);
 
     .text-input__title {
-      color: $c-accent-two;
+      color: var(--c-accent-two);
     }
   }
 
   &__title {
     position: absolute;
     top: -0.8em;
-    color: $c-text-primary;
-    background-color: $c-box;
+    color: var(--c-primary-light);
+    background-color: var(--c-box);
     left: $space-sm;
     padding: 0 $space-ssm;
   }

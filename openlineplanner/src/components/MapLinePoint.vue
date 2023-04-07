@@ -160,7 +160,7 @@ export default {
   position: relative;
 
   &--selected {
-    box-shadow: $bs-md;
+    box-shadow: var(--bs-md);
   }
 }
 
@@ -172,8 +172,8 @@ export default {
     padding: 1px $space-ssm;
     font-weight: 700;
     white-space: nowrap;
-    background-color: $c-box;
-    border: 2px solid $c-text-primary;
+    background-color: var(--c-box);
+    border: 2px solid var(--c-primary-light);
     border-radius: $br-md;
     z-index: 3;
   }
