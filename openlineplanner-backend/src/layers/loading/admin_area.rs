@@ -50,11 +50,7 @@ impl TryFrom<GeoJson> for AdminAreas {
                         let Some(geometry) = feature.geometry.and_then(|geometry|
                             TryInto::<Polygon>::try_into(geometry.value).ok()
                         ) else {
-                            log::info!("Area dropped due to wrong geometry: {}", properties
-                                .get("name")
-                                .and_then(|name| name.as_str())
-                                .unwrap_or_default()
-                            );
+                            log::info!("Area dropped due to wrong geometry: {:?}", properties);
                             return None;
                         };
                         Some(AdminArea {

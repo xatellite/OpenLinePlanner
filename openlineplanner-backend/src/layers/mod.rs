@@ -36,6 +36,7 @@ pub fn layers() -> Scope {
             web::get().to(get_merged_layers_by_type),
         )
         .route("/{layer_id}", web::get().to(get_layer))
+        .route("/{layer_id}", web::delete().to(delete_layer))
         .route("", web::get().to(summarize_layers))
 }
 
@@ -291,4 +292,19 @@ async fn get_layer(
         .iter()
         .find(|layer| &layer.id == id.as_ref())
         .cloned())
+}
+
+async fn delete_layer(id: web::Path<String>, layers: web::Data<RwLock<Layers>>) -> impl Responder {
+    let index = layers.read().unwrap()
+        .0
+        .iter()
+        .position(|layer| &layer.id == id.as_ref());
+
+    match index {
+        Some(index) => {
+            layers.write().unwrap().0.remove(index);
+            HttpResponse::Ok().finish()
+        }
+        None => HttpResponse::NotFound().finish(),
+    }
 }
