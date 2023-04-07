@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { getMethods, getAdminBounds } from "../helpers/api";
+import { getMethods, getAdminBounds, getLayers } from "../helpers/api";
 
 export const useDataStore = () => {
   const innerStore = defineStore({
@@ -11,13 +11,14 @@ export const useDataStore = () => {
       noAreas: false,
       selectedMethod: null,
       selectedArea: null,
+      mapBounds: [],
+      mapHighligh: null,
     }),
     getters: {
-      questionsResolved: (state) => {
-        console.log("check");
-        console.log(state.selectedMethod.questions);
+      questionsResolved(state) {
         if (state.selectedMethod) {
-          for (const question in state.selectedMethod.questions) {
+          for (const index in state.selectedMethod.questions) {
+            const question = state.selectedMethod.questions[index];
             if (!question.answer) return false;
           }
           return true;
@@ -29,9 +30,11 @@ export const useDataStore = () => {
       setAddPoint(value) {
         this.addPoint = value;
         this.resetSelection();
-        getAdminBounds()
+        getAdminBounds(value)
           .then((areas) => {
-            this.areas = areas;
+            this.areas = areas.features;
+            this.mapBounds = areas.features;
+            this.mapHighligh = null;
             if (areas.length == 0) {
               this.noAreas = true;
             }
@@ -43,6 +46,9 @@ export const useDataStore = () => {
       },
       removeAddPoint() {
         this.addPoint = null;
+      },
+      highlightArea(area) {
+        this.mapHighligh = area;
       },
       selectMethod(method) {
         // ToDo: Fix this workaround..?!
@@ -57,6 +63,9 @@ export const useDataStore = () => {
       async loadMethods() {
         this.methods = await getMethods();
       },
+      async loadLayers() {
+        this.layers = await getLayers();
+      },
       resetSelection() {
         this.selectedArea = null;
         this.selectedMethod = null;
@@ -68,5 +77,6 @@ export const useDataStore = () => {
   // Async Init
   const s = innerStore();
   s.loadMethods();
+  s.loadLayers();
   return s;
 };

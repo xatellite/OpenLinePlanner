@@ -1,20 +1,15 @@
 export const getLayers = async () => {
-  return [{}];
+  const response = await fetch(import.meta.env.VITE_API_ENDPOINT + "/layer");
+  const layerInfo = await response.json();
+  return layerInfo;
 };
 
-export const getAdminBounds = async () => {
-  return [
-    {
-      osmId: 23123123,
-      name: "Gemeinde Groß-Enzersdorf",
-      geojson: {},
-    },
-    {
-      osmId: 23123543,
-      name: "Bezirk Groß-Enzersdorf",
-      geojson: {},
-    },
-  ];
+export const getBBoxForLayer = async (layer) => {
+};
+
+export const getAdminBounds = async (point) => {
+  const response = await fetch(import.meta.env.VITE_API_ENDPOINT + `/osm/admin_bounds/${point.lat}/${point.lng}`);
+  return await response.json();
 };
 
 export const postCalculate = async () => {
@@ -22,26 +17,7 @@ export const postCalculate = async () => {
 };
 
 export const getMethods = async () => {
-  // const response = await fetch(
-  //   import.meta.env.VITE_API_ENDPOINT + "/methods",
-  //   {
-  //     headers: {
-  //       "Content-type": "application/json",
-  //     },
-  //   }
-  // );
-  // return await response.json();
-  return [
-    {
-      title: "OpenHousePopulator",
-      description: "Using OSM Data and population count",
-      questions: [
-        {
-          id: "population",
-          type: "number",
-          text: "Total population in this area",
-        },
-      ],
-    },
-  ];
+  const response = await fetch(import.meta.env.VITE_API_ENDPOINT + "/layer/methods");
+  const methodList = await response.json();
+  return methodList;
 };

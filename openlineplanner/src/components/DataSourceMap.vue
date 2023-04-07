@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import { watch } from "vue";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import DataSourceMapOverlay from "./DataSourceMapOverlay.vue";
@@ -17,6 +18,7 @@ export default {
       selectPoint: null,
       dataStore: useDataStore(),
       marker: null,
+      displayedBounds: [],
     };
   },
   components: { DataSourceMapOverlay },
@@ -49,6 +51,20 @@ export default {
     if (this.dataStore.addPoint) {
       this.setMarker(this.dataStore.addPoint);
     }
+
+    watch(
+      () => this.dataStore.mapBounds,
+      () => {
+        this.updateBounds();
+      }
+    );
+
+    watch(
+      () => this.dataStore.mapHighligh,
+      () => {
+        this.updateHighlight();
+      }
+    );
   },
   methods: {
     setMarker(point) {
@@ -62,10 +78,62 @@ export default {
       marker.on("dragend", this.onDragEnd);
       this.marker = marker;
     },
-    onDragEnd() {
+    onDragEnd() {},
+    updateBounds() {
+      const bounds = this.dataStore.mapBounds;
 
+      this.removeAllBoundLayers();
+
+      bounds.forEach((bound) => {
+        const boundId = bound.properties.id;
+        this.map.addSource(boundId, {
+          type: "geojson",
+          data: bound,
+        });
+
+        this.map.addLayer({
+          id: boundId,
+          type: "fill",
+          source: boundId,
+          paint: {
+            "fill-color": "#1B998B",
+            "fill-opacity": 0.2,
+          },
+        });
+        this.map.addLayer({
+          id: `stroke-${boundId}`,
+          type: "line",
+          source: boundId,
+          paint: {
+            "line-color": "#1B998B",
+            "line-opacity": 0.3,
+            "line-width": 2,
+          },
+        });
+        this.displayedBounds.push(boundId);
+      });
     },
-  }
+    updateHighlight() {
+      const highlight = this.dataStore.mapHighligh;
+      this.displayedBounds.forEach((boundId) => {
+        this.map.setPaintProperty(boundId, "fill-opacity", 0.2);
+        this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.2);
+      });
+      if (highlight) {
+        const boundId = highlight.properties.id;
+        this.map.setPaintProperty(boundId, "fill-opacity", 0.5);
+        this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.8);
+      }
+    },
+    removeAllBoundLayers() {
+      this.displayedBounds.forEach((boundId) => {
+        this.map.removeLayer(boundId);
+        this.map.removeLayer(`stroke-${boundId}`);
+        this.map.removeSource(boundId);
+      });
+      this.displayedBounds = [];
+    },
+  },
 };
 </script>
 
