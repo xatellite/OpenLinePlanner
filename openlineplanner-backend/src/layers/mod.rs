@@ -11,6 +11,7 @@ use geo::{BooleanOps, Contains, HaversineDistance, LineString, MultiPolygon, Poi
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
+    Feature,
 };
 use osmpbfreader::NodeId;
 use serde::{Deserialize, Serialize};
@@ -241,7 +242,7 @@ async fn get_layer_methods() -> impl Responder {
 #[derive(Serialize, Deserialize)]
 struct Answer {
     name: String,
-    value: AnswerValue,
+    value: u64,
 }
 
 #[derive(Serialize, Deserialize, Copy, Clone)]
@@ -252,19 +253,26 @@ enum AnswerValue {
 
 #[derive(Deserialize)]
 struct CalculateLayerRequest {
-    area: AdminArea,
+    area: Feature,
     layer_type: LayerType,
     method: String,
     answers: Vec<Answer>,
 }
 
+impl CalculateLayerRequest {
+    fn admin_area(&self) -> Result<AdminArea, OLPError> {
+        self.area.clone().try_into()
+    }
+}
+
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
     layers: web::Data<RwLock<Layers>>,
-    buildings: web::Data<Vec<Building>>,
+    buildings: web::Data<Buildings>,
     streets: web::Data<Streets>,
 ) -> Result<HttpResponse, OLPError> {
     let request = request.into_inner();
+    let admin_area = request.admin_area()?;
     let layer_type = request.layer_type;
     let _method = request.method;
     let answers = request.answers;
@@ -272,13 +280,13 @@ async fn calculate_new_layer(
     let mut filtered_buildings: Buildings = buildings
         .iter()
         .filter(|building| match &building.geometry {
-            GenericGeometry::GenericPoint(point) => request.area.geometry.contains(point),
-            GenericGeometry::GenericPolygon(polygon) => request.area.geometry.contains(polygon),
+            GenericGeometry::GenericPoint(point) => admin_area.geometry.contains(point),
+            GenericGeometry::GenericPolygon(polygon) => admin_area.geometry.contains(polygon),
         })
         .cloned()
         .collect();
 
-    if let Some(AnswerValue::IntAnswer(answer)) = answers.get(0).map(|ans| ans.value) {
+    if let Some(answer) = answers.get(0).map(|ans| ans.value) {
         filtered_buildings
             .distribute_population(answer, &openhousepopulator::Config::builder().build());
     } else {
@@ -302,14 +310,16 @@ async fn calculate_new_layer(
         centroid.street_graph_id = closest_street_node;
     }
 
+    let new_layer_id = uuid::Uuid::new_v4().to_string();
+
     layers.write().map_err(OLPError::from_error)?.push(Layer {
-        id: String::new(),
-        bbox: MultiPolygon::new(vec![request.area.geometry]),
+        id: new_layer_id.clone(),
+        bbox: MultiPolygon::new(vec![admin_area.geometry]),
         centroids,
         layer_type,
     });
 
-    Ok(HttpResponse::Ok().finish())
+    Ok(HttpResponse::Ok().body(new_layer_id))
 }
 
 async fn get_layer(

@@ -1,18 +1,17 @@
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{Point, Polygon};
 use geojson::{
-    de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
-    GeoJson,
+    Feature, GeoJson,
 };
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use tinytemplate::TinyTemplate;
 
 use crate::error::OLPError;
 
 use super::overpass::query_overpass;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct AdminArea {
     name: String,
     id: String,
@@ -22,6 +21,44 @@ pub struct AdminArea {
         deserialize_with = "deserialize_geometry"
     )]
     pub geometry: Polygon,
+}
+
+impl TryFrom<Feature> for AdminArea {
+    type Error = OLPError;
+
+    fn try_from(value: Feature) -> Result<Self, Self::Error> {
+        let properties = value.properties.unwrap_or_default();
+        let Some(geometry) = value.geometry.and_then(|geometry|
+            TryInto::<Polygon>::try_into(geometry.value).ok()
+        ) else {
+            log::info!("Area dropped due to wrong geometry: {:?}", properties);
+            return Err(OLPError::GeometryError)
+        };
+        Ok(AdminArea {
+            name: format!(
+                "{} {}",
+                properties
+                    .get("name:prefix")
+                    .and_then(|prefix| prefix.as_str())
+                    .unwrap_or_default(),
+                properties
+                    .get("name")
+                    .and_then(|name| name.as_str())
+                    .unwrap_or_default()
+            ),
+            id: properties
+                .get("id")
+                .and_then(|id| id.as_str())
+                .unwrap_or_default()
+                .to_owned(),
+            admin_level: properties
+                .get("admin_level")
+                .and_then(|id| id.as_str())
+                .and_then(|id| id.parse().ok())
+                .unwrap_or_default(),
+            geometry: geometry,
+        })
+    }
 }
 
 static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
@@ -46,39 +83,7 @@ impl TryFrom<GeoJson> for AdminAreas {
             GeoJson::FeatureCollection(feature_collection) => Ok(AdminAreas(
                 feature_collection
                     .into_iter()
-                    .filter_map(|feature| {
-                        let properties = feature.properties.unwrap_or_default();
-                        let Some(geometry) = feature.geometry.and_then(|geometry|
-                            TryInto::<Polygon>::try_into(geometry.value).ok()
-                        ) else {
-                            log::info!("Area dropped due to wrong geometry: {:?}", properties);
-                            return None;
-                        };
-                        Some(AdminArea {
-                            name: format!(
-                                "{} {}",
-                                properties
-                                    .get("name:prefix")
-                                    .and_then(|prefix| prefix.as_str())
-                                    .unwrap_or_default(),
-                                properties
-                                    .get("name")
-                                    .and_then(|name| name.as_str())
-                                    .unwrap_or_default()
-                            ),
-                            id: properties
-                                .get("id")
-                                .and_then(|id| id.as_str())
-                                .unwrap_or_default()
-                                .to_owned(),
-                            admin_level: properties
-                                .get("admin_level")
-                                .and_then(|id| id.as_str())
-                                .and_then(|id| id.parse().ok())
-                                .unwrap_or_default(),
-                            geometry: geometry,
-                        })
-                    })
+                    .filter_map(|feature| feature.try_into().ok())
                     .collect(),
             )),
             _ => Err(OLPError::GeometryError),
