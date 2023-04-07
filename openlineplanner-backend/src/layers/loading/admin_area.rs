@@ -1,6 +1,6 @@
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{Point, Polygon};
-use geojson::{ser::to_feature_collection_string, GeoJson};
+use geojson::{ser::{to_feature_collection_string, serialize_geometry}, GeoJson, de::deserialize_geometry};
 use serde::{Deserialize, Serialize};
 use tinytemplate::TinyTemplate;
 
@@ -13,6 +13,10 @@ pub struct AdminArea {
     name: String,
     id: String,
     admin_level: u16,
+    #[serde(
+        serialize_with = "serialize_geometry",
+        deserialize_with = "deserialize_geometry"
+    )]
     pub geometry: Polygon,
 }
 
