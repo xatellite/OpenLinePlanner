@@ -27,6 +27,7 @@ pub struct AdminArea {
 static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
 is_in({lat}, {lon}) -> .a;
 (
+  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"6\"](pivot.a);
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"7\"](pivot.a);
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"9\"](pivot.a);
