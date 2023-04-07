@@ -44,18 +44,19 @@ pub fn layers() -> Scope {
 pub async fn summarize_layers(
     layers: web::Data<RwLock<Layers>>,
 ) -> Result<Json<Vec<Value>>, OLPError> {
-    Ok(Json(
-        layers
-            .read()
-            .map_err(OLPError::from_error)?
-            .0
-            .iter()
-            .map(|layer| layer.serialize_info())
-            .collect::<Vec<_>>(),
-    ))
+    log::info!("getting layer summary");
+    let layer_summary = layers
+        .read()
+        .map_err(OLPError::from_error)?
+        .0
+        .iter()
+        .map(|layer| layer.serialize_info())
+        .collect::<Vec<_>>();
+    log::info!("summary: {:?}", layer_summary);
+    Ok(Json(layer_summary))
 }
 
-#[derive(Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct PopulatedCentroid {
     #[serde(
         serialize_with = "serialize_geometry",
@@ -88,6 +89,7 @@ impl PopulatedCentroid {
     }
 }
 
+#[derive(Debug)]
 pub struct Layers(Vec<Layer>);
 
 impl Layers {
@@ -169,7 +171,7 @@ impl Layers {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Layer {
     id: String,
     bbox: MultiPolygon,

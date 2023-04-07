@@ -93,6 +93,13 @@ async fn main() -> std::io::Result<()> {
 
     info!("starting openlineplanner backend");
 
+    let mut pbf = OsmPbfReader::new(File::open(Path::new("./pbf/LHGZ.osm.pbf")).unwrap());
+
+    let streets = web::Data::new(load_streetgraph(&mut pbf));
+    let buildings = web::Data::new(load_buildings(&mut pbf));
+
+    log::info!("loading data done");
+
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin("https://openlineplanner.xatellite.io")
@@ -108,18 +115,11 @@ async fn main() -> std::io::Result<()> {
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
-        let mut pbf = OsmPbfReader::new(File::open(Path::new("./pbf/LHGZ.osm.pbf")).unwrap());
-
-        let streets = web::Data::new(load_streetgraph(&mut pbf));
-        let buildings = web::Data::new(load_buildings(&mut pbf));
-
-        log::info!("loading data done");
-
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(RwLock::new(Layers::new())))
-            .app_data(streets)
-            .app_data(buildings)
+            .app_data(streets.clone())
+            .app_data(buildings.clone())
             .route("/station-info", web::post().to(station_info))
             .route(
                 "/coverage-info/{router}",
