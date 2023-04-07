@@ -1,7 +1,4 @@
-use std::{
-    error::Error,
-    fmt::{Display},
-};
+use std::{error::Error, fmt::Display};
 
 use actix_web::{body::BoxBody, HttpResponse, Responder, ResponseError};
 
@@ -10,6 +7,12 @@ pub enum OLPError {
     OverpassError(anyhow::Error),
     GeometryError,
     GenericError(String),
+}
+
+impl OLPError {
+    pub fn from_error<T: Display>(error: T) -> Self {
+        Self::GenericError(error.to_string())
+    }
 }
 
 impl Error for OLPError {}

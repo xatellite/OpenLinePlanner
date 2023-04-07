@@ -12,18 +12,18 @@ use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
 };
-use osmpbfreader::{NodeId};
+use osmpbfreader::NodeId;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+mod loading;
 mod merge;
 pub mod osm;
-mod overpass;
-pub mod protomaps;
+pub use loading::osm;
 pub use merge::*;
 
-use self::osm::AdminArea;
-use crate::error::{OLPError};
+use self::loading::AdminArea;
+use crate::error::OLPError;
 use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
@@ -257,13 +257,13 @@ async fn calculate_new_layer(
     let _layer_type = request.layer_type;
     let _method = request.method;
     let _answers = request.answers;
-    let mut pbf_reader = protomaps::download_pbf(request.area).await.unwrap();
+    /*
     let _populated_buildings = openhousepopulator::populate_houses(
         &mut pbf_reader,
         &None,
         true,
         &openhousepopulator::Config::builder().build(),
-    );
+    );*/
     HttpResponse::Ok()
 }
 

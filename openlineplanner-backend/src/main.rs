@@ -105,7 +105,7 @@ async fn main() -> std::io::Result<()> {
             )
             .route("/find-station", web::post().to(find_station))
             .service(layers::layers())
-            .service(layers::osm::osm())
+            .service(layers::osm())
     })
     .bind(("0.0.0.0", 8080))?
     .run()
