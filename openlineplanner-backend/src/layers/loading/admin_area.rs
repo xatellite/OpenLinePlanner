@@ -1,10 +1,14 @@
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{Point, Polygon};
-use geojson::{ser::{to_feature_collection_string, serialize_geometry}, GeoJson, de::deserialize_geometry};
+use geojson::{
+    de::deserialize_geometry,
+    ser::{serialize_geometry, to_feature_collection_string},
+    GeoJson, Geometry,
+};
 use serde::{Deserialize, Serialize};
 use tinytemplate::TinyTemplate;
 
-use crate::error::OLPError;
+use crate::{error::OLPError, geometry};
 
 use super::overpass::query_overpass;
 
@@ -41,9 +45,19 @@ impl TryFrom<GeoJson> for AdminAreas {
             GeoJson::FeatureCollection(feature_collection) => Ok(AdminAreas(
                 feature_collection
                     .into_iter()
-                    .map(|feature| {
+                    .filter_map(|feature| {
                         let properties = feature.properties.unwrap_or_default();
-                        AdminArea {
+                        let Some(geometry) = feature.geometry.and_then(|geometry|
+                            TryInto::<Polygon>::try_into(geometry.value).ok()
+                        ) else {
+                            log::info!("Area dropped due to wrong geometry: {}", properties
+                                .get("name")
+                                .and_then(|name| name.as_str())
+                                .unwrap_or_default()
+                            );
+                            return None;
+                        };
+                        Some(AdminArea {
                             name: format!(
                                 "{} {}",
                                 properties
@@ -65,8 +79,8 @@ impl TryFrom<GeoJson> for AdminAreas {
                                 .and_then(|id| id.as_str())
                                 .and_then(|id| id.parse().ok())
                                 .unwrap_or_default(),
-                            geometry: feature.geometry.unwrap().value.try_into().unwrap(),
-                        }
+                            geometry: geometry,
+                        })
                     })
                     .collect(),
             )),
