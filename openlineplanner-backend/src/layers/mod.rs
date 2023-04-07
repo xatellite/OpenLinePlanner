@@ -208,8 +208,11 @@ impl Responder for Layer {
 
 #[derive(PartialEq, Debug, Serialize, Deserialize, Eq, Hash, Clone)]
 pub enum LayerType {
+    #[serde(alias = "residential")]
     Residential,
+    #[serde(alias = "workplace")]
     Workplace,
+    #[serde(alias = "shopping")]
     Shopping,
 }
 
