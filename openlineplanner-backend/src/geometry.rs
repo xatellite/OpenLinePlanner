@@ -2,7 +2,7 @@ use geo::{
     CoordFloat, HaversineDistance, HaversineLength, Line, LineInterpolatePoint, LineString, Point,
 };
 
-use crate::{layers::PopulatedCentroid, osm::Streets};
+use crate::{layers::streetgraph::Streets, layers::PopulatedCentroid};
 use osmpbfreader::NodeId;
 use petgraph::algo::dijkstra;
 

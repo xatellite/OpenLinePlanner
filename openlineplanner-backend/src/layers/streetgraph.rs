@@ -1,10 +1,8 @@
-use std::{collections::HashMap, path::Path};
+use std::collections::HashMap;
 
 use geo::{HaversineDistance, Point};
-use osmpbfreader::{NodeId, OsmObj};
+use osmpbfreader::{NodeId, OsmObj, OsmPbfReader};
 use petgraph::prelude::UnGraphMap;
-
-use crate::layers::PopulatedCentroid;
 
 pub struct Streets {
     pub nodes: HashMap<NodeId, Point>,
@@ -12,17 +10,9 @@ pub struct Streets {
 }
 
 /// Generates a street graph for a given area and maps new houses
-pub fn _read_osm_nodes(
-    file: &Path,
-    mut houses: Vec<PopulatedCentroid>,
-) -> (
-    UnGraphMap<NodeId, f64>,
-    Vec<PopulatedCentroid>,
-    HashMap<NodeId, Point>,
-) {
-    let r = std::fs::File::open(file).unwrap();
-    let mut pbf = osmpbfreader::OsmPbfReader::new(r);
-
+pub fn generate_streetgraph<T: std::io::Read + std::io::Seek>(
+    pbf: &mut OsmPbfReader<T>,
+) -> Streets {
     let osm_nodes = pbf.get_objs_and_deps(|obj| obj.is_node()).unwrap();
 
     let nodes: HashMap<NodeId, Point> = osm_nodes
@@ -79,17 +69,7 @@ pub fn _read_osm_nodes(
         .map(|(a, b)| (a.clone(), b.clone()))
         .collect();
 
-    for mut house in &mut houses {
-        let closest_street_node = nodes
-            .iter()
-            .min_by_key(|(_, node)| node.haversine_distance(&house.geometry) as u32)
-            .map(|(id, _)| id)
-            .copied();
+    let streetgraph = UnGraphMap::from_edges(edges);
 
-        house.street_graph_id = closest_street_node;
-    }
-
-    let graph = UnGraphMap::from_edges(edges);
-
-    (graph, houses, nodes)
+    Streets { streetgraph, nodes }
 }

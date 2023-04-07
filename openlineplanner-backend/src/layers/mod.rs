@@ -7,7 +7,7 @@ use actix_web::{
     HttpResponse, Responder, Scope,
 };
 
-use geo::{BooleanOps, HaversineDistance, LineString, MultiPolygon, Point, Polygon};
+use geo::{BooleanOps, Contains, HaversineDistance, LineString, MultiPolygon, Point, Polygon};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
@@ -18,13 +18,13 @@ use serde_json::{json, Value};
 
 mod loading;
 mod merge;
-pub mod osm;
+pub mod streetgraph;
 pub use loading::osm;
 pub use merge::*;
 
-use self::loading::AdminArea;
+use self::{loading::AdminArea, streetgraph::Streets};
 use crate::error::OLPError;
-use openhousepopulator::{Building, GenericGeometry};
+use openhousepopulator::{Building, Buildings, GenericGeometry};
 
 pub fn layers() -> Scope {
     web::scope("/layer")
@@ -244,7 +244,7 @@ struct Answer {
     value: AnswerValue,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Copy, Clone)]
 enum AnswerValue {
     IntAnswer(u64),
     BoolAnswer(bool),
@@ -261,23 +261,54 @@ struct CalculateLayerRequest {
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
     layers: web::Data<RwLock<Layers>>,
+    buildings: web::Data<Vec<Building>>,
+    streets: web::Data<Streets>,
 ) -> Result<HttpResponse, OLPError> {
     let request = request.into_inner();
     let layer_type = request.layer_type;
     let _method = request.method;
-    let _answers = request.answers;
-    /*let populated_buildings = openhousepopulator::populate_houses(
-        &mut pbf_reader,
-        &None,
-        true,
-        &openhousepopulator::Config::builder().build(),
-    );*/
+    let answers = request.answers;
+
+    let mut filtered_buildings: Buildings = buildings
+        .iter()
+        .filter(|building| match &building.geometry {
+            GenericGeometry::GenericPoint(point) => request.area.geometry.contains(point),
+            GenericGeometry::GenericPolygon(polygon) => request.area.geometry.contains(polygon),
+        })
+        .cloned()
+        .collect();
+
+    if let Some(AnswerValue::IntAnswer(answer)) = answers.get(0).map(|ans| ans.value) {
+        filtered_buildings
+            .distribute_population(answer, &openhousepopulator::Config::builder().build());
+    } else {
+        filtered_buildings.estimate_population();
+    }
+
+    let mut centroids: Vec<PopulatedCentroid> = filtered_buildings
+        .into_iter()
+        .filter_map(|building| building.try_into().ok())
+        .collect();
+
+    let nodes = &streets.nodes;
+
+    for centroid in &mut centroids {
+        let closest_street_node = nodes
+            .iter()
+            .min_by_key(|(_, node)| node.haversine_distance(&centroid.geometry) as u32)
+            .map(|(id, _)| id)
+            .copied();
+
+        centroid.street_graph_id = closest_street_node;
+    }
+
     layers.write().map_err(OLPError::from_error)?.push(Layer {
         id: String::new(),
         bbox: MultiPolygon::new(vec![request.area.geometry]),
-        centroids: vec![],
-        layer_type: layer_type,
+        centroids,
+        layer_type,
     });
+
     Ok(HttpResponse::Ok().finish())
 }
 
@@ -295,7 +326,9 @@ async fn get_layer(
 }
 
 async fn delete_layer(id: web::Path<String>, layers: web::Data<RwLock<Layers>>) -> impl Responder {
-    let index = layers.read().unwrap()
+    let index = layers
+        .read()
+        .unwrap()
         .0
         .iter()
         .position(|layer| &layer.id == id.as_ref());

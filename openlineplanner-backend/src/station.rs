@@ -8,8 +8,8 @@ use crate::{
     coverage::StationCoverageInfo,
     coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
     geometry::{DensifyHaversine, OsmPopulatedCentroidDistanceCalculator},
+    layers::streetgraph::Streets,
     layers::PopulatedCentroid,
-    osm::Streets,
 };
 
 static DEFAULT_COVERAGE: f64 = 300f64;

@@ -14,9 +14,9 @@ use crate::error::OLPError;
 use crate::geometry::HaversinePopulatedCentroidDistanceCalculator;
 use crate::geometry::OsmPopulatedCentroidDistanceCalculator;
 use crate::geometry::PopulatedCentroidDistanceCalculator;
+use crate::layers::streetgraph::Streets;
 use crate::layers::Layers;
 use crate::layers::PopulatedCentroid;
-use crate::osm::Streets;
 use crate::Station;
 
 use std::collections::HashMap;

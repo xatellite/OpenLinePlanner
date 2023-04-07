@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::path::Path;
 use std::sync::RwLock;
 
 use actix_cors::Cors;
@@ -6,7 +8,8 @@ use anyhow::Result;
 use error::OLPError;
 use geo::Point;
 use log::info;
-use osm::Streets;
+use openhousepopulator::Buildings;
+use osmpbfreader::OsmPbfReader;
 use population::InhabitantsMap;
 use serde::Deserialize;
 
@@ -18,7 +21,9 @@ mod population;
 mod station;
 
 use coverage::{CoverageMap, Method, Routing};
-use layers::{osm, LayerType, Layers};
+use layers::streetgraph::generate_streetgraph;
+use layers::streetgraph::Streets;
+use layers::{LayerType, Layers};
 use station::{OptimalStationResult, Station};
 
 #[derive(Deserialize)]
@@ -103,9 +108,18 @@ async fn main() -> std::io::Result<()> {
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
+        let mut pbf = OsmPbfReader::new(File::open(Path::new("./pbf/LHGZ.osm.pbf")).unwrap());
+
+        let streets = web::Data::new(load_streetgraph(&mut pbf));
+        let buildings = web::Data::new(load_buildings(&mut pbf));
+
+        log::info!("loading data done");
+
         App::new()
             .wrap(cors)
             .app_data(web::Data::new(RwLock::new(Layers::new())))
+            .app_data(streets)
+            .app_data(buildings)
             .route("/station-info", web::post().to(station_info))
             .route(
                 "/coverage-info/{router}",
@@ -136,4 +150,17 @@ fn setup_logger() -> Result<()> {
         .chain(std::io::stdout())
         .apply()?;
     Ok(())
+}
+
+fn load_buildings<T: std::io::Read + std::io::Seek>(pbf: &mut OsmPbfReader<T>) -> Buildings {
+    openhousepopulator::calculate_buildings(
+        pbf,
+        true,
+        &openhousepopulator::Config::builder().build(),
+    )
+    .unwrap()
+}
+
+fn load_streetgraph<T: std::io::Read + std::io::Seek>(pbf: &mut OsmPbfReader<T>) -> Streets {
+    generate_streetgraph(pbf)
 }

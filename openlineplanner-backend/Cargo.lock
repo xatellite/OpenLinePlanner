@@ -1733,7 +1733,7 @@ checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
 [[package]]
 name = "openhousepopulator"
 version = "0.2.2"
-source = "git+https://github.com/xatellite/OpenHousePopulator?rev=v2.4#bc3251a39cfc9506d558d6c873c0beea14caa588"
+source = "git+https://github.com/xatellite/OpenHousePopulator?rev=v2.7#c819e7a22cd885b312b98c7231e38c93b621c5a7"
 dependencies = [
  "clap 4.2.1",
  "config",
@@ -1744,6 +1744,7 @@ dependencies = [
  "geojson 0.23.0",
  "handlebars",
  "itertools",
+ "log",
  "nom",
  "osmpbfreader 0.16.0",
  "rand 0.8.5",
