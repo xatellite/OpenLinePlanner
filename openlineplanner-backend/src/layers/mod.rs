@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, sync::RwLock};
+use std::{collections::HashMap, fmt::Display, sync::RwLock, thread};
 
 use actix_web::{
     body::BoxBody,
@@ -22,6 +22,7 @@ mod merge;
 pub mod streetgraph;
 pub use loading::osm;
 pub use merge::*;
+use uuid::Uuid;
 
 use self::{loading::AdminArea, streetgraph::Streets};
 use crate::error::OLPError;
@@ -44,15 +45,14 @@ pub fn layers() -> Scope {
 pub async fn summarize_layers(
     layers: web::Data<RwLock<Layers>>,
 ) -> Result<Json<Vec<Value>>, OLPError> {
-    log::info!("getting layer summary");
+    log::info!("getting layer summary {:?}", thread::current().id());
     let layer_summary = layers
         .read()
         .map_err(OLPError::from_error)?
         .0
         .iter()
-        .map(|layer| layer.serialize_info())
+        .map(|(_, layer)| layer.serialize_info())
         .collect::<Vec<_>>();
-    log::info!("summary: {:?}", layer_summary);
     Ok(Json(layer_summary))
 }
 
@@ -90,28 +90,28 @@ impl PopulatedCentroid {
 }
 
 #[derive(Debug)]
-pub struct Layers(Vec<Layer>);
+pub struct Layers(HashMap<Uuid, Layer>);
 
 impl Layers {
     pub fn by_type(&self, layer_type: LayerType) -> Layer {
         let centroids: Vec<PopulatedCentroid> = self
             .0
             .iter()
-            .filter(|layer| layer.layer_type == layer_type)
-            .flat_map(|layer| layer.centroids.clone())
+            .filter(|(_, layer)| layer.layer_type == layer_type)
+            .flat_map(|(_, layer)| layer.centroids.clone())
             .collect();
         let bbox = self
             .0
             .iter()
-            .filter(|layer| layer.layer_type == layer_type)
-            .map(|layer| layer.bbox.clone())
+            .filter(|(_, layer)| layer.layer_type == layer_type)
+            .map(|(_, layer)| layer.bbox.clone())
             .reduce(|acc, bbox| acc.union(&bbox))
             .unwrap_or(MultiPolygon::new(vec![Polygon::new(
                 LineString::from(vec![(0., 0.)]),
                 vec![],
             )]));
         Layer {
-            id: layer_type.to_string(),
+            id: Uuid::nil(),
             bbox,
             centroids,
             layer_type: layer_type,
@@ -120,7 +120,7 @@ impl Layers {
 
     pub fn all_merged_by_type(&self) -> Vec<Layer> {
         let mut layers_map: HashMap<LayerType, Layer> = HashMap::new();
-        for layer in &self.0 {
+        for (_, layer) in &self.0 {
             layers_map
                 .entry(layer.layer_type.clone())
                 .and_modify(|elem| {
@@ -136,7 +136,7 @@ impl Layers {
         if self.0.is_empty() {
             // Return empty layer to stay restful
             return Layer {
-                id: "all".to_string(),
+                id: Uuid::nil(),
                 bbox: MultiPolygon::new(vec![]),
                 centroids: Vec::new(),
                 layer_type: LayerType::Residential,
@@ -145,35 +145,39 @@ impl Layers {
         let centroids: Vec<PopulatedCentroid> = self
             .0
             .iter()
-            .flat_map(|layer| layer.centroids.clone())
+            .flat_map(|(_, layer)| layer.centroids.clone())
             .collect();
         let bbox = self
             .0
             .iter()
-            .map(|layer| layer.bbox.clone())
+            .map(|(_, layer)| layer.bbox.clone())
             .reduce(|acc, bbox| acc.union(&bbox))
             .unwrap();
 
         Layer {
-            id: "all".to_string(),
+            id: Uuid::nil(),
             bbox,
             centroids,
             layer_type: LayerType::Residential,
         }
     }
 
+    pub fn get(&self, id: &Uuid) -> Option<&Layer> {
+        self.0.get(id)
+    }
+
     pub fn new() -> Self {
-        Self(Vec::new())
+        Self(HashMap::new())
     }
 
     pub fn push(&mut self, layer: Layer) {
-        self.0.push(layer)
+        self.0.insert(layer.id, layer);
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct Layer {
-    id: String,
+    id: Uuid,
     bbox: MultiPolygon,
     centroids: Vec<PopulatedCentroid>,
     layer_type: LayerType,
@@ -244,7 +248,7 @@ async fn get_layer_methods() -> impl Responder {
         .json(tmp_json)
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Hash, Debug)]
 struct Answer {
     name: String,
     value: u64,
@@ -279,7 +283,7 @@ async fn calculate_new_layer(
     let request = request.into_inner();
     let admin_area = request.admin_area()?;
     let layer_type = request.layer_type;
-    let _method = request.method;
+    let method = request.method;
     let answers = request.answers;
 
     let mut filtered_buildings: Buildings = buildings
@@ -315,7 +319,10 @@ async fn calculate_new_layer(
         centroid.street_graph_id = closest_street_node;
     }
 
-    let new_layer_id = uuid::Uuid::new_v4().to_string();
+    let new_layer_id = uuid::Uuid::new_v5(
+        &uuid::Uuid::NAMESPACE_URL,
+        format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
+    );
 
     layers.write().map_err(OLPError::from_error)?.push(Layer {
         id: new_layer_id.clone(),
@@ -324,35 +331,27 @@ async fn calculate_new_layer(
         layer_type,
     });
 
-    Ok(HttpResponse::Ok().body(new_layer_id))
+    Ok(HttpResponse::Ok().json(new_layer_id))
 }
 
 async fn get_layer(
-    id: web::Path<String>,
+    id: web::Path<Uuid>,
     layers: web::Data<RwLock<Layers>>,
 ) -> Result<Option<Layer>, OLPError> {
     Ok(layers
         .read()
         .map_err(OLPError::from_error)?
         .0
-        .iter()
-        .find(|layer| &layer.id == id.as_ref())
+        .get(&id)
         .cloned())
 }
 
-async fn delete_layer(id: web::Path<String>, layers: web::Data<RwLock<Layers>>) -> impl Responder {
-    let index = layers
-        .read()
-        .unwrap()
-        .0
-        .iter()
-        .position(|layer| &layer.id == id.as_ref());
-
-    match index {
-        Some(index) => {
-            layers.write().unwrap().0.remove(index);
-            HttpResponse::Ok().finish()
-        }
-        None => HttpResponse::NotFound().finish(),
+async fn delete_layer(
+    id: web::Path<Uuid>,
+    layers: web::Data<RwLock<Layers>>,
+) -> Result<HttpResponse, OLPError> {
+    match layers.write().map_err(OLPError::from_error)?.0.remove(&id) {
+        Some(_) => Ok(HttpResponse::Ok().finish()),
+        None => Ok(HttpResponse::NotFound().finish()),
     }
 }

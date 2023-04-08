@@ -97,6 +97,7 @@ async fn main() -> std::io::Result<()> {
 
     let streets = web::Data::new(load_streetgraph(&mut pbf));
     let buildings = web::Data::new(load_buildings(&mut pbf));
+    let layers = web::Data::new(RwLock::new(Layers::new()));
 
     log::info!("loading data done");
 
@@ -117,7 +118,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(cors)
-            .app_data(web::Data::new(RwLock::new(Layers::new())))
+            .app_data(layers.clone())
             .app_data(streets.clone())
             .app_data(buildings.clone())
             .route("/station-info", web::post().to(station_info))

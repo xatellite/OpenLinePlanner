@@ -13,9 +13,9 @@ use super::overpass::query_overpass;
 
 #[derive(Serialize)]
 pub struct AdminArea {
-    name: String,
-    id: String,
-    admin_level: u16,
+    pub name: String,
+    pub id: String,
+    pub admin_level: u16,
     #[serde(
         serialize_with = "serialize_geometry",
         deserialize_with = "deserialize_geometry"
