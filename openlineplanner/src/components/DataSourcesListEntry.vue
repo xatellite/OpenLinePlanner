@@ -1,19 +1,23 @@
 <template>
-  <div class="layer-entry">
-    <HomeCityIcon v-if="layer.type == 'residential'" />
-    <CartOutlineIcon v-else-if="layer.type == 'shopping'" />
-    <BriefcaseOutlineIcon v-else-if="layer.type == 'business'" />
-    <SchoolOutlineIcon v-else-if="layer.type == 'school'" />
-    <TheaterIcon v-else-if="layer.type == 'leisure'" />
-    <BinocularsIcon v-else-if="layer.type == 'tourism'" />
+  <div
+    :class="layerActive ? 'layer-entry layer-entry--active' : 'layer-entry'"
+    @click="toggleLayer"
+  >
+    <HomeCityIcon v-if="layer.layer_type == 'Residential'" />
+    <CartOutlineIcon v-else-if="layer.layer_type == 'Shopping'" />
+    <BriefcaseOutlineIcon v-else-if="layer.layer_type == 'Business'" />
+    <SchoolOutlineIcon v-else-if="layer.layer_type == 'School'" />
+    <TheaterIcon v-else-if="layer.layer_type == 'Leisure'" />
+    <BinocularsIcon v-else-if="layer.layer_type == 'Tourism'" />
     <MapMarkerStarOutline v-else />
     <div class="layer-entry__text">
-      <span class="layer-entry__text__title">{{ layer.properties.name }}</span>
-      <span>{{ layer.properties.description }}</span>
+      <span class="layer-entry__text__title">{{ layer.name }}</span>
+      <span>{{ layer.layer_type }}</span>
     </div>
+    <LoadingIcon v-if="layerLoading" class="loader" />
     <TooltipButton
       toolTip="Remove layer (permanent)"
-      :handler="dataStore.removeLayer(layer)"
+      :handler="remove"
     >
       <span class="remove"><TrashCanOutlineIcon /></span>
     </TooltipButton>
@@ -29,7 +33,10 @@ import TheaterIcon from "vue-material-design-icons/Theater.vue";
 import BinocularsIcon from "vue-material-design-icons/Binoculars.vue";
 import MapMarkerStarOutline from "vue-material-design-icons/MapMarkerStarOutline.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
-import { useDataStore } from '../stores/data';
+import LoadingIcon from "vue-material-design-icons/Loading.vue";
+import { useDataStore } from "../stores/data";
+import TooltipButton from "./TooltipButton.vue";
+import { getLayer } from '../helpers/api';
 
 export default {
   props: {
@@ -38,6 +45,8 @@ export default {
   data() {
     return {
       dataStore: useDataStore(),
+      layerActive: false,
+      layerLoading: false,
     };
   },
   components: {
@@ -49,21 +58,58 @@ export default {
     BinocularsIcon,
     MapMarkerStarOutline,
     TrashCanOutlineIcon,
+    TooltipButton,
+    LoadingIcon,
   },
+  methods: {
+    toggleLayer() {
+      if (this.layerLoading) {
+        return;
+      }
+      if (this.layerActive) {
+        this.dataStore.removeMapBoundsById(this.layer.id);
+        this.layerActive = false;
+        return;
+      }
+      this.layerActive = true;
+      this.layerLoading = true;
+      getLayer(this.layer.id).then((layerGeoJson) => {
+        layerGeoJson.properties = {};
+        layerGeoJson.properties.id = this.layer.id;
+        this.dataStore.addMapBound(layerGeoJson, "points", "layer", "#FEC80B");
+        this.layerLoading = false;
+      });
+    },
+    remove(event) {
+      event.stopPropagation();
+      this.dataStore.removeLayer(this.layer);
+    },
+  }
 };
 </script>
 
 <style lang="scss" scoped>
-.line-element {
+.layer-entry {
   display: flex;
   gap: $space-sm;
+  padding: $space-sm $space-md;
+  align-items: center;
+  cursor: pointer;
+
+  &--active {
+    background-color: var(--c-background-inverted);
+    color: var(--c-text-inverted);
+  }
 
   &__text {
     display: flex;
     flex-direction: column;
+    font-size: $font-sm;
+    margin-right: auto;
 
     &__title {
       font-weight: bold;
+      font-size: $font-md;
     }
   }
 }

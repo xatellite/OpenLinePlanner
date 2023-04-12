@@ -93,7 +93,7 @@ async fn main() -> std::io::Result<()> {
 
     info!("starting openlineplanner backend");
 
-    let mut pbf = OsmPbfReader::new(File::open(Path::new("./pbf/LHGZ.osm.pbf")).unwrap());
+    let mut pbf = OsmPbfReader::new(File::open(Path::new("./pbf/BaseLayer.osm.pbf")).unwrap());
 
     let streets = web::Data::new(load_streetgraph(&mut pbf));
     let buildings = web::Data::new(load_buildings(&mut pbf));
@@ -111,7 +111,7 @@ async fn main() -> std::io::Result<()> {
                     .ends_with(b".openlineplanner.xatellite.io")
             })
             .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b"localhost:3000"))
-            .allowed_methods(vec!["GET", "POST"])
+            .allowed_methods(vec!["GET", "POST", "DELETE"])
             .allowed_headers(vec![http::header::AUTHORIZATION, http::header::ACCEPT])
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);

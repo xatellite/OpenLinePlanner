@@ -4,6 +4,7 @@ import {
   getAdminBounds,
   getLayers,
   deleteLayer,
+  postCalculate,
 } from "../helpers/api";
 
 export const useDataStore = () => {
@@ -40,19 +41,39 @@ export const useDataStore = () => {
         getAdminBounds(value)
           .then((areas) => {
             this.areas = areas.features;
-            this.mapBounds = areas.features;
+            this.removeMapBoundsByType("proposal");
+            this.areas.forEach((area) => {
+              this.addMapBound(area, "area", "proposal", "#1B998B");
+            });
             this.mapHighligh = null;
             if (areas.length == 0) {
               this.noAreas = true;
             }
           })
-          .catch(() => {
-            console.log("error");
+          .catch((err) => {
+            console.log("error", err);
             this.noAreas = true;
           });
       },
       removeAddPoint() {
         this.addPoint = null;
+      },
+      addMapBound(area, type, ref, color) {
+        console.log(area);
+        area.properties.type = type;
+        area.properties.color = color;
+        area.properties.ref = ref;
+        this.mapBounds = [...this.mapBounds, area];
+      },
+      removeMapBoundsById(id) {
+        this.mapBounds = this.mapBounds.filter(
+          (area) => area.properties.id != id
+        );
+      },
+      removeMapBoundsByType(ref) {
+        this.mapBounds = this.mapBounds.filter(
+          (area) => area.properties.ref != ref
+        );
       },
       highlightArea(area) {
         this.mapHighligh = area;
@@ -73,8 +94,24 @@ export const useDataStore = () => {
       async loadLayers() {
         this.layers = await getLayers();
       },
-      removeLayer(layer) {
-        deleteLayer(layer);
+      calculateLayer() {
+        this.loadingLayer = true;
+        postCalculate(this.selectedMethod, this.selectedArea)
+          .then(() => {
+            this.loadingLayer = false;
+            this.resetSelection();
+            this.loadLayers();
+          })
+          .catch(() => {
+            this.loadingLayer = false;
+            this.resetSelection();
+            this.loadLayers();
+          });
+      },
+      async removeLayer(layer) {
+        this.removeMapBoundsById(layer.properties.id);
+        await deleteLayer(layer);
+        this.loadLayers();
       },
       resetSelection() {
         this.selectedArea = null;

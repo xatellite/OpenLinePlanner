@@ -115,6 +115,7 @@ impl Layers {
             bbox,
             centroids,
             layer_type: layer_type,
+            layer_name: layer_type.to_string(),
         }
     }
 
@@ -140,6 +141,7 @@ impl Layers {
                 bbox: MultiPolygon::new(vec![]),
                 centroids: Vec::new(),
                 layer_type: LayerType::Residential,
+                layer_name: "Residential".to_string(),
             };
         }
         let centroids: Vec<PopulatedCentroid> = self
@@ -159,6 +161,7 @@ impl Layers {
             bbox,
             centroids,
             layer_type: LayerType::Residential,
+            layer_name: "Residential".to_string(),
         }
     }
 
@@ -181,6 +184,7 @@ pub struct Layer {
     bbox: MultiPolygon,
     centroids: Vec<PopulatedCentroid>,
     layer_type: LayerType,
+    layer_name: String,
 }
 
 impl Layer {
@@ -194,7 +198,8 @@ impl Layer {
     pub fn serialize_info(&self) -> Value {
         json! ({
             "id": self.id,
-            "layer_type": self.layer_type
+            "layer_type": self.layer_type,
+            "name": self.layer_name,
         })
     }
 }
@@ -212,7 +217,7 @@ impl Responder for Layer {
     }
 }
 
-#[derive(PartialEq, Debug, Serialize, Deserialize, Eq, Hash, Clone)]
+#[derive(PartialEq, Debug, Serialize, Deserialize, Eq, Hash, Clone, Copy)]
 pub enum LayerType {
     #[serde(alias = "residential")]
     Residential,
@@ -262,6 +267,7 @@ enum AnswerValue {
 
 #[derive(Deserialize)]
 struct CalculateLayerRequest {
+    name: String,
     area: Feature,
     layer_type: LayerType,
     method: String,
@@ -285,6 +291,7 @@ async fn calculate_new_layer(
     let layer_type = request.layer_type;
     let method = request.method;
     let answers = request.answers;
+    let layer_name = request.name;
 
     let mut filtered_buildings: Buildings = buildings
         .iter()
@@ -329,6 +336,7 @@ async fn calculate_new_layer(
         bbox: MultiPolygon::new(vec![admin_area.geometry]),
         centroids,
         layer_type,
+        layer_name,
     });
 
     Ok(HttpResponse::Ok().json(new_layer_id))

@@ -56,7 +56,7 @@
       <div class="data-overlay__actions">
         <button @click="dataStore.selectedMethod = null">Back</button>
         <button
-          @click="dataStore.selectArea(selectArea)"
+          @click="dataStore.selectArea(selectedArea)"
           :disabled="!selectedArea"
         >
           Next
@@ -76,7 +76,7 @@
               :title="question.text"
               type="number"
               :value="question.answer"
-              :callback="(value) => dataStore.answerQuestion(index, value)"
+              :callback="(value) => dataStore.answerQuestion(index, Number(value))"
             />
           </div>
           <div v-if="question.type == 'bool'">
@@ -89,7 +89,7 @@
         <button @click="dataStore.selectedArea = null">Back</button>
         <button
           :disabled="!dataStore.questionsResolved"
-          @click="dataStore.loadingLayer = true"
+          @click="dataStore.calculateLayer"
         >
           Request
         </button>

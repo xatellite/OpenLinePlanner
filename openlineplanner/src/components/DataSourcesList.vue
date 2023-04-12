@@ -4,7 +4,7 @@
       <div
         class="data-list__item"
         v-for="layer in dataStore.layers"
-        :key="`${layer.properties.id}-list-entry`"
+        :key="`${layer.name}-list-entry`"
       >
         <DataSourcesListEntry :layer="layer" />
       </div>
@@ -24,7 +24,7 @@ export default {
   components: {
     ListContainer,
     DataSourcesListEntry
-},
+  },
   data() {
     return {
       dataStore: useDataStore(),

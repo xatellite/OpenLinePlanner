@@ -96,50 +96,75 @@ export default {
       this.removeAllBoundLayers();
 
       bounds.forEach((bound) => {
+        console.log("bounds");
         const boundId = bound.properties.id;
+        console.log(boundId);
         this.map.addSource(boundId, {
           type: "geojson",
           data: bound,
         });
 
-        this.map.addLayer({
-          id: boundId,
-          type: "fill",
-          source: boundId,
-          paint: {
-            "fill-color": "#1B998B",
-            "fill-opacity": 0.2,
-          },
-        });
-        this.map.addLayer({
-          id: `stroke-${boundId}`,
-          type: "line",
-          source: boundId,
-          paint: {
-            "line-color": "#1B998B",
-            "line-opacity": 0.3,
-            "line-width": 2,
-          },
-        });
+        if (bound.properties.type == "area") {
+          this.map.addLayer({
+            id: `area-${boundId}`,
+            type: "fill",
+            source: boundId,
+            paint: {
+              "fill-color": bound.properties.color,
+              "fill-opacity": 0.2,
+            },
+          });
+          this.map.addLayer({
+            id: `stroke-${boundId}`,
+            type: "line",
+            source: boundId,
+            paint: {
+              "line-color": bound.properties.color,
+              "line-opacity": 0.3,
+              "line-width": 2,
+            },
+          });
+        } else if (bound.properties.type == "points") {
+          console.log("points");
+          this.map.addLayer({
+            id: `points-${boundId}`,
+            type: "circle",
+            source: boundId,
+            paint: {
+              "circle-radius": 6,
+              "circle-color": bound.properties.color,
+            },
+          });
+        }
         this.displayedBounds.push(boundId);
       });
     },
     updateHighlight() {
       const highlight = this.dataStore.mapHighligh;
       this.displayedBounds.forEach((boundId) => {
-        this.map.setPaintProperty(boundId, "fill-opacity", 0.2);
-        this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.2);
+        if (this.map.getLayer(`area-${boundId}`)) {
+          this.map.setPaintProperty(`area-${boundId}`, "fill-opacity", 0.2);
+          this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.2);
+        }
       });
       if (highlight) {
         const boundId = highlight.properties.id;
-        this.map.setPaintProperty(boundId, "fill-opacity", 0.5);
-        this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.8);
+        if (this.map.getLayer(`area-${boundId}`)) {
+          this.map.setPaintProperty(`area-${boundId}`, "fill-opacity", 0.5);
+          this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.8);
+        }
       }
     },
     removeAllBoundLayers() {
       this.displayedBounds.forEach((boundId) => {
-        this.map.removeLayer(boundId);
-        this.map.removeLayer(`stroke-${boundId}`);
+        console.log("Remove", boundId);
+        if (this.map.getLayer(`area-${boundId}`)) {
+          this.map.removeLayer(`area-${boundId}`);
+          this.map.removeLayer(`stroke-${boundId}`);
+        }
+        if (this.map.getLayer(`points-${boundId}`)) {
+          this.map.removeLayer(`points-${boundId}`);
+        }
         this.map.removeSource(boundId);
       });
       this.displayedBounds = [];
