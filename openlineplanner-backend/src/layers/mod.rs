@@ -7,7 +7,7 @@ use actix_web::{
     HttpResponse, Responder, Scope,
 };
 
-use geo::{BooleanOps, Contains, HaversineDistance, LineString, MultiPolygon, Point, Polygon};
+use geo::{BooleanOps, Contains, HaversineDistance, LineString, MultiPolygon, Point, Polygon, Centroid};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
@@ -31,6 +31,7 @@ use openhousepopulator::{Building, Buildings, GenericGeometry};
 pub fn layers() -> Scope {
     web::scope("/layer")
         .app_data(Data::new(Layers::new()))
+        .route("/center", web::get().to(find_center))
         .route("/calculate", web::post().to(calculate_new_layer))
         .route("/methods", web::get().to(get_layer_methods))
         .route(
@@ -40,6 +41,17 @@ pub fn layers() -> Scope {
         .route("/{layer_id}", web::get().to(get_layer))
         .route("/{layer_id}", web::delete().to(delete_layer))
         .route("", web::get().to(summarize_layers))
+}
+
+pub async fn find_center(layers: web::Data<RwLock<Layers>>) -> Result<Json<Point<f64>>, OLPError> {
+    layers
+        .read()
+        .map_err(OLPError::from_error)?
+        .all_merged()
+        .bbox
+        .centroid()
+        .ok_or(OLPError::GenericError("failed to find center of data".to_string()))
+        .map(|point| Json(point))
 }
 
 pub async fn summarize_layers(
@@ -114,7 +126,7 @@ impl Layers {
             id: Uuid::nil(),
             bbox,
             centroids,
-            layer_type: layer_type,
+            layer_type,
             layer_name: layer_type.to_string(),
         }
     }
@@ -163,10 +175,6 @@ impl Layers {
             layer_type: LayerType::Residential,
             layer_name: "Residential".to_string(),
         }
-    }
-
-    pub fn get(&self, id: &Uuid) -> Option<&Layer> {
-        self.0.get(id)
     }
 
     pub fn new() -> Self {

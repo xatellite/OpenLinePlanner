@@ -1,6 +1,7 @@
 use geo::{
     CoordFloat, HaversineDistance, HaversineLength, Line, LineInterpolatePoint, LineString, Point,
 };
+use std::collections::HashMap;
 
 use crate::{layers::streetgraph::Streets, layers::PopulatedCentroid};
 use osmpbfreader::NodeId;
@@ -53,29 +54,67 @@ where
     }
 }
 
-pub trait PopulatedCentroidDistanceCalculator {
+pub trait DistanceCalculator {
+    type FixedPoint: DistanceFromPoint;
     fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64;
+    fn fix_point(&self, point: &Point) -> Self::FixedPoint;
 }
 
-pub struct HaversinePopulatedCentroidDistanceCalculator;
+pub trait DistanceFromPoint {
+    fn distance(&self, other: &PopulatedCentroid) -> f64;
+}
 
-impl PopulatedCentroidDistanceCalculator for HaversinePopulatedCentroidDistanceCalculator {
-    fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64 {
-        a.haversine_distance(b)
+pub struct HaversineDistanceCalculator;
+
+pub struct HaversineFixedPoint {
+    point: Point
+}
+
+impl DistanceFromPoint for HaversineFixedPoint {
+    fn distance(&self, other: &PopulatedCentroid) -> f64 {
+        self.point.haversine_distance(&other.geometry)
     }
 }
 
-impl HaversinePopulatedCentroidDistanceCalculator {
+impl DistanceCalculator for HaversineDistanceCalculator {
+    type FixedPoint = HaversineFixedPoint;
+
+    fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64 {
+        a.haversine_distance(b)
+    }
+    fn fix_point(&self, point: &Point) -> Self::FixedPoint {
+        HaversineFixedPoint {point: point.clone()}
+    }
+}
+
+impl HaversineDistanceCalculator {
     pub fn new() -> Self {
         Self
     }
 }
 
-pub struct OsmPopulatedCentroidDistanceCalculator<'a> {
+pub struct OsmDistanceCalculator<'a> {
     streets: &'a Streets,
+
 }
 
-impl<'a> PopulatedCentroidDistanceCalculator for OsmPopulatedCentroidDistanceCalculator<'a> {
+pub struct OsmFixedPoint {
+    diff_distance: f64, 
+    distance_matrix: HashMap<NodeId, f64>
+}
+
+impl DistanceFromPoint for OsmFixedPoint {
+    fn distance(&self, other: &PopulatedCentroid) -> f64 {
+        self.distance_matrix
+            .get(&other.street_graph_id.unwrap())
+            .unwrap_or(&f64::MAX)
+            + self.diff_distance
+    }
+}
+
+impl<'a> DistanceCalculator for OsmDistanceCalculator<'a> {
+    type FixedPoint = OsmFixedPoint;
+
     fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64 {
         let (origin_node, diff_distance) = self.find_closest_node_to_point(b);
         let osm_distance_matrix = dijkstra(&self.streets.streetgraph, origin_node, None, |e| *e.2);
@@ -84,9 +123,17 @@ impl<'a> PopulatedCentroidDistanceCalculator for OsmPopulatedCentroidDistanceCal
             .unwrap_or(&f64::MAX)
             + diff_distance
     }
+    fn fix_point(&self, point: &Point) -> Self::FixedPoint {
+        let (origin_node, diff_distance) = self.find_closest_node_to_point(point);
+        let distance_matrix = dijkstra(&self.streets.streetgraph, origin_node, None, |e| *e.2);
+        OsmFixedPoint {
+            diff_distance,
+            distance_matrix
+        }
+    }
 }
 
-impl<'a> OsmPopulatedCentroidDistanceCalculator<'a> {
+impl<'a> OsmDistanceCalculator<'a> {
     pub fn new(streets: &'a Streets) -> Self {
         Self { streets }
     }

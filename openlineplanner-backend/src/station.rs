@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::{
     coverage::StationCoverageInfo,
     coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
-    geometry::{DensifyHaversine, OsmPopulatedCentroidDistanceCalculator},
+    geometry::{DensifyHaversine, OsmDistanceCalculator},
     layers::streetgraph::Streets,
     layers::PopulatedCentroid,
 };
@@ -63,7 +63,7 @@ pub fn find_optimal_station(
                     &point,
                     coverage,
                     &leftover_houses,
-                    OsmPopulatedCentroidDistanceCalculator::new(streets),
+                    OsmDistanceCalculator::new(streets),
                     &others,
                 ),
                 method,

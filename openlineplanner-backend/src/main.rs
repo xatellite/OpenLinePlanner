@@ -54,6 +54,7 @@ async fn station_info(
     let coverage_info: Vec<(LayerType, CoverageMap)> = merged_layers
         .iter()
         .map(|layer| {
+            log::debug!("calculating for layer type: {}", layer.get_type());
             (
                 layer.get_type().clone(),
                 coverage::houses_for_stations(

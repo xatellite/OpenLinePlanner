@@ -11,9 +11,10 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::error::OLPError;
-use crate::geometry::HaversinePopulatedCentroidDistanceCalculator;
-use crate::geometry::OsmPopulatedCentroidDistanceCalculator;
-use crate::geometry::PopulatedCentroidDistanceCalculator;
+use crate::geometry::HaversineDistanceCalculator;
+use crate::geometry::OsmDistanceCalculator;
+use crate::geometry::DistanceCalculator;
+use crate::geometry::DistanceFromPoint;
 use crate::layers::streetgraph::Streets;
 use crate::layers::Layers;
 use crate::layers::PopulatedCentroid;
@@ -71,17 +72,18 @@ pub enum Method {
 }
 
 /// Gets all houses which are in the coverage area of a station and which are not closer to another station
-pub fn get_houses_in_coverage<'a, D: PopulatedCentroidDistanceCalculator>(
+pub fn get_houses_in_coverage<'a, D: DistanceCalculator>(
     origin: &Point,
     coverage: f64,
     houses: &'a [PopulatedCentroid],
     distance_calculator: D,
     possible_collision_stations: &[&Station],
 ) -> Vec<PopulatedCentroidInfo<'a>> {
+    let distance_from_origin = distance_calculator.fix_point(origin);
     houses
         .iter()
         .filter_map(|house| {
-            let distance = distance_calculator.distance(house, origin);
+            let distance = distance_from_origin.distance(house);
             if distance < coverage {
                 Some(PopulatedCentroidInfo{centroid: house, distance})
             } else {
@@ -120,14 +122,14 @@ pub fn houses_for_stations<'a, 'b>(
                 &station.location,
                 station.coverage(),
                 houses,
-                HaversinePopulatedCentroidDistanceCalculator::new(),
+                HaversineDistanceCalculator::new(),
                 &possible_collision_stations,
             ),
             Routing::Osm => get_houses_in_coverage(
                 &station.location,
                 station.coverage(),
                 houses,
-                OsmPopulatedCentroidDistanceCalculator::new(streets),
+                OsmDistanceCalculator::new(streets),
                 &possible_collision_stations,
             ),
         };
