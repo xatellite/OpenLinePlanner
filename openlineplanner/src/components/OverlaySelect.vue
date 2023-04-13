@@ -18,16 +18,15 @@
           Object.keys(overlayStore.overlayData).length === 0
         "
       />
-      <HomeAccountIcon v-else-if="overlayStore.overlay == 'residence'" />
-      <SchoolOutlineIcon v-else-if="overlayStore.overlay == 'schools'" />
-      <BriefcaseAccountIcon v-else-if="overlayStore.overlay == 'jobs'" />
+      <HomeAccountIcon v-else-if="overlayStore.overlay == 'Residential'" />
+      <!-- <SchoolOutlineIcon v-else-if="overlayStore.overlay == 'Shopping'" /> -->
+      <BriefcaseAccountIcon v-else-if="overlayStore.overlay == 'Workplace'" />
       <BlurOffIcon v-else />
     </span>
     <select @change="handleSelect" :value="overlayStore.overlay">
       <option value="none">None</option>
-      <option value="residence">Residential</option>
-      <option value="schools">Schools</option>
-      <option value="jobs">Jobs/Leisure</option>
+      <option value="Residential">Residential</option>
+      <option value="Workplace">Workplaces</option>
     </select>
     <div
       class="tooltip"
@@ -41,7 +40,7 @@
 
 <script>
 import HomeAccountIcon from "vue-material-design-icons/HomeAccount.vue";
-import SchoolOutlineIcon from "vue-material-design-icons/SchoolOutline.vue";
+// import SchoolOutlineIcon from "vue-material-design-icons/SchoolOutline.vue";
 import BriefcaseAccountIcon from "vue-material-design-icons/BriefcaseAccount.vue";
 import BlurOffIcon from "vue-material-design-icons/BlurOff.vue";
 import LoadingIcon from "vue-material-design-icons/Loading.vue";
@@ -50,7 +49,7 @@ import { useOverlayStore } from "../stores/overlay";
 export default {
   components: {
     HomeAccountIcon,
-    SchoolOutlineIcon,
+    // SchoolOutlineIcon,
     BriefcaseAccountIcon,
     BlurOffIcon,
     LoadingIcon,

@@ -18,6 +18,7 @@ $font-ssm: $space-ssm;
   --c-button-background--darkened-strong: #e0e0e0;
   --c-button-border: #cacaca;
   --c-text-inverted: #ffffff;
+  --c-text-inverted--alt: #ffffff;
   --c-accent-one: #464646;
   --c-accent-two: #1B998B;
   --c-accent-three: #FEC80B;
@@ -25,7 +26,7 @@ $font-ssm: $space-ssm;
   --c-box-darkened: #f8f8f8;
   --c-background-primary: #ffffff;
   --c-background-inverted: #464646;
-  --bs-md: 0px 4px 16px 0px #797979;
+  --bs-md: 0px 4px 10px 0px #bdbdbd;
 }
 
 [data-theme="dark"] {
@@ -35,7 +36,8 @@ $font-ssm: $space-ssm;
   --c-button-background--darkened-light: #3a3a3a;
   --c-button-background--darkened-strong: #222222;
   --c-button-border: #6d6d6d;
-  --c-text-inverted: #f1f1f1;
+  --c-text-inverted: #303030;
+  --c-text-inverted--alt: #a5a5a5;
   --c-accent-one: #f8f8f8;
   --c-accent-two: #1B998B;
   --c-accent-three: #FEC80B;

@@ -25,7 +25,7 @@ export const useOverlayStore = defineStore({
         window.Piwik.getTracker().trackEvent("editing", "overlay_select", type);
       }
       if (type != "none") {
-        fetch(import.meta.env.VITE_API_ENDPOINT + "/overlay/" + type, {
+        fetch(import.meta.env.VITE_API_ENDPOINT + "/layer/by_type/" + type, {
           method: "GET",
           headers: {
             "Content-type": "application/json",

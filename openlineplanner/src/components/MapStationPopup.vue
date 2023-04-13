@@ -30,18 +30,18 @@
         </button>
       </div>
     </div>
-    <div>
-      <MapStationCharts
-        v-if="seriesTransport.length > 0 && paxStore.isCurrent"
-        :seriesType="seriesType"
-        :seriesTransport="seriesTransport"
-      />
+    <div class="station-popup__container">
+      <div class="station-popup__chart" v-if="chartSeries.length > 0 && paxStore.isCurrent">
+        <apexchart
+          width="300"
+          type="bar"
+          :options="chartOptions"
+          :series="chartSeries"
+        />
+      </div>
+      
       <div v-else class="station-popup__lazy">
-        <div class="station-popup__lazy__border">
-          <span> loading... </span>
-          <div class="station-popup__lazy__chart" />
-        </div>
-        <div class="station-popup__lazy__border">
+        <div class="station-popup__chart">
           <span> loading... </span>
           <div class="station-popup__lazy__chart" />
         </div>
@@ -58,7 +58,6 @@ import PlusIcon from "vue-material-design-icons/Plus.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import TransitConnectionHorizontalIcon from "vue-material-design-icons/TransitConnectionHorizontal.vue";
 import { useEditStore } from "../stores/editing";
-import MapStationCharts from "./MapStationCharts.vue";
 import TooltipButton from "./TooltipButton.vue";
 
 export default {
@@ -69,7 +68,6 @@ export default {
     PlusIcon,
     TrashCanOutlineIcon,
     TransitConnectionHorizontalIcon,
-    MapStationCharts,
     TooltipButton,
   },
   data() {
@@ -77,8 +75,8 @@ export default {
       paxStore: usePaxStore(),
       linesStore: useLinesStore(),
       editStore: useEditStore(),
-      seriesType: [],
-      seriesTransport: [],
+      chartSeries: [],
+      chartOptions: [],
       lineExtendIndex: -1,
     };
   },
@@ -118,30 +116,33 @@ export default {
       this.paxStore
         .getPaxForStation(this.point.id, this.linesStore)
         .then((stationData) => {
+          console.log(stationData);
           // ToDo: Merge series build with chart series build
-          this.seriesTransport = [
+          this.chartSeries = [
             {
               name: "series-1",
               data: [
-                Math.round(stationData.total),
-                Math.round(stationData.ped),
-                Math.round(stationData.bike),
-                Math.round(stationData.car),
+                stationData.reduce((partialSum, entry) => partialSum + entry.value, 0),
+                ...stationData.map((entry) => entry.value),
               ],
             },
           ];
-          this.seriesType = [
-            {
-              name: "series-1",
-              data: [
-                Math.round(stationData.total),
-                Math.round(stationData.leisure),
-                Math.round(stationData.school),
-                Math.round(stationData.residential),
-                Math.round(stationData.work),
-              ],
+          this.chartOptions = {
+            chart: {
+              id: "station-chart",
             },
-          ];
+            title: {text:'Catchment Area'},
+            xaxis: {
+              categories: [ "Total", ...stationData.map((entry) => entry.layer_type)],
+            },
+            colors: ["#424242", "#5DE947", "#54BA7D", "#BA546C"], //ToDo: Add colors to Endpoint?
+            plotOptions: {
+              bar: {
+                horizontal: true,
+                distributed: true,
+              },
+            },
+          };
         });
     },
     extendLine(e) {
@@ -185,11 +186,12 @@ export default {
   top: auto;
   bottom: $space-md;
   display: flex;
-  align-items: center;
+  // align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: $space-ssm;
   z-index: 4;
+  overflow: hidden;
+  border: 1px solid var(--c-button-border);
 
   &__title {
     font-size: $font-lg;
@@ -205,6 +207,9 @@ export default {
     display: flex;
     justify-content: space-between;
     width: 100%;
+    padding: $space-ssm;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--c-button-border);
   }
 
   &__actions {
@@ -217,20 +222,6 @@ export default {
     position: relative;
     display: flex;
 
-    &__border {
-      position: relative;
-      display: flex;
-      align-items: center;
-      font-size: $font-md;
-      z-index: 10;
-      justify-content: center;
-      border: 1px solid var(--c-primary-light);
-      border-radius: $br-md;
-      margin: $space-ssm;
-      width: 300px;
-      height: 200px;
-    }
-
     &__chart {
       position: absolute;
       z-index: -1;
@@ -242,5 +233,27 @@ export default {
       animation: infinite-blur-change 1s linear infinite;
     }
   }
+
+  &__container {
+    background-color: var(--c-button-background);
+    padding: $space-ssm;
+  }
+
+
+  &__chart {
+      position: relative;
+      display: flex;
+      align-items: center;
+      font-size: $font-md;
+      z-index: 10;
+      justify-content: center;
+      border: 1px solid var(--c-button-border);
+      border-radius: $br-md;
+      padding: $space-ssm;
+      margin: $space-ssm;
+      background-color: var(--c-box);
+      width: 300px;
+      height: 200px;
+    }
 }
 </style>

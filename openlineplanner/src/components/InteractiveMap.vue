@@ -449,22 +449,16 @@ export default {
           type: "geojson",
           data: this.overlayStore.overlayData,
         });
-        let weight = "pop";
-        if (this.overlayStore.overlay == "jobs") {
-          weight = "jobs";
-        } else if (this.overlayStore.overlay == "schools") {
-          weight = "kids";
-        }
 
         const colors = {
-          residence: [
+          Residential: [
             "rgba(68,44,49, 0.1)",
             "#7F4955",
             "#BD6275",
             "#E0B092",
             "#F5E5C6",
           ],
-          jobs: [
+          Workplace: [
             "rgba(51,70,82, 0.1)",
             "#4F819E",
             "#4A99C6",
@@ -488,7 +482,7 @@ export default {
             paint: {
               // increase weight as diameter breast height increases
               "heatmap-weight": {
-                property: weight,
+                property: this.overlayStore.overlay,
                 type: "exponential",
                 stops: [
                   [1, 0],

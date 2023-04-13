@@ -50,7 +50,7 @@ export const usePaxStore = defineStore({
             ),
           })),
         method: this.calculationMethod,
-        routing: this.routingMethod
+        routing: this.routingMethod,
       };
       if (this.currentRequestController != null) {
         this.currentRequestController.abort();

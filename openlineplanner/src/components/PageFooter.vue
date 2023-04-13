@@ -13,7 +13,7 @@ export default {};
 <style lang="scss" scoped>
 .footer {
   background: var(--c-background-inverted);
-  color: var(--c-text-inverted);
+  color: var(--c-text-inverted-alt);
   font-size: $space-sm;
   width: 100%;
   display: grid;

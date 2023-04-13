@@ -9,9 +9,6 @@
       {{ $route.name }} <MenuDownIcon />
     </button>
     <nav :class="`page-header__navigation ${menuActive ? 'active' : ''}`">
-      <router-link to="/" class="page-header__navigation__item"
-        >Project</router-link
-      >
       <router-link to="/data" class="page-header__navigation__item"
         >Data</router-link
       >
@@ -20,6 +17,9 @@
       >
       <router-link to="/timetable" class="page-header__navigation__item"
         >Timetable</router-link
+      >
+      <router-link to="/" class="page-header__navigation__item"
+        >Project</router-link
       >
       <GithubCorner />
     </nav>

@@ -135,11 +135,11 @@ select::-ms-expand {
     }
 
     &:hover {
-      background-color: var(--c-primary-light--lightened-light);
+      background-color: var(--c-primary-light);
     }
 
     &:active {
-      background-color: var(--c-primary-light--lightened-strong);
+      background-color: var(--c-primary-light);
     }
     .toggle-button__icon {
       border-right: 1px solid #696969;
