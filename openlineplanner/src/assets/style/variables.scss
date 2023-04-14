@@ -129,3 +129,26 @@ a {
     filter: blur($space-ssm);
   }
 }
+
+.apexcharts-title-text {
+  fill: var(--c-text-primary);
+}
+
+.apexcharts-text {
+  fill: var(--c-text-primary);
+}
+
+.apexcharts-legend-text {
+  color: var(--c-text-primary) !important;
+}
+
+.apexcharts-legend-marker {
+  border-width: 1px !important;
+  border-color: var(--c-button-border) !important;
+}
+
+.apexcharts-menu-icon {
+  svg {
+    fill: var(--c-button-border) !important;
+  }
+}

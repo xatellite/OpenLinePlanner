@@ -32,8 +32,8 @@ export default {
     this.map = new mapboxgl.Map({
       container: "map",
       style: this.uiStore.mapStyle,
-      center: [16.4585, 48.2284],
-      zoom: 12,
+      center: this.uiStore.mapPosition,
+      zoom: 8,
       preserveDrawingBuffer: true,
     });
     // disable map rotation using right click + drag
@@ -43,6 +43,11 @@ export default {
     this.map.on("load", () => {
       // ToDo: Do something?!
     });
+
+    this.map.on("moveend", () => {
+      this.uiStore.mapPosition = this.map.getCenter();
+    });
+
     // Handle mouse click
     this.map.on("mousedown", (e) => {
       if (e.originalEvent.target == this.map.getCanvas()) {
@@ -55,6 +60,19 @@ export default {
     if (this.dataStore.addPoint) {
       this.setMarker(this.dataStore.addPoint);
     }
+
+    this.uiStore.$onAction(({ name, after, value }) => {
+      if (name === "setMapCenter") {
+        console.log("check");
+        after(() => {
+          this.map.flyTo({
+            center: this.uiStore.mapPosition,
+            essential: true,
+            zoom: 12,
+          });
+        });
+      }
+    });
 
     watch(
       () => this.uiStore.mode,

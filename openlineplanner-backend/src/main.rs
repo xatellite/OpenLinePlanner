@@ -1,3 +1,4 @@
+use std::fs;
 use std::fs::File;
 use std::path::Path;
 use std::sync::RwLock;
@@ -19,12 +20,14 @@ mod geometry;
 mod layers;
 mod population;
 mod station;
+mod persistence;
 
 use coverage::{CoverageMap, Method, Routing};
 use layers::streetgraph::generate_streetgraph;
 use layers::streetgraph::Streets;
 use layers::{LayerType, Layers};
 use station::{OptimalStationResult, Station};
+use persistence::{load_preprocessed_data, save_preprocessed_data, PreProcessingData};
 
 #[derive(Deserialize)]
 struct StationInfoRequest {
@@ -94,10 +97,7 @@ async fn main() -> std::io::Result<()> {
 
     info!("starting openlineplanner backend");
 
-    let mut pbf = OsmPbfReader::new(File::open(Path::new("./pbf/BaseLayer.osm.pbf")).unwrap());
-
-    let streets = web::Data::new(load_streetgraph(&mut pbf));
-    let buildings = web::Data::new(load_buildings(&mut pbf));
+    let (streets, buildings) = load_base_data();
     let layers = web::Data::new(RwLock::new(Layers::new()));
 
     log::info!("loading data done");
@@ -161,6 +161,33 @@ fn load_buildings<T: std::io::Read + std::io::Seek>(pbf: &mut OsmPbfReader<T>) -
         &openhousepopulator::Config::builder().build(),
     )
     .unwrap()
+}
+
+fn load_base_data() -> (web::Data<Streets>, web::Data<Buildings>) {
+    let paths = fs::read_dir("./pbf").unwrap();
+    let file_ending = ".osm.pbf";
+    let mut filename = paths
+        .into_iter()
+        .filter_map(|path| path.map(|p| p.file_name().into_string().unwrap()).ok())
+        .find(|filename| filename.ends_with(file_ending))
+        .unwrap();
+    filename.truncate(filename.len() - file_ending.len());
+    
+    let path_string = format!("./cache/{}.map", filename);
+    let path = Path::new(&path_string);
+
+    if path.is_file() {
+        let preprocessing_data = load_preprocessed_data(path).unwrap();
+        return (web::Data::new(preprocessing_data.streets), web::Data::new(preprocessing_data.buildings))
+    }
+
+    let mut pbf = OsmPbfReader::new(File::open(Path::new(&format!("./pbf/{}{}", filename, file_ending))).unwrap());
+    let streets = load_streetgraph(&mut pbf);
+    let buildings = load_buildings(&mut pbf);
+    
+    save_preprocessed_data(&PreProcessingData{buildings: buildings.clone(), streets: streets.clone()}, path).unwrap();
+
+    (web::Data::new(streets), web::Data::new(buildings))
 }
 
 fn load_streetgraph<T: std::io::Read + std::io::Seek>(pbf: &mut OsmPbfReader<T>) -> Streets {

@@ -11,10 +11,10 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::error::OLPError;
-use crate::geometry::HaversineDistanceCalculator;
-use crate::geometry::OsmDistanceCalculator;
 use crate::geometry::DistanceCalculator;
 use crate::geometry::DistanceFromPoint;
+use crate::geometry::HaversineDistanceCalculator;
+use crate::geometry::OsmDistanceCalculator;
 use crate::layers::streetgraph::Streets;
 use crate::layers::Layers;
 use crate::layers::PopulatedCentroid;

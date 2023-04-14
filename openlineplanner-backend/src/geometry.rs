@@ -67,7 +67,7 @@ pub trait DistanceFromPoint {
 pub struct HaversineDistanceCalculator;
 
 pub struct HaversineFixedPoint {
-    point: Point
+    point: Point,
 }
 
 impl DistanceFromPoint for HaversineFixedPoint {
@@ -83,7 +83,9 @@ impl DistanceCalculator for HaversineDistanceCalculator {
         a.haversine_distance(b)
     }
     fn fix_point(&self, point: &Point) -> Self::FixedPoint {
-        HaversineFixedPoint {point: point.clone()}
+        HaversineFixedPoint {
+            point: point.clone(),
+        }
     }
 }
 
@@ -95,12 +97,11 @@ impl HaversineDistanceCalculator {
 
 pub struct OsmDistanceCalculator<'a> {
     streets: &'a Streets,
-
 }
 
 pub struct OsmFixedPoint {
-    diff_distance: f64, 
-    distance_matrix: HashMap<NodeId, f64>
+    diff_distance: f64,
+    distance_matrix: HashMap<NodeId, f64>,
 }
 
 impl DistanceFromPoint for OsmFixedPoint {
@@ -128,7 +129,7 @@ impl<'a> DistanceCalculator for OsmDistanceCalculator<'a> {
         let distance_matrix = dijkstra(&self.streets.streetgraph, origin_node, None, |e| *e.2);
         OsmFixedPoint {
             diff_distance,
-            distance_matrix
+            distance_matrix,
         }
     }
 }

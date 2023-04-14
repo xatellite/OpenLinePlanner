@@ -4,12 +4,29 @@
   <PageFooter />
 </template>
 
-<script setup>
+<script>
 import { RouterView } from "vue-router";
 import PageHeader from "@/components/PageHeader.vue";
 import PageFooter from "@/components/PageFooter.vue";
 import "@fontsource/poppins";
 import "@fontsource/poppins/700.css";
+import { useUIStore } from './stores/ui';
+
+export default {
+  components: {
+    RouterView,
+    PageHeader,
+    PageFooter,
+  },
+  data() {
+    return {
+      uiStore: useUIStore(),
+    }
+  },
+  mounted() {
+    this.uiStore.getMapCenter();
+  },
+};
 </script>
 
 <!-- Not to be scoped, as the view is used to inject global scss -->

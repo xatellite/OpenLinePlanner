@@ -62,3 +62,11 @@ export const deleteLayer = async (layer) => {
   );
   return;
 };
+
+export const getMapCenter = async () => {
+  const response = await fetch(
+    import.meta.env.VITE_API_ENDPOINT + "/layer/center"
+  );
+  const mapCenter = await response.json();
+  return mapCenter;
+};

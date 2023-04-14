@@ -7,7 +7,9 @@ use actix_web::{
     HttpResponse, Responder, Scope,
 };
 
-use geo::{BooleanOps, Contains, HaversineDistance, LineString, MultiPolygon, Point, Polygon, Centroid};
+use geo::{
+    BooleanOps, Centroid, Contains, HaversineDistance, LineString, MultiPolygon, Point, Polygon, point,
+};
 use geojson::{
     de::deserialize_geometry,
     ser::{serialize_geometry, to_feature_collection_string},
@@ -44,14 +46,14 @@ pub fn layers() -> Scope {
 }
 
 pub async fn find_center(layers: web::Data<RwLock<Layers>>) -> Result<Json<Point<f64>>, OLPError> {
-    layers
+    let point = layers
         .read()
         .map_err(OLPError::from_error)?
         .all_merged()
         .bbox
         .centroid()
-        .ok_or(OLPError::GenericError("failed to find center of data".to_string()))
-        .map(|point| Json(point))
+        .unwrap_or(point!((16.37159586889, 48.20750456628)));
+    Ok(Json(point))
 }
 
 pub async fn summarize_layers(

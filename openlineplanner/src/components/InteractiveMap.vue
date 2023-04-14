@@ -47,7 +47,7 @@ export default {
     this.map = new mapboxgl.Map({
       container: "map",
       style: this.uiStore.mapStyle,
-      center: [16.4585, 48.2284],
+      center: this.uiStore.mapPosition,
       zoom: 12,
       preserveDrawingBuffer: true,
     });
@@ -64,6 +64,11 @@ export default {
         }
       }
     });
+
+    this.map.on("moveend", () => {
+      this.uiStore.mapPosition = this.map.getCenter();
+    });
+
     // Receive and return export event data
     document.addEventListener("generateMapExport", () => {
       this.editStore.stopAllInputs();
@@ -181,6 +186,19 @@ export default {
               this.updateLine(this.linesStore.getLineById(lineRef))
             );
           }
+        });
+      }
+    });
+
+    this.uiStore.$onAction(({ name, after, value }) => {
+      if (name === "setMapCenter") {
+        console.log("check");
+        after(() => {
+          this.map.flyTo({
+            center: this.uiStore.mapPosition,
+            essential: true,
+            zoom: 12,
+          });
         });
       }
     });
