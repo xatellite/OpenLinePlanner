@@ -8,7 +8,8 @@ use actix_web::{
 };
 
 use geo::{
-    BooleanOps, Centroid, Contains, HaversineDistance, LineString, MultiPolygon, Point, Polygon, point,
+    point, BooleanOps, Centroid, Contains, HaversineDistance, LineString, MultiPolygon, Point,
+    Polygon,
 };
 use geojson::{
     de::deserialize_geometry,

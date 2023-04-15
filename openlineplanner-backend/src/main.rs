@@ -18,16 +18,16 @@ mod coverage;
 mod error;
 mod geometry;
 mod layers;
+mod persistence;
 mod population;
 mod station;
-mod persistence;
 
 use coverage::{CoverageMap, Method, Routing};
 use layers::streetgraph::generate_streetgraph;
 use layers::streetgraph::Streets;
 use layers::{LayerType, Layers};
-use station::{OptimalStationResult, Station};
 use persistence::{load_preprocessed_data, save_preprocessed_data, PreProcessingData};
+use station::{OptimalStationResult, Station};
 
 use crate::persistence::load_layers;
 
@@ -176,20 +176,32 @@ fn load_base_data() -> (web::Data<Streets>, web::Data<Buildings>) {
         .find(|filename| filename.ends_with(file_ending))
         .unwrap();
     filename.truncate(filename.len() - file_ending.len());
-    
+
     let path_string = format!("./cache/{}.map", filename);
     let path = Path::new(&path_string);
 
     if path.is_file() {
         let preprocessing_data = load_preprocessed_data(path).unwrap();
-        return (web::Data::new(preprocessing_data.streets), web::Data::new(preprocessing_data.buildings))
+        return (
+            web::Data::new(preprocessing_data.streets),
+            web::Data::new(preprocessing_data.buildings),
+        );
     }
 
-    let mut pbf = OsmPbfReader::new(File::open(Path::new(&format!("./pbf/{}{}", filename, file_ending))).unwrap());
+    let mut pbf = OsmPbfReader::new(
+        File::open(Path::new(&format!("./pbf/{}{}", filename, file_ending))).unwrap(),
+    );
     let streets = load_streetgraph(&mut pbf);
     let buildings = load_buildings(&mut pbf);
-    
-    save_preprocessed_data(&PreProcessingData{buildings: buildings.clone(), streets: streets.clone()}, path).unwrap();
+
+    save_preprocessed_data(
+        &PreProcessingData {
+            buildings: buildings.clone(),
+            streets: streets.clone(),
+        },
+        path,
+    )
+    .unwrap();
 
     (web::Data::new(streets), web::Data::new(buildings))
 }
