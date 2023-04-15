@@ -180,6 +180,14 @@ impl Layers {
         }
     }
 
+    pub fn get(&self, key: &Uuid) -> Option<&Layer> {
+        self.0.get(key) 
+    }
+
+    pub fn contains_key(&self, key: &Uuid) -> bool {
+        self.0.contains_key(key)
+    }
+
     pub fn new() -> Self {
         Self(HashMap::new())
     }
@@ -296,13 +304,22 @@ async fn calculate_new_layer(
     layers: web::Data<RwLock<Layers>>,
     buildings: web::Data<Buildings>,
     streets: web::Data<Streets>,
-) -> Result<HttpResponse, OLPError> {
+) -> Result<Json<Uuid>, OLPError> {
     let request = request.into_inner();
     let admin_area = request.admin_area()?;
     let layer_type = request.layer_type;
     let method = request.method;
     let answers = request.answers;
     let layer_name = request.name;
+
+    let new_layer_id = uuid::Uuid::new_v5(
+        &uuid::Uuid::NAMESPACE_URL,
+        format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
+    );
+    
+    if !layers.read().map_err(OLPError::from_error)?.contains_key(&new_layer_id) {
+        return Ok(Json(new_layer_id));
+    }
 
     let mut filtered_buildings: Buildings = buildings
         .iter()
@@ -337,11 +354,6 @@ async fn calculate_new_layer(
         centroid.street_graph_id = closest_street_node;
     }
 
-    let new_layer_id = uuid::Uuid::new_v5(
-        &uuid::Uuid::NAMESPACE_URL,
-        format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
-    );
-
     layers.write().map_err(OLPError::from_error)?.push(Layer {
         id: new_layer_id.clone(),
         bbox: MultiPolygon::new(vec![admin_area.geometry]),
@@ -352,7 +364,7 @@ async fn calculate_new_layer(
 
     save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, Path::new("./cache/layers"))?;
 
-    Ok(HttpResponse::Ok().json(new_layer_id))
+    Ok(Json(new_layer_id))
 }
 
 async fn get_layer(
