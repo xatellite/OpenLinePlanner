@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, sync::RwLock, thread};
+use std::{collections::HashMap, fmt::Display, sync::RwLock, thread, path::Path};
 
 use actix_web::{
     body::BoxBody,
@@ -27,7 +27,7 @@ pub use merge::*;
 use uuid::Uuid;
 
 use self::{loading::AdminArea, streetgraph::Streets};
-use crate::error::OLPError;
+use crate::{error::OLPError, persistence::save_layers};
 use openhousepopulator::{Building, Buildings, GenericGeometry};
 
 pub fn layers() -> Scope {
@@ -103,7 +103,7 @@ impl PopulatedCentroid {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Layers(HashMap<Uuid, Layer>);
 
 impl Layers {
@@ -303,6 +303,15 @@ async fn calculate_new_layer(
     let answers = request.answers;
     let layer_name = request.name;
 
+    let new_layer_id = uuid::Uuid::new_v5(
+        &uuid::Uuid::NAMESPACE_URL,
+        format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
+    );
+    
+    if layers.read().map_err(OLPError::from_error)?.contains_key(&new_layer_id) {
+        return Ok(Json(new_layer_id));
+    }
+
     let mut filtered_buildings: Buildings = buildings
         .iter()
         .filter(|building| match &building.geometry {
@@ -348,6 +357,8 @@ async fn calculate_new_layer(
         layer_type,
         layer_name,
     });
+
+    save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, Path::new("./cache/layers"))?;
 
     Ok(HttpResponse::Ok().json(new_layer_id))
 }
