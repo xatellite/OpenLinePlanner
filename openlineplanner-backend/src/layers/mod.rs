@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, sync::RwLock, thread};
+use std::{collections::HashMap, fmt::Display, sync::RwLock, thread, path::Path};
 
 use actix_web::{
     body::BoxBody,
@@ -28,7 +28,7 @@ pub use merge::*;
 use uuid::Uuid;
 
 use self::{loading::AdminArea, streetgraph::Streets};
-use crate::error::OLPError;
+use crate::{error::OLPError, persistence::save_layers};
 use openhousepopulator::{Building, Buildings, GenericGeometry};
 
 pub fn layers() -> Scope {
@@ -349,6 +349,8 @@ async fn calculate_new_layer(
         layer_type,
         layer_name,
     });
+
+    save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, Path::new("./cache/layers"))?;
 
     Ok(HttpResponse::Ok().json(new_layer_id))
 }
