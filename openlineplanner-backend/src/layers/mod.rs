@@ -103,7 +103,7 @@ impl PopulatedCentroid {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Layers(HashMap<Uuid, Layer>);
 
 impl Layers {
@@ -188,7 +188,7 @@ impl Layers {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Layer {
     id: Uuid,
     bbox: MultiPolygon,
