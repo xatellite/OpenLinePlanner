@@ -29,6 +29,8 @@ use layers::{LayerType, Layers};
 use persistence::{load_preprocessed_data, save_preprocessed_data, PreProcessingData};
 use station::{OptimalStationResult, Station};
 
+use crate::persistence::load_layers;
+
 #[derive(Deserialize)]
 struct StationInfoRequest {
     stations: Vec<Station>,
@@ -98,7 +100,7 @@ async fn main() -> std::io::Result<()> {
     info!("starting openlineplanner backend");
 
     let (streets, buildings) = load_base_data();
-    let layers = web::Data::new(RwLock::new(Layers::new()));
+    let layers = web::Data::new(RwLock::new(load_layers(Path::new("./cache/layers")).unwrap_or_default()));
 
     log::info!("loading data done");
 

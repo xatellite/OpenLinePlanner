@@ -36,7 +36,7 @@ pub(crate) fn save_preprocessed_data(data: &PreProcessingData, path: &Path) -> R
 pub(crate) fn save_layers(layers: &Layers, path: &Path) -> Result<(), OLPError> {
     let mut file = File::create(path).map_err(OLPError::from_error)?;
     file.write_all(
-        postcard::to_allocvec(layers)
+        serde_json::to_vec(layers)
             .map_err(OLPError::from_error)?
             .as_slice(),
     )
@@ -46,6 +46,6 @@ pub(crate) fn save_layers(layers: &Layers, path: &Path) -> Result<(), OLPError> 
 pub(crate) fn load_layers(path: &Path) -> Result<Layers, OLPError> {
     let mut file = File::open(path).map_err(OLPError::from_error)?;
     let mut data: Vec<u8> = Vec::new();
-    file.read_to_end(&mut data);
-    postcard::from_bytes(&data).map_err(OLPError::from_error)
+    file.read_to_end(&mut data).map_err(OLPError::from_error)?;
+    serde_json::from_slice(&data).map_err(OLPError::from_error)
 }

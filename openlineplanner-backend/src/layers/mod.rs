@@ -104,7 +104,7 @@ impl PopulatedCentroid {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Layers(HashMap<Uuid, Layer>);
 
 impl Layers {
@@ -317,7 +317,7 @@ async fn calculate_new_layer(
         format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
     );
     
-    if !layers.read().map_err(OLPError::from_error)?.contains_key(&new_layer_id) {
+    if layers.read().map_err(OLPError::from_error)?.contains_key(&new_layer_id) {
         return Ok(Json(new_layer_id));
     }
 
