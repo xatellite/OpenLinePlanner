@@ -320,6 +320,7 @@ async fn calculate_new_layer(
         .map_err(OLPError::from_error)?
         .contains_key(&new_layer_id)
     {
+        log::info!("layer {} is already calculated, reusing", new_layer_id);
         return Ok(Json(new_layer_id));
     }
 
