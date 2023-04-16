@@ -27,9 +27,14 @@ pub(crate) fn load_preprocessed_data(path: &Path) -> Result<PreProcessingData> {
     Ok(result)
 }
 
-pub(crate) fn save_preprocessed_data(data: &PreProcessingData, path: &Path) -> Result<()> {
+pub(crate) fn save_preprocessed_data(
+    buildings: Buildings,
+    streets: Streets,
+    path: &Path,
+) -> Result<()> {
+    let data = PreProcessingData { buildings, streets };
     let mut file = File::create(path)?;
-    file.write_all(postcard::to_allocvec(data)?.as_slice())?;
+    file.write_all(postcard::to_allocvec(&data)?.as_slice())?;
     Ok(())
 }
 

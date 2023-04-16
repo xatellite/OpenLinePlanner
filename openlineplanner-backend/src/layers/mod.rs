@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, sync::RwLock, thread, path::Path};
+use std::{collections::HashMap, fmt::Display, fs, path::PathBuf, sync::RwLock, thread};
 
 use actix_web::{
     body::BoxBody,
@@ -7,6 +7,7 @@ use actix_web::{
     HttpResponse, Responder, Scope,
 };
 
+use config::Config;
 use geo::{
     point, BooleanOps, Centroid, Contains, HaversineDistance, LineString, MultiPolygon, Point,
     Polygon,
@@ -180,10 +181,6 @@ impl Layers {
         }
     }
 
-    pub fn get(&self, key: &Uuid) -> Option<&Layer> {
-        self.0.get(key) 
-    }
-
     pub fn contains_key(&self, key: &Uuid) -> bool {
         self.0.contains_key(key)
     }
@@ -304,6 +301,7 @@ async fn calculate_new_layer(
     layers: web::Data<RwLock<Layers>>,
     buildings: web::Data<Buildings>,
     streets: web::Data<Streets>,
+    config: web::Data<Config>,
 ) -> Result<Json<Uuid>, OLPError> {
     let request = request.into_inner();
     let admin_area = request.admin_area()?;
@@ -362,7 +360,18 @@ async fn calculate_new_layer(
         layer_name,
     });
 
-    save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, Path::new("./cache/layers"))?;
+    let mut path = PathBuf::from(config.get_string("cache.dir").unwrap());
+    match fs::create_dir_all(&path) {
+        Ok(_) => {
+            path.set_file_name("layers");
+            if let Err(e) =
+                save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, &path)
+            {
+                log::error!("failed to save layers to cache: {}", e)
+            }
+        }
+        Err(e) => log::error!("failed to create directory {}: {}", path.display(), e),
+    }
 
     Ok(Json(new_layer_id))
 }
