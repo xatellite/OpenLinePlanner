@@ -28,7 +28,13 @@ impl Display for OLPError {
 impl Responder for OLPError {
     type Body = BoxBody;
 
-    fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
+    fn respond_to(self, req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
+        log::error!(
+            "failed to process {} query to {} with {}",
+            req.method(),
+            req.path(),
+            self
+        );
         HttpResponse::InternalServerError().body(self.to_string())
     }
 }
@@ -39,6 +45,7 @@ impl ResponseError for OLPError {
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {
+        log::error!("failed to process query: {}", self);
         HttpResponse::new(self.status_code()).set_body(BoxBody::new(self.to_string()))
     }
 }
