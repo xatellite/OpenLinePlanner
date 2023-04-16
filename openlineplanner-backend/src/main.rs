@@ -183,7 +183,7 @@ fn load_base_data(config: &Config) -> (web::Data<Streets>, web::Data<Buildings>)
 
     let mut path = PathBuf::from(config.get_string("cache.dir").unwrap());
     fs::create_dir_all(&path).expect("failed to create cache dir");
-    path.set_file_name(&pbf_file.file_stem().unwrap());
+    path.push(&pbf_file.file_stem().unwrap());
     path.set_extension("map");
 
     if path.is_file() {
@@ -206,7 +206,7 @@ fn load_base_data(config: &Config) -> (web::Data<Streets>, web::Data<Buildings>)
 
 fn load_layers(config: &Config) -> web::Data<RwLock<Layers>> {
     let mut path = PathBuf::from(config.get_string("cache.dir").unwrap());
-    path.set_file_name("layers");
+    path.push("layers");
     let layers = persistence::load_layers(&path).unwrap_or_default();
     web::Data::new(RwLock::new(layers))
 }

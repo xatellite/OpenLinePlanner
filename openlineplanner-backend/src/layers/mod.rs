@@ -368,7 +368,7 @@ async fn calculate_new_layer(
     let mut path = PathBuf::from(config.get_string("cache.dir").unwrap());
     match fs::create_dir_all(&path) {
         Ok(_) => {
-            path.set_file_name("layers");
+            path.push("layers");
             if let Err(e) =
                 save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, &path)
             {
