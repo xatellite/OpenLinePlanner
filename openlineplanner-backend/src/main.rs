@@ -100,7 +100,9 @@ async fn main() -> std::io::Result<()> {
     info!("starting openlineplanner backend");
 
     let (streets, buildings) = load_base_data();
-    let layers = web::Data::new(RwLock::new(load_layers(Path::new("./cache/layers")).unwrap_or_default()));
+    let layers = web::Data::new(RwLock::new(
+        load_layers(Path::new("./cache/layers")).unwrap_or_default(),
+    ));
 
     log::info!("loading data done");
 
