@@ -314,8 +314,12 @@ async fn calculate_new_layer(
         &uuid::Uuid::NAMESPACE_URL,
         format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
     );
-    
-    if layers.read().map_err(OLPError::from_error)?.contains_key(&new_layer_id) {
+
+    if layers
+        .read()
+        .map_err(OLPError::from_error)?
+        .contains_key(&new_layer_id)
+    {
         return Ok(Json(new_layer_id));
     }
 
