@@ -13,7 +13,7 @@ RUN gcc --version
 RUN TARGET_CC=gcc cargo install --target x86_64-unknown-linux-musl --path .
 
 # Install osmtogeojson
-RUN apt install npm
+RUN apk install npm
 RUN npm install -g osmtogeojson
 
 # FROM scratch
