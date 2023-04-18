@@ -6,7 +6,8 @@ services:
     container_name: "openlineplanner_xat_io_api"
     restart: always
     volumes:
-      - "/srv/volumes/openlineplanner/data:/data"
+      - "/srv/volumes/openlineplanner/cache:/cache"
+      - "/srv/volumes/openlineplanner/pbf:/pbf"
       - "/srv/volumes/openlineplanner/log:/log"
       - "/srv/volumes/openlineplanner/settings:/settings"
     labels:
