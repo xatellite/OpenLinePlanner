@@ -12,7 +12,11 @@ COPY src ./src
 RUN gcc --version
 RUN TARGET_CC=gcc cargo install --target x86_64-unknown-linux-musl --path .
 
-FROM scratch
-COPY --from=build /usr/local/cargo/bin/openlineplanner-backend .
-USER 1000
+# Install osmtogeojson
+RUN apt install npm
+RUN npm install -g osmtogeojson
+
+# FROM scratch
+# COPY --from=build /usr/local/cargo/bin/openlineplanner-backend .
+# USER 1000
 CMD ["./openlineplanner-backend"]
