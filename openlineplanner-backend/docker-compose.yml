@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   openlineplanner_xat_io_api:
@@ -12,7 +12,7 @@ services:
       - "/srv/volumes/openlineplanner/settings:/settings"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.openlineplanner_xat_io_api.rule=Host(`api.openlineplanner.xatellite.io`)"
+      - "traefik.http.routers.openlineplanner_xat_io_api.rule=Host(`api.openlineplanner.xatellite.space`)"
       - "traefik.http.routers.openlineplanner_xat_io_api.entrypoints=websecure"
       - "traefik.http.routers.openlineplanner_xat_io_api.tls=true"
       - "traefik.http.routers.openlineplanner_xat_io_api.tls.certResolver=lets_encrypt"

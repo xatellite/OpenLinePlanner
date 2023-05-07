@@ -26,14 +26,14 @@
   <p align="center">
     Fast and Easy public transport network prototyping
     <br />
-    <a href="https://openlineplanner.xatellite.io/"><strong>Check out the Demo »</strong></a>
+    <a href="https://openlineplanner.xatellite.space/"><strong>Check out the Demo »</strong></a>
     <br />
     <br />
     <a href="https://github.com/TheNewCivilian/OpenLinePlanner/issues">Report Bug</a>
     ·
     <a href="https://github.com/TheNewCivilian/OpenLinePlanner/issues">Request Feature</a>
     ·
-    <a href="mailto:openlineplanner@xatellite.io?subject=%5BOpenlineplanner%5D">Send Feedback</a>
+    <a href="mailto:hey@xatellite.space?subject=%5BOpenlineplanner%5D">Send Feedback</a>
   </p>
 </div>
 
@@ -67,9 +67,8 @@
   </ol>
 </details>
 
-
-
 <!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 ![OpenLinePlanner Screen Shot][product-screenshot]
@@ -81,8 +80,6 @@ The tool allows to save configurations fast and export all results to a printabl
 It is build to be extendable and easy to adjust, to be applicable in different scenarios.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
-
 
 ### Built With
 
@@ -97,13 +94,10 @@ And deployed with:
 
 [![Docker][Docker]][Docker-url]
 
-
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
-
 <!-- USAGE EXAMPLES -->
+
 ## Usage
 
 OpenLinePlanner allows you to
@@ -116,6 +110,7 @@ OpenLinePlanner allows you to
 ... automatically **locate new stations**, based on predicted demand <br>
 
 ### Calculation Methods
+
 By default OpenLinePlanner is configured to show the **absolute** amount of residences living in the coverage area of each station.
 Every person in the influence radius of the station (default 500m) is rated with the weight of 1.
 i.e. if 200 people life in the influence are the result is a score of 200
@@ -123,12 +118,12 @@ i.e. if 200 people life in the influence are the result is a score of 200
 Alternatively a relative measurement can be applied (Settings). This approach takes the distance between station and the home of a potential passenger into account:
 
 ```js
-  // Calculation methods:
-  absolute: 1
-  relative: 1 / sqrt(distance)
+// Calculation methods:
+absolute: 1;
+relative: 1 / sqrt(distance);
 ```
 
-If your scenario requires adjusted parameters please reach out! ([Contact via Email](mailto:openlineplanner@xatellite.io))
+If your scenario requires adjusted parameters please reach out! ([Contact via Email](mailto:openlineplanner@xatellite.space))
 Further adjustment dialogs are planned to be implemented if requested.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -144,59 +139,63 @@ Further adjustment dialogs are planned to be implemented if requested.
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- GETTING STARTED -->
+
 ## Setting up Developing Environment
 
 This is a short guide to setup your own development environment of OpenLinePlanner.
 
 1. To start of clone the Repo:
-    ```sh
-    $ git clone https://github.com/TheNewCivilian/OpenLinePlanner.git
-    ```
+   ```sh
+   $ git clone https://github.com/TheNewCivilian/OpenLinePlanner.git
+   ```
 
 ### Backend Setup
 
 The backend can be build running
 
 2. Build backend
-    ```sh
-    $ cd openlineplanner-backend
-    $ cargo build --release
-    ```
+
+   ```sh
+   $ cd openlineplanner-backend
+   $ cargo build --release
+   ```
 
 3. Gather data files from [OpenPopulationEstimator](https://github.com/TheNewCivilian/OpenPopulationEstimator) (inhabitants geojson) and e.g. [Protomaps](https://app.protomaps.com/downloads/osm) (pbf file of region)
 
-7. Add ./settings/Settings.toml e.g.
+4. Add ./settings/Settings.toml e.g.
+
    ```toml
     [data]
     residence = "./data/residence.geojson"
     osm = "./data/Wien_Donaustadt.osm.pbf"
    ```
-  
-8. Install backend binaries
-    ```sh
-    $ cargo install --path .
-    ```
-9. Startup Backend (Takes some minutes on first startup)
-    ```sh
-    $ openlineplanner-backend
-    ```
+
+5. Install backend binaries
+   ```sh
+   $ cargo install --path .
+   ```
+6. Startup Backend (Takes some minutes on first startup)
+   ```sh
+   $ openlineplanner-backend
+   ```
 
 ### Frontend Setup
+
 All environment variables are automatically loaded by VITE from the available .env files. If you need to adjust ports or endpoints check these files.
 
 4. Install all NPM packages
    ```sh
    $ yarn
    ```
-4. Start development server
+5. Start development server
    ```js
    $ yarn dev
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
 <!-- CONTRIBUTING -->
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
@@ -212,20 +211,19 @@ If this project brings you any value or inspires you don't forget to give the pr
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- LICENSE -->
+
 ## License
 
 Distributed under the GNU GPL V3 License. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- CONTACT -->
+
 ## Contact
-Email: [openlineplanner@xatellite.io](mailto:openlineplanner@xatellite.io) 
+
+Email: [openlineplanner@xatellite.space](mailto:openlineplanner@xatellite.space)
 
 Project Link: [https://github.com/TheNewCivilian/OpenLinePlanner](https://github.com/TheNewCivilian/OpenLinePlanner)
 
@@ -236,23 +234,22 @@ Project Link: [https://github.com/TheNewCivilian/OpenLinePlanner](https://github
 [TheNewCivilian](https://github.com/TheNewCivilian), [zdmx](https://github.com/zandemax)
 
 <!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
 
+## Acknowledgments
 
 The following pages and resources have been very helpful in the creation of the project:
 
-* [README Template - @OthneilDrew](https://github.com/othneildrew/Best-README-Template)
-* [Choose an Open Source License - @ChooseaLicense](https://choosealicense.com)
-* [Img Shields - @ShieldIO](https://shields.io)
+- [README Template - @OthneilDrew](https://github.com/othneildrew/Best-README-Template)
+- [Choose an Open Source License - @ChooseaLicense](https://choosealicense.com)
+- [Img Shields - @ShieldIO](https://shields.io)
 
 This project was created as part of the interdisciplinary project of the master class Rail Technology and Management of Railway Systems @FH-St.Pölten.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-
-
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+
 [contributors-shield]: https://img.shields.io/github/contributors/TheNewCivilian/OpenLinePlanner.svg?style=for-the-badge
 [contributors-url]: https://github.com/TheNewCivilian/OpenLinePlanner/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/TheNewCivilian/OpenLinePlanner.svg?style=for-the-badge
@@ -264,14 +261,12 @@ This project was created as part of the interdisciplinary project of the master 
 [license-shield]: https://img.shields.io/github/license/TheNewCivilian/OpenLinePlanner.svg?style=for-the-badge
 [license-url]: https://github.com/TheNewCivilian/OpenLinePlanner/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-
 [product-screenshot]: ./doc/images/plain.png
 [coverage-screenshot]: ./doc/images/coverage.png
 [station-info-screenshot]: ./doc/images/station_info.png
 [coverage-station-screenshot]: ./doc/images/coverage_station.png
 [data-screenshot]: ./doc/images/data.png
 [timetable-screenshot]: ./doc/images/timetable.png
-
 [Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
 [Vue-url]: https://vuejs.org/
 [Vite]: https://img.shields.io/badge/Vite-35495E?style=for-the-badge&logo=Vite&logoColor=646CFF
@@ -280,7 +275,5 @@ This project was created as part of the interdisciplinary project of the master 
 [Docker-url]: https://www.docker.com/
 [Rust]: https://img.shields.io/badge/Rust-35495E?style=for-the-badge&logo=Rust&logoColor=000000
 [Rust-url]: https://www.rust-lang.org/
-
-
 [Matomo]: https://img.shields.io/badge/Matomo-35495E?style=for-the-badge&logo=Matomo&logoColor=3152A0
 [Matomo-url]: https://matomo.org/

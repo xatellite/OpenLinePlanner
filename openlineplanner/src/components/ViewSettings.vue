@@ -85,7 +85,7 @@
 import LayersOutlineIcon from "vue-material-design-icons/LayersOutline.vue";
 import BullseyeIcon from "vue-material-design-icons/Bullseye.vue";
 import MapMarkerDistanceIcon from "vue-material-design-icons/MapMarkerDistance.vue";
-import MapIcon from "vue-material-design-icons/Map.vue"
+import MapIcon from "vue-material-design-icons/Map.vue";
 import CheckboxBlankCircleIcon from "vue-material-design-icons/CheckboxBlankCircle.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import RulerIcon from "vue-material-design-icons/Ruler.vue";
@@ -149,7 +149,7 @@ export default {
   max-height: $space-md;
   background-color: var(--c-box);
   border-radius: $br-md;
-  box-shadow: var(--bs-md);
+  box-shadow: $bs-md;
   font-size: $font-md;
   cursor: pointer;
 
