@@ -33,7 +33,7 @@
     ·
     <a href="https://github.com/TheNewCivilian/OpenLinePlanner/issues">Request Feature</a>
     ·
-    <a href="mailto:hey@xatellite.space?subject=%5BOpenlineplanner%5D">Send Feedback</a>
+    <a href="mailto:hi@xatellite.space?subject=%5BOpenlineplanner%5D">Send Feedback</a>
   </p>
 </div>
 
@@ -123,7 +123,7 @@ absolute: 1;
 relative: 1 / sqrt(distance);
 ```
 
-If your scenario requires adjusted parameters please reach out! ([Contact via Email](mailto:openlineplanner@xatellite.space))
+If your scenario requires adjusted parameters please reach out! ([Contact via Email](mailto:hi@xatellite.space))
 Further adjustment dialogs are planned to be implemented if requested.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -223,7 +223,7 @@ Distributed under the GNU GPL V3 License. See `LICENSE.txt` for more information
 
 ## Contact
 
-Email: [openlineplanner@xatellite.space](mailto:openlineplanner@xatellite.space)
+Email: [openlineplanner@xatellite.space](mailto:hi@xatellite.space)
 
 Project Link: [https://github.com/TheNewCivilian/OpenLinePlanner](https://github.com/TheNewCivilian/OpenLinePlanner)
 
