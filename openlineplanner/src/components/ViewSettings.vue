@@ -149,7 +149,7 @@ export default {
   max-height: $space-md;
   background-color: var(--c-box);
   border-radius: $br-md;
-  box-shadow: $bs-md;
+  box-shadow: var(--bs-md);
   font-size: $font-md;
   cursor: pointer;
 
