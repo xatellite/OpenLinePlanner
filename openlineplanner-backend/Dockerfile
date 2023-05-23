@@ -1,7 +1,8 @@
 FROM rust AS build
-WORKDIR /usr/src
+ARG TARGETPLATFORM
 
-RUN rustup target add x86_64-unknown-linux-musl
+WORKDIR /usr/src
+RUN export ARCH=$(echo "$TARGETPLATFORM" | sed "s/linux\///" | sed "s/arm64/aarch64/" | sed "s/amd64/x86_64/") && rustup target add ${ARCH}-unknown-linux-musl
 
 RUN USER=root cargo new openlineplanner-backend
 WORKDIR /usr/src/openlineplanner-backend
@@ -10,7 +11,7 @@ RUN cargo build --release
 
 COPY src ./src
 RUN gcc --version
-RUN TARGET_CC=gcc cargo install --target x86_64-unknown-linux-musl --path .
+RUN export ARCH=$(echo "$TARGETPLATFORM" | sed "s/linux\///" | sed "s/arm64/aarch64/" | sed "s/amd64/x86_64/") && TARGET_CC=gcc cargo install --target $ARCH-unknown-linux-musl --path .
 
 FROM node:lts-slim
 # Install osmtogeojson
