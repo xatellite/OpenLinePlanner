@@ -5,6 +5,7 @@ use std::sync::RwLock;
 
 use actix_cors::Cors;
 use actix_web::{http, web, App, HttpServer};
+use actix_web_httpauth::middleware::HttpAuthentication;
 use anyhow::Result;
 use config::Config;
 use error::OLPError;
@@ -14,6 +15,7 @@ use openhousepopulator::Buildings;
 use osmpbfreader::OsmPbfReader;
 use population::InhabitantsMap;
 use serde::Deserialize;
+use alcoholic_jwt::JWKS;
 
 mod coverage;
 mod error;
@@ -22,6 +24,7 @@ mod layers;
 mod persistence;
 mod population;
 mod station;
+mod middleware;
 
 use coverage::{CoverageMap, Method, Routing};
 use layers::streetgraph::generate_streetgraph;
@@ -49,6 +52,7 @@ async fn station_info(
     request: web::Json<StationInfoRequest>,
     layers: web::Data<RwLock<Layers>>,
     streets: web::Data<Streets>,
+    auth: web::ReqData<middleware::auth::Claims>
 ) -> Result<InhabitantsMap, OLPError> {
     let merged_layers = layers
         .read()
@@ -101,6 +105,7 @@ async fn main() -> std::io::Result<()> {
     let config = Config::builder()
         .set_default("cache.dir", "./cache/").unwrap()
         .set_default("data.dir", "./pbf/").unwrap()
+        .set_default("oidc.issuer", "https://dex.prod.k8s.xatellite.space").unwrap()
         .add_source(config::File::with_name("Config.toml").required(false))
         .build()
         .unwrap();
@@ -108,6 +113,9 @@ async fn main() -> std::io::Result<()> {
     let (streets, buildings) = load_base_data(&config);
     let layers = load_layers(&config);
     let config = web::Data::new(config);
+    let jwks_data: JWKS = reqwest::get(format!("{}/keys", config.get_string("oidc.issuer").unwrap())).await.unwrap().json().await.unwrap();
+    log::info!("loaded jwks: {:?}", jwks_data);
+    let jwks = web::Data::new(jwks_data);
 
     log::info!("loading data done");
 
@@ -126,12 +134,16 @@ async fn main() -> std::io::Result<()> {
             .allowed_header(http::header::CONTENT_TYPE)
             .max_age(3600);
 
+        let authentication = HttpAuthentication::bearer(middleware::auth::validator);
+
         App::new()
             .wrap(cors)
+            .wrap(authentication)
             .app_data(layers.clone())
             .app_data(streets.clone())
             .app_data(buildings.clone())
             .app_data(config.clone())
+            .app_data(jwks.clone())
             .route("/station-info", web::post().to(station_info))
             .route(
                 "/coverage-info/{router}",
