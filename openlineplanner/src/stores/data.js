@@ -109,7 +109,8 @@ export const useDataStore = () => {
           });
       },
       async removeLayer(layer) {
-        this.removeMapBoundsById(layer.properties.id);
+        console.log(layer);
+        this.removeMapBoundsById(layer.id);
         await deleteLayer(layer);
         this.loadLayers();
       },
