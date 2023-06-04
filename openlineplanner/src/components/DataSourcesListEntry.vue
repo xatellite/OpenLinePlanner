@@ -81,8 +81,13 @@ export default {
       });
     },
     remove(event) {
-      event.stopPropagation();
-      this.dataStore.removeLayer(this.layer);
+      if (
+        confirm("Do you really want to delete this layer (not reversible) ?")
+      ) {
+        event.stopPropagation();
+        event.preventDefault();
+        this.dataStore.removeLayer(this.layer);
+      }
     },
   }
 };
