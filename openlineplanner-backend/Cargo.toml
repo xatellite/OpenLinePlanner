@@ -31,3 +31,5 @@ predicates = "3.0.3"
 postcard = { version = "1.0.4", features = ["alloc"] }
 rayon = "1.7.0"
 datatypes = { path = "../datatypes" }
+actix-web-httpauth = "0.8.0"
+alcoholic_jwt = "4091.0.0"
