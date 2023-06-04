@@ -87,6 +87,7 @@ import ColorPicker from "./ColorPicker.vue";
 import { usePaxStore } from "../stores/pax";
 import TypePicker from "./TypePicker.vue";
 import TypeIcon from "./TypeIcon.vue";
+import { getStreetAddressName } from "@/helpers/api";
 
 export default {
   props: {
@@ -248,9 +249,20 @@ export default {
               this.line,
               stationProposal.index
             );
-            newPoint.type = "station";
+
+            const updatedPoint = newPoint.copy();
+            getStreetAddressName(updatedPoint)
+              .then((name) => {
+                updatedPoint.name = name;
+              })
+              .finally(() => {
+                updatedPoint.type = "station";
+                this.linesStore.points[newPoint.id] = updatedPoint;
+                this.paxStore.setCurrent(false);
+                this.findStationLoading = false;
+              });
           })
-          .finally(() => {
+          .catch(() => {
             this.findStationLoading = false;
           });
       }

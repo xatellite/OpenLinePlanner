@@ -13,9 +13,10 @@ import PlusIcon from "vue-material-design-icons/Plus.vue";
 import BusStopIcon from "vue-material-design-icons/BusStop.vue";
 import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import TooltipButton from "./TooltipButton.vue";
-import { useLinesStore } from "../stores/lines";
-import { usePaxStore } from "../stores/pax";
-import { useEditStore } from "../stores/editing";
+import { useLinesStore } from "@/stores/lines";
+import { usePaxStore } from "@/stores/pax";
+import { useEditStore } from "@/stores/editing";
+import { getStreetAddressName } from "@/helpers/api";
 
 export default {
   props: {
@@ -37,23 +38,17 @@ export default {
   },
   methods: {
     addStation() {
-      this.setStreetAddressName(this.point);
       const updatedPoint = this.point.copy();
-      updatedPoint.type = "station";
-      this.linesStore.points[this.point.id] = updatedPoint;
-      this.paxStore.setCurrent(false);
-    },
-    // Duplicate with ActionToolbar
-    setStreetAddressName(point) {
-      fetch("https://nominatim.openstreetmap.org/reverse.php?lat="+point.lat+"&lon="+point.lng+"&zoom=18&format=jsonv2", {
-          method: "GET"
+      // Fetch street address name if possible
+      getStreetAddressName(this.point)
+        .then((name) => {
+          updatedPoint.name = name;
         })
-          .then((data) => data.json())
-          .then((geocodingResult) => {
-            const updatedPoint = this.linesStore.points[point.id];
-            updatedPoint.name = geocodingResult.address.road;
-            this.linesStore.points[point.id] = updatedPoint;
-          })
+        .finally(() => {
+          updatedPoint.type = "station";
+          this.linesStore.points[this.point.id] = updatedPoint;
+          this.paxStore.setCurrent(false);
+        });
     },
     removePoint() {
       // Matomo Tracking
