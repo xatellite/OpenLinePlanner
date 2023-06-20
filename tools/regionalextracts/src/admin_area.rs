@@ -1,5 +1,5 @@
 use geo::Polygon;
-use geojson::{ser::serialize_geometry, Feature, GeoJson};
+use geojson::{ser::serialize_geometry, feature::Id, Feature, GeoJson};
 use serde::Serialize;
 use tinytemplate::TinyTemplate;
 
@@ -24,6 +24,10 @@ impl TryFrom<Feature> for AdminArea {
 
     fn try_from(value: Feature) -> Result<Self, Self::Error> {
         let properties = value.properties.unwrap_or_default();
+        let id: u64 = match value.id.unwrap() {
+            Id::String(id) => id.split('/').skip(1).next().unwrap().parse().unwrap(),
+            Id::Number(id) => id.as_u64().unwrap(),
+        };
         let Some(geometry) = value.geometry.and_then(|geometry|
             TryInto::<Polygon>::try_into(geometry.value).ok()
         ) else {
@@ -42,11 +46,7 @@ impl TryFrom<Feature> for AdminArea {
                     .and_then(|name| name.as_str())
                     .unwrap_or_default()
             ),
-            id: properties
-                .get("id")
-                .and_then(|id| id.as_u64())
-                .unwrap_or_default()
-                .to_owned(),
+            id,
             admin_level: properties
                 .get("admin_level")
                 .and_then(|id| id.as_str())

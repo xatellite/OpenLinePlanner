@@ -13,9 +13,11 @@ use anyhow::{anyhow, bail, Result};
 
 mod admin_area;
 mod overpass;
+mod processing;
 
 fn main() {
-    let admin_levels: [u16; 1] = [4]; //, 6, 8, 9, 10];
+    let admin_levels: [u16; 5] = [4, 6, 8, 9, 10];
+    let preprocessing_admin_levels: [u16; 3] = [8, 9, 10];
     for level in admin_levels {
         let mut level_path = env::current_dir().expect("failed to get current directory");
         level_path.push(&level.to_string());
@@ -30,6 +32,9 @@ fn main() {
             split_for_level(&file, level, &level_path).unwrap();
         }
         env::set_current_dir(level_path).unwrap();
+        if preprocessing_admin_levels.contains(&level) {
+            processing::process_data(&Path::new("./"))
+        }
     }
 }
 
@@ -40,9 +45,16 @@ fn split_for_level(pbf: &Path, admin_level: u16, target_dir: &Path) -> Result<()
         .to_string_lossy()
         .parse()?;
     let areas = admin_area::find_admin_boundaries(admin_level, area_id)?;
-    println!("Splitting {:?} for areas {:?}", pbf, areas);
+    println!(
+        "Splitting {:?} for areas {:?}",
+        pbf,
+        areas
+            .iter()
+            .map(|area| (&area.name, area.id))
+            .collect::<Vec<_>>()
+    );
     if areas.is_empty() {
-        return Ok(())
+        return Ok(());
     }
     let config = generate_osmium_config(pbf, target_dir, areas)?;
     split_pbf(&config, pbf)?;
@@ -58,9 +70,7 @@ struct OsmiumExtractConfig {
 #[derive(Serialize)]
 struct OsmiumExtract {
     output: String,
-    #[serde(
-        serialize_with = "serialize_polygon_list",
-    )]
+    #[serde(serialize_with = "serialize_polygon_list")]
     polygon: Polygon,
 }
 
@@ -101,7 +111,14 @@ fn split_pbf(config_file: &Path, pbf: &Path) -> Result<()> {
     Ok(())
 }
 
-fn serialize_polygon_list<S>(polygon: &Polygon, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer{
-    let inner_list: Vec<[f64; 2]> = polygon.exterior().coords().map(|coord| [coord.x, coord.y]).collect();
+fn serialize_polygon_list<S>(polygon: &Polygon, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let inner_list: Vec<[f64; 2]> = polygon
+        .exterior()
+        .coords()
+        .map(|coord| [coord.x, coord.y])
+        .collect();
     serializer.collect_seq([inner_list])
 }

@@ -10,7 +10,12 @@ anyhow = "1.0.71"
 geo = { version = "0.25.0", features = ["serde"] }
 geojson = "0.24.1"
 log = "0.4.19"
+osmpbfreader = "0.16.0"
+petgraph = "0.6.3"
 reqwest = { version = "0.11.18", features = ["rustls", "blocking"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.97"
 tinytemplate = "1.2.1"
+openhousepopulator = { rev = "v0.2.4", git ="https://github.com/xatellite/OpenHousePopulator" }
+postcard = { version = "1.0.4", features = ["alloc"] }
+datatypes = { path = "../../datatypes" }
