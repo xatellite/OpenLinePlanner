@@ -14,7 +14,7 @@ use super::overpass::query_overpass;
 #[derive(Serialize)]
 pub struct AdminArea {
     pub name: String,
-    pub id: String,
+    pub id: u64,
     pub admin_level: u16,
     #[serde(
         serialize_with = "serialize_geometry",
@@ -48,7 +48,7 @@ impl TryFrom<Feature> for AdminArea {
             ),
             id: properties
                 .get("id")
-                .and_then(|id| id.as_str())
+                .and_then(|id| id.as_u64())
                 .unwrap_or_default()
                 .to_owned(),
             admin_level: properties

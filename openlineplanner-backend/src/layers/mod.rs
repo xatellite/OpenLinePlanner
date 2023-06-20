@@ -1,4 +1,11 @@
-use std::{collections::HashMap, fmt::Display, fs, path::PathBuf, sync::RwLock, thread};
+use std::{
+    collections::HashMap,
+    fmt::Display,
+    fs,
+    path::{Path, PathBuf},
+    sync::RwLock,
+    thread,
+};
 
 use actix_web::{
     body::BoxBody,
@@ -9,8 +16,7 @@ use actix_web::{
 
 use config::Config;
 use geo::{
-    point, BooleanOps, Centroid, Contains, HaversineDistance, LineString, MultiPolygon, Point,
-    Polygon,
+    point, BooleanOps, Centroid, HaversineDistance, LineString, MultiPolygon, Point, Polygon,
 };
 use geojson::{
     de::deserialize_geometry,
@@ -18,6 +24,7 @@ use geojson::{
     Feature,
 };
 use osmpbfreader::NodeId;
+use petgraph::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
@@ -29,8 +36,11 @@ pub use merge::*;
 use uuid::Uuid;
 
 use self::{loading::AdminArea, streetgraph::Streets};
-use crate::{error::OLPError, persistence::save_layers};
-use openhousepopulator::{Building, Buildings, GenericGeometry};
+use crate::{
+    error::OLPError,
+    persistence::{self, save_layers},
+};
+use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
     web::scope("/layer")
@@ -105,12 +115,38 @@ impl PopulatedCentroid {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct LayersContainer(HashMap<Uuid, Layers>);
+impl LayersContainer {
+    pub fn get(&self, user_id: &Uuid) -> Option<&Layers> {
+        self.0.get(user_id)
+    }
+
+    pub fn insert(&mut self, user_id: Uuid, layers: Layers) {
+        self.0.insert(user_id, layers);
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Layers(HashMap<Uuid, Layer>);
 
 impl Layers {
     pub fn by_type(&self, layer_type: LayerType) -> Layer {
-        let centroids: Vec<PopulatedCentroid> = self
+        let streetgraph = UnGraphMap::from_edges(
+            self.0
+                .iter()
+                .filter(|(_, layer)| layer.layer_type == layer_type)
+                .flat_map(|(_, layer)| layer.streets.streetgraph.all_edges()),
+        );
+        let nodes = self
+            .0
+            .iter()
+            .filter(|(_, layer)| layer.layer_type == layer_type)
+            .flat_map(|(_, layer)| layer.streets.nodes.clone())
+            .collect();
+        let streets = Streets { nodes, streetgraph };
+
+        let centroids = self
             .0
             .iter()
             .filter(|(_, layer)| layer.layer_type == layer_type)
@@ -130,6 +166,7 @@ impl Layers {
             id: Uuid::nil(),
             bbox,
             centroids,
+            streets,
             layer_type,
             layer_name: layer_type.to_string(),
         }
@@ -156,11 +193,23 @@ impl Layers {
                 id: Uuid::nil(),
                 bbox: MultiPolygon::new(vec![]),
                 centroids: Vec::new(),
+                streets: Streets::new(),
                 layer_type: LayerType::Residential,
                 layer_name: "Residential".to_string(),
             };
         }
-        let centroids: Vec<PopulatedCentroid> = self
+        let streetgraph = UnGraphMap::from_edges(
+            self.0
+                .iter()
+                .flat_map(|(_, layer)| layer.streets.streetgraph.all_edges()),
+        );
+        let nodes = self
+            .0
+            .iter()
+            .flat_map(|(_, layer)| layer.streets.nodes.clone())
+            .collect();
+        let streets = Streets { nodes, streetgraph };
+        let centroids = self
             .0
             .iter()
             .flat_map(|(_, layer)| layer.centroids.clone())
@@ -176,6 +225,7 @@ impl Layers {
             id: Uuid::nil(),
             bbox,
             centroids,
+            streets,
             layer_type: LayerType::Residential,
             layer_name: "Residential".to_string(),
         }
@@ -194,11 +244,12 @@ impl Layers {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Layer {
     id: Uuid,
     bbox: MultiPolygon,
     centroids: Vec<PopulatedCentroid>,
+    streets: Streets,
     layer_type: LayerType,
     layer_name: String,
 }
@@ -286,7 +337,6 @@ struct CalculateLayerRequest {
     name: String,
     area: Feature,
     layer_type: LayerType,
-    method: String,
     answers: Vec<Answer>,
 }
 
@@ -299,21 +349,15 @@ impl CalculateLayerRequest {
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
     layers: web::Data<RwLock<Layers>>,
-    buildings: web::Data<Buildings>,
-    streets: web::Data<Streets>,
     config: web::Data<Config>,
 ) -> Result<Json<Uuid>, OLPError> {
     let request = request.into_inner();
     let admin_area = request.admin_area()?;
     let layer_type = request.layer_type;
-    let method = request.method;
     let answers = request.answers;
     let layer_name = request.name;
 
-    let new_layer_id = uuid::Uuid::new_v5(
-        &uuid::Uuid::NAMESPACE_URL,
-        format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
-    );
+    let new_layer_id = uuid::Uuid::new_v5(&uuid::Uuid::NAMESPACE_URL, &admin_area.id.to_le_bytes());
 
     if layers
         .read()
@@ -324,31 +368,31 @@ async fn calculate_new_layer(
         return Ok(Json(new_layer_id));
     }
 
-    let mut filtered_buildings: Buildings = buildings
-        .iter()
-        .filter(|building| match &building.geometry {
-            GenericGeometry::GenericPoint(point) => admin_area.geometry.contains(point),
-            GenericGeometry::GenericPolygon(polygon) => admin_area.geometry.contains(polygon),
-        })
-        .cloned()
-        .collect();
+    let data_path = config
+        .get_string("data.dir")
+        .map_err(OLPError::from_error)?;
+    let data_path = Path::new(&data_path)
+        .with_file_name(&admin_area.id.to_string())
+        .with_extension("map");
+    let mut data = persistence::load_preprocessed_data(&data_path)?;
 
     if let Some(answer) = answers.get(0).map(|ans| ans.value) {
-        filtered_buildings
+        data.buildings
             .distribute_population(answer, &openhousepopulator::Config::builder().build());
     } else {
-        filtered_buildings.estimate_population();
+        data.buildings.estimate_population();
     }
 
-    let mut centroids: Vec<PopulatedCentroid> = filtered_buildings
+    let mut centroids: Vec<PopulatedCentroid> = data
+        .buildings
         .into_iter()
         .filter_map(|building| building.try_into().ok())
         .collect();
 
-    let nodes = &streets.nodes;
-
     for centroid in &mut centroids {
-        let closest_street_node = nodes
+        let closest_street_node = data
+            .streets
+            .nodes
             .iter()
             .min_by_key(|(_, node)| node.haversine_distance(&centroid.geometry) as u32)
             .map(|(id, _)| id)
@@ -360,6 +404,7 @@ async fn calculate_new_layer(
     layers.write().map_err(OLPError::from_error)?.push(Layer {
         id: new_layer_id.clone(),
         bbox: MultiPolygon::new(vec![admin_area.geometry]),
+        streets: data.streets,
         centroids,
         layer_type,
         layer_name,
