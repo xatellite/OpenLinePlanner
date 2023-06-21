@@ -9,11 +9,6 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "Project",
-      component: ProjectView,
-    },
-    {
-      path: "/data",
       name: "Data",
       component: DataSourcesView,
     },
@@ -26,6 +21,11 @@ const router = createRouter({
       path: "/timetable",
       name: "Timetable",
       component: TimetableView,
+    },
+    {
+      path: "/project",
+      name: "Project",
+      component: ProjectView,
     },
   ],
 });
