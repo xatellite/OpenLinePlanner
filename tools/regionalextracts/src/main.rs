@@ -46,7 +46,8 @@ fn main() {
                     .into_iter()
                     .map(|file| file.unwrap().path())
                     .filter(|file| fs::metadata(file).unwrap().is_file())
-                    .collect();
+                    .filter(|file| file.extension().unwrap_or_default() == "pbf")
+            .collect();
                 for file in files {
                     split_for_level(&file, level, &level_path).unwrap();
                 }
@@ -83,11 +84,13 @@ fn main() {
 }
 
 fn split_for_level(pbf: &Path, admin_level: u16, target_dir: &Path) -> Result<()> {
+    println!("splitting pbf {:?}", pbf.file_stem().unwrap());
     let area_id = pbf
         .file_stem()
         .ok_or(anyhow!("failed to get file stem"))?
         .to_string_lossy()
         .parse()?;
+    println!("getting areas");
     let areas = admin_area::find_admin_boundaries(admin_level, area_id)?;
     println!(
         "Splitting {:?} for areas {:?}",
@@ -98,6 +101,9 @@ fn split_for_level(pbf: &Path, admin_level: u16, target_dir: &Path) -> Result<()
             .collect::<Vec<_>>()
     );
     if areas.is_empty() {
+        if admin_level != 10 {
+            fs::copy(pbf, target_dir.with_file_name(area_id.to_string()).with_extension("pbf"))?;
+        }
         return Ok(());
     }
     let config = generate_osmium_config(pbf, target_dir, areas)?;
