@@ -19,3 +19,4 @@ tinytemplate = "1.2.1"
 openhousepopulator = { rev = "v0.2.4", git ="https://github.com/xatellite/OpenHousePopulator" }
 postcard = { version = "1.0.4", features = ["alloc"] }
 datatypes = { path = "../../datatypes" }
+clap = { version = "4.3.5", features = ["derive"] }

@@ -1,11 +1,14 @@
 use std::{
-    env, fs,
+    env,
+    ffi::OsStr,
+    fs,
     io::Write,
     path::{Path, PathBuf},
-    process::Command,
+    process,
 };
 
 use admin_area::AdminArea;
+use clap::{Parser, Subcommand};
 use geo::Polygon;
 use serde::{Serialize, Serializer};
 
@@ -15,26 +18,67 @@ mod admin_area;
 mod overpass;
 mod processing;
 
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Split,
+    Deduplicate,
+    Preprocess,
+}
+
 fn main() {
-    let admin_levels: [u16; 5] = [4, 6, 8, 9, 10];
-    let preprocessing_admin_levels: [u16; 3] = [8, 9, 10];
-    for level in admin_levels {
-        let mut level_path = env::current_dir().expect("failed to get current directory");
-        level_path.push(&level.to_string());
-        fs::create_dir_all(&level_path).expect("failed to create directory");
-        let files: Vec<PathBuf> = fs::read_dir(env::current_dir().unwrap())
-            .unwrap()
-            .into_iter()
-            .map(|file| file.unwrap().path())
-            .filter(|file| fs::metadata(file).unwrap().is_file())
-            .collect();
-        for file in files {
-            split_for_level(&file, level, &level_path).unwrap();
+    let cli = Cli::parse();
+    match cli.command {
+        Commands::Split => {
+            let admin_levels: [u16; 5] = [4, 6, 8, 9, 10];
+            for level in admin_levels {
+                let mut level_path = env::current_dir().expect("failed to get current directory");
+                level_path.push(&level.to_string());
+                fs::create_dir_all(&level_path).expect("failed to create directory");
+                let files: Vec<PathBuf> = fs::read_dir(env::current_dir().unwrap())
+                    .unwrap()
+                    .into_iter()
+                    .map(|file| file.unwrap().path())
+                    .filter(|file| fs::metadata(file).unwrap().is_file())
+                    .collect();
+                for file in files {
+                    split_for_level(&file, level, &level_path).unwrap();
+                }
+                env::set_current_dir(level_path).unwrap();
+            }
         }
-        env::set_current_dir(level_path).unwrap();
-        if preprocessing_admin_levels.contains(&level) {
-            processing::process_data(&Path::new("./"))
+        Commands::Deduplicate => {
+            let path = env::current_dir().unwrap();
+            let mut files_here: Vec<PathBuf> = fs::read_dir(&path)
+                .unwrap()
+                .into_iter()
+                .filter_map(|file| file.ok().and_then(|f| Some(f.path())))
+                .filter(|file| file.is_file() && file.extension() == Some(OsStr::new("pbf")))
+                .collect();
+            let files_above: Vec<String> =
+                fs::read_dir(path.parent().expect("directory has to have parent"))
+                    .unwrap()
+                    .into_iter()
+                    .filter_map(|file| file.ok().and_then(|f| Some(f.path())))
+                    .filter(|file| file.is_file() && file.extension() == Some(OsStr::new("pbf")))
+                    .map(|file| file.file_name().unwrap().to_string_lossy().into_owned())
+                    .collect();
+
+            files_here.retain(|elem| {
+                files_above.contains(&elem.file_name().unwrap().to_string_lossy().into_owned())
+            });
+
+            for file in files_here {
+                fs::remove_file(file).expect("failed to delete file");
+            }
         }
+        Commands::Preprocess => processing::process_data(&env::current_dir().unwrap()),
     }
 }
 
@@ -96,7 +140,7 @@ fn generate_osmium_config(pbf: &Path, target_dir: &Path, areas: Vec<AdminArea>) 
 }
 
 fn split_pbf(config_file: &Path, pbf: &Path) -> Result<()> {
-    if !Command::new("osmium")
+    if !process::Command::new("osmium")
         .arg("extract")
         .arg("--overwrite")
         .arg("-c")

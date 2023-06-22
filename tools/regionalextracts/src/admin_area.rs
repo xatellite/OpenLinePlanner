@@ -1,5 +1,5 @@
 use geo::Polygon;
-use geojson::{ser::serialize_geometry, feature::Id, Feature, GeoJson};
+use geojson::{feature::Id, ser::serialize_geometry, Feature, GeoJson};
 use serde::Serialize;
 use tinytemplate::TinyTemplate;
 
