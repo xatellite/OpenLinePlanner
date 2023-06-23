@@ -16,7 +16,7 @@ reqwest = { version = "0.11.18", features = ["rustls", "blocking"], default-feat
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.97"
 tinytemplate = "1.2.1"
-openhousepopulator = { rev = "v0.2.4", git ="https://github.com/xatellite/OpenHousePopulator" }
+openhousepopulator = { rev = "0.2.5", git ="https://github.com/xatellite/OpenHousePopulator" }
 postcard = { version = "1.0.4", features = ["alloc"] }
 datatypes = { path = "../../datatypes" }
 clap = { version = "4.3.5", features = ["derive"] }

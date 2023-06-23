@@ -26,6 +26,7 @@ pub fn process_data(path: &Path) {
         .collect();
 
     for pbf_file in pbf_files {
+        println!("prepocessing file {:?}", pbf_file.file_name());
         let mut path = PathBuf::from("./out");
         fs::create_dir_all(&path).expect("failed to create cache dir");
         path.push(&pbf_file.file_stem().unwrap());

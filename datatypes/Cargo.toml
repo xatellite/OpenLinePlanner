@@ -9,7 +9,7 @@ edition = "2021"
 anyhow = "1.0.71"
 postcard = { version = "1.0.4", features = ["alloc"] }
 serde = { version = "1.0.164", features = ["derive"] }
-openhousepopulator = { rev = "v0.2.4", git ="https://github.com/xatellite/OpenHousePopulator" }
+openhousepopulator = { rev = "0.2.5", git ="https://github.com/xatellite/OpenHousePopulator" }
 geo = "0.25.0"
 osmpbfreader = "0.16.0"
 petgraph = "0.6.3"

@@ -1,4 +1,4 @@
-use geo::Polygon;
+use geo::{MultiPolygon, Polygon};
 use geojson::{feature::Id, ser::serialize_geometry, Feature, GeoJson};
 use serde::Serialize;
 use tinytemplate::TinyTemplate;
@@ -16,7 +16,7 @@ pub struct AdminArea {
         serialize_with = "serialize_geometry",
         deserialize_with = "deserialize_geometry"
     )]
-    pub geometry: Polygon,
+    pub geometry: MultiPolygon,
 }
 
 impl TryFrom<Feature> for AdminArea {
@@ -29,9 +29,13 @@ impl TryFrom<Feature> for AdminArea {
             Id::Number(id) => id.as_u64().unwrap(),
         };
         let Some(geometry) = value.geometry.and_then(|geometry|
-            TryInto::<Polygon>::try_into(geometry.value).ok()
+            if let Some(multipoly) = TryInto::<MultiPolygon>::try_into(geometry.value.clone()).ok() {
+                Some(multipoly)
+            } else {
+                TryInto::<Polygon>::try_into(geometry.value).ok().and_then(|polygon| Some(MultiPolygon::from(polygon)))
+            }
         ) else {
-            log::info!("Area dropped due to wrong geometry: {:?}", properties);
+            println!("Area dropped due to wrong geometry: {}", id);
             return Err(anyhow!("failed to parse geometry"))
         };
         Ok(AdminArea {

@@ -1014,8 +1014,8 @@ checksum = "dd8b5dd2ae5ed71462c540258bedcb51965123ad7e7ccf4b9a8cafaa4a63576d"
 
 [[package]]
 name = "openhousepopulator"
-version = "0.2.3"
-source = "git+https://github.com/xatellite/OpenHousePopulator?rev=v0.2.4#199bd2a7a7d7110ccb8ec5ce524a997f05417639"
+version = "0.2.5"
+source = "git+https://github.com/xatellite/OpenHousePopulator?rev=0.2.5#000b3a392a13f1214edf5390eac054b32fffe688"
 dependencies = [
  "clap",
  "config",

@@ -9,7 +9,7 @@ use std::{
 
 use admin_area::AdminArea;
 use clap::{Parser, Subcommand};
-use geo::Polygon;
+use geo::{MultiPolygon, Polygon};
 use serde::{Serialize, Serializer};
 
 use anyhow::{anyhow, bail, Result};
@@ -27,7 +27,10 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Split,
+    Split {
+        levels: Option<Vec<u16>>,
+        file: Option<PathBuf>,
+    },
     Deduplicate,
     Preprocess,
 }
@@ -35,19 +38,23 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Split => {
-            let admin_levels: [u16; 5] = [4, 6, 8, 9, 10];
+        Commands::Split { levels, file } => {
+            let admin_levels: Vec<u16> = levels.unwrap_or(Vec::from([4, 6, 8, 9, 10]));
             for level in admin_levels {
                 let mut level_path = env::current_dir().expect("failed to get current directory");
                 level_path.push(&level.to_string());
                 fs::create_dir_all(&level_path).expect("failed to create directory");
+                if let Some(file) = file {
+                    split_for_level(&file, level, &level_path).unwrap();
+                    break;
+                }
                 let files: Vec<PathBuf> = fs::read_dir(env::current_dir().unwrap())
                     .unwrap()
                     .into_iter()
                     .map(|file| file.unwrap().path())
                     .filter(|file| fs::metadata(file).unwrap().is_file())
                     .filter(|file| file.extension().unwrap_or_default() == "pbf")
-            .collect();
+                    .collect();
                 for file in files {
                     split_for_level(&file, level, &level_path).unwrap();
                 }
@@ -102,7 +109,12 @@ fn split_for_level(pbf: &Path, admin_level: u16, target_dir: &Path) -> Result<()
     );
     if areas.is_empty() {
         if admin_level != 10 {
-            fs::copy(pbf, target_dir.with_file_name(area_id.to_string()).with_extension("pbf"))?;
+            fs::copy(
+                pbf,
+                target_dir
+                    .with_file_name(area_id.to_string())
+                    .with_extension("pbf"),
+            )?;
         }
         return Ok(());
     }
@@ -121,7 +133,7 @@ struct OsmiumExtractConfig {
 struct OsmiumExtract {
     output: String,
     #[serde(serialize_with = "serialize_polygon_list")]
-    polygon: Polygon,
+    polygon: MultiPolygon,
 }
 
 fn generate_osmium_config(pbf: &Path, target_dir: &Path, areas: Vec<AdminArea>) -> Result<PathBuf> {
@@ -161,14 +173,30 @@ fn split_pbf(config_file: &Path, pbf: &Path) -> Result<()> {
     Ok(())
 }
 
-fn serialize_polygon_list<S>(polygon: &Polygon, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_polygon_list<S>(polygon: &MultiPolygon, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    let inner_list: Vec<[f64; 2]> = polygon
-        .exterior()
-        .coords()
-        .map(|coord| [coord.x, coord.y])
+    let polygons: Vec<Vec<Vec<[f64; 2]>>> = polygon
+        .0
+        .iter()
+        .map(|polygon| {
+            let mut res = Vec::new();
+            res.push(
+                polygon
+                    .exterior()
+                    .coords()
+                    .map(|coord| [coord.x, coord.y])
+                    .collect(),
+            );
+            res.extend(polygon.interiors().into_iter().map(|linestring| {
+                linestring
+                    .coords()
+                    .map(|coord| [coord.x, coord.y])
+                    .collect()
+            }));
+            res
+        })
         .collect();
-    serializer.collect_seq([inner_list])
+    serializer.collect_seq(polygons)
 }
