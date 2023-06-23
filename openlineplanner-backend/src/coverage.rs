@@ -194,7 +194,6 @@ pub async fn coverage_info(
     stations: web::Json<Vec<Station>>,
     routing: web::Path<Routing>,
     layers: web::Data<RwLock<Layers>>,
-    streets: web::Data<Streets>,
 ) -> Result<PopulatedCentroidCoverageLayer, OLPError> {
     let layer = layers.read().map_err(OLPError::from_error)?.all_merged();
     let coverage_info = houses_for_stations(
@@ -202,7 +201,7 @@ pub async fn coverage_info(
         layer.get_centroids(),
         &Method::Absolute,
         &routing,
-        &streets,
+        layer.get_streets(),
     );
     Ok(PopulatedCentroidCoverageLayer::from(coverage_info))
 }

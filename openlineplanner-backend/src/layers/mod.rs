@@ -2,9 +2,8 @@ use std::{
     collections::HashMap,
     fmt::Display,
     fs,
-    path::{Path, PathBuf},
+    path::PathBuf,
     sync::RwLock,
-    thread,
 };
 
 use actix_web::{
@@ -71,7 +70,6 @@ pub async fn find_center(layers: web::Data<RwLock<Layers>>) -> Result<Json<Point
 pub async fn summarize_layers(
     layers: web::Data<RwLock<Layers>>,
 ) -> Result<Json<Vec<Value>>, OLPError> {
-    log::info!("getting layer summary {:?}", thread::current().id());
     let layer_summary = layers
         .read()
         .map_err(OLPError::from_error)?
@@ -180,6 +178,8 @@ impl Layers {
                 .and_modify(|elem| {
                     elem.centroids.append(&mut layer.centroids.clone());
                     elem.bbox.union(&layer.bbox);
+                    elem.streets.streetgraph.extend(layer.streets.streetgraph.all_edges());
+                    elem.streets.nodes.extend(layer.streets.nodes.iter());
                 })
                 .or_insert(layer.clone());
         }
@@ -260,6 +260,10 @@ impl Layer {
     }
     pub fn get_type(&self) -> &LayerType {
         &self.layer_type
+    }
+
+    pub fn get_streets(&self) -> &Streets {
+        &self.streets
     }
 
     pub fn serialize_info(&self) -> Value {
@@ -368,12 +372,14 @@ async fn calculate_new_layer(
         return Ok(Json(new_layer_id));
     }
 
-    let data_path = config
+    let data_path_str = config
         .get_string("data.dir")
         .map_err(OLPError::from_error)?;
-    let data_path = Path::new(&data_path)
-        .with_file_name(&admin_area.id.to_string())
-        .with_extension("map");
+    let mut data_path = PathBuf::new();
+    data_path.push(data_path_str);
+    data_path.push(&admin_area.id.to_string());
+    data_path.set_extension("map");
+    log::info!("loading data from {:?}", data_path);
     let mut data = persistence::load_preprocessed_data(&data_path)?;
 
     if let Some(answer) = answers.get(0).map(|ans| ans.value) {

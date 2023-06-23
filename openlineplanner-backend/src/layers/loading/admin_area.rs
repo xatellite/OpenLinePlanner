@@ -1,6 +1,7 @@
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{Point, Polygon};
 use geojson::{
+    feature::Id,
     ser::{serialize_geometry, to_feature_collection_string},
     Feature, GeoJson,
 };
@@ -28,6 +29,10 @@ impl TryFrom<Feature> for AdminArea {
 
     fn try_from(value: Feature) -> Result<Self, Self::Error> {
         let properties = value.properties.unwrap_or_default();
+        let id: u64 = match value.id.unwrap() {
+            Id::String(id) => id.split('/').skip(1).next().unwrap().parse().unwrap(),
+            Id::Number(id) => id.as_u64().unwrap(),
+        };
         let Some(geometry) = value.geometry.and_then(|geometry|
             TryInto::<Polygon>::try_into(geometry.value).ok()
         ) else {
@@ -46,11 +51,7 @@ impl TryFrom<Feature> for AdminArea {
                     .and_then(|name| name.as_str())
                     .unwrap_or_default()
             ),
-            id: properties
-                .get("id")
-                .and_then(|id| id.as_u64())
-                .unwrap_or_default()
-                .to_owned(),
+            id,
             admin_level: properties
                 .get("admin_level")
                 .and_then(|id| id.as_str())
@@ -64,11 +65,8 @@ impl TryFrom<Feature> for AdminArea {
 static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
 is_in({lat}, {lon}) -> .a;
 (
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"6\"](pivot.a);
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"7\"](pivot.a);
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"9\"](pivot.a);
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"10\"](pivot.a);
 );
 
 out geom;";

@@ -20,7 +20,6 @@ mod population;
 mod station;
 
 use coverage::{CoverageMap, Method, Routing};
-use layers::streetgraph::Streets;
 use layers::{LayerType, Layers};
 use station::{OptimalStationResult, Station};
 
@@ -43,7 +42,6 @@ struct FindStationRequest {
 async fn station_info(
     request: web::Json<StationInfoRequest>,
     layers: web::Data<RwLock<Layers>>,
-    streets: web::Data<Streets>,
 ) -> Result<InhabitantsMap, OLPError> {
     let merged_layers = layers
         .read()
@@ -57,10 +55,10 @@ async fn station_info(
                 layer.get_type().clone(),
                 coverage::houses_for_stations(
                     &request.stations,
-                    &layer.get_centroids(),
+                    layer.get_centroids(),
                     &request.method.as_ref().unwrap_or(&Method::Relative),
                     &request.routing.as_ref().unwrap_or(&Routing::Osm),
-                    &streets,
+                    layer.get_streets(),
                 ),
             )
         })
@@ -72,17 +70,16 @@ async fn station_info(
 async fn find_station(
     request: web::Json<FindStationRequest>,
     layers: web::Data<RwLock<Layers>>,
-    streets: web::Data<Streets>,
 ) -> Result<OptimalStationResult, OLPError> {
     let layer = layers.read().map_err(OLPError::from_error)?.all_merged();
     Ok(station::find_optimal_station(
         request.route.clone(),
         300f64,
-        &layer.get_centroids(),
+        layer.get_centroids(),
         &request.stations,
         &request.method.as_ref().unwrap_or(&Method::Relative),
         &request.routing.as_ref().unwrap_or(&Routing::Osm),
-        &streets,
+        layer.get_streets(),
     ))
 }
 
@@ -99,7 +96,7 @@ async fn main() -> std::io::Result<()> {
     #[rustfmt::skip]
     let config = Config::builder()
         .set_default("cache.dir", "./cache/").unwrap()
-        .set_default("data.dir", "./pbf/").unwrap()
+        .set_default("data.dir", "./data/").unwrap()
         .add_source(config::File::with_name("Config.toml").required(false))
         .build()
         .unwrap();

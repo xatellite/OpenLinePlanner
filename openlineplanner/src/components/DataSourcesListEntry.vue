@@ -75,7 +75,7 @@ export default {
       this.layerLoading = true;
       getLayer(this.layer.id).then((layerGeoJson) => {
         layerGeoJson.properties = {};
-        layerGeoJson.properties.id = this.layer.id;
+        layerGeoJson.id = this.layer.id;
         this.dataStore.addMapBound(layerGeoJson, "points", "layer", "#FEC80B");
         this.layerLoading = false;
       });
