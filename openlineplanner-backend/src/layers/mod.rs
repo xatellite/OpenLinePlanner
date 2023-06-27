@@ -26,15 +26,15 @@ use osmpbfreader::NodeId;
 use petgraph::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use datatypes::Streets;
 
 mod loading;
 mod merge;
-pub mod streetgraph;
 pub use loading::osm;
 pub use merge::*;
 use uuid::Uuid;
 
-use self::{loading::AdminArea, streetgraph::Streets};
+use self::{loading::AdminArea};
 use crate::{
     error::OLPError,
     persistence::{self, save_layers},

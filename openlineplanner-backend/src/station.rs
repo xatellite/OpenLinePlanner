@@ -3,12 +3,12 @@ use std::borrow::Borrow;
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{HaversineDistance, LineString, Point};
 use serde::{Deserialize, Serialize};
+use datatypes::Streets;
 
 use crate::{
     coverage::StationCoverageInfo,
     coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
     geometry::{DensifyHaversine, OsmDistanceCalculator},
-    layers::streetgraph::Streets,
     layers::PopulatedCentroid,
 };
 

@@ -4,10 +4,11 @@ use std::{
     io::{Read, Write},
     path::Path,
 };
+use datatypes::Streets;
 
 use crate::{
     error::OLPError,
-    layers::{streetgraph::Streets, Layers},
+    layers::Layers,
 };
 use openhousepopulator::Buildings;
 

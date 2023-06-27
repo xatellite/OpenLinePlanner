@@ -9,13 +9,14 @@ use geojson::ser::serialize_geometry;
 use geojson::ser::to_feature_collection_string;
 use serde::Deserialize;
 use serde::Serialize;
+use rayon::prelude::*;
+use datatypes::Streets;
 
 use crate::error::OLPError;
 use crate::geometry::DistanceCalculator;
 use crate::geometry::DistanceFromPoint;
 use crate::geometry::HaversineDistanceCalculator;
 use crate::geometry::OsmDistanceCalculator;
-use crate::layers::streetgraph::Streets;
 use crate::layers::Layers;
 use crate::layers::PopulatedCentroid;
 use crate::Station;
@@ -72,7 +73,7 @@ pub enum Method {
 }
 
 /// Gets all houses which are in the coverage area of a station and which are not closer to another station
-pub fn get_houses_in_coverage<'a, D: DistanceCalculator>(
+pub fn get_houses_in_coverage<'a, D: DistanceCalculator + Sync>(
     origin: &Point,
     coverage: f64,
     houses: &'a [PopulatedCentroid],
@@ -81,7 +82,7 @@ pub fn get_houses_in_coverage<'a, D: DistanceCalculator>(
 ) -> Vec<PopulatedCentroidInfo<'a>> {
     let distance_from_origin = distance_calculator.fix_point(origin);
     houses
-        .iter()
+        .par_iter()
         .filter_map(|house| {
             let distance = distance_from_origin.distance(house);
             if distance < coverage {

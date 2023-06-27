@@ -16,6 +16,13 @@ pub struct Streets {
 }
 
 impl Streets {
+    pub fn new() -> Streets {
+        Streets {
+            streetgraph: UnGraphMap::new(),
+            nodes: HashMap::new(),
+        }
+    }
+
     fn serialize_streetgraph<S>(
         graph: &UnGraphMap<NodeId, f64>,
         serializer: S,

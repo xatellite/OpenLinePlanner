@@ -189,7 +189,7 @@ export default {
   // align-items: center;
   justify-content: center;
   flex-direction: column;
-  z-index: 10;
+  z-index: 4;
   overflow: hidden;
   border: 1px solid var(--c-button-border);
 

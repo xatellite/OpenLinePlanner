@@ -29,3 +29,5 @@ acc_reader = "2.0.0"
 uuid = { version = "1.3.0", features = ["v4", "serde", "v5"] }
 predicates = "3.0.3"
 postcard = { version = "1.0.4", features = ["alloc"] }
+rayon = "1.7.0"
+datatypes = { path = "../datatypes" }

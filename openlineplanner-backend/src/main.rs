@@ -107,10 +107,10 @@ async fn main() -> std::io::Result<()> {
     log::info!("loading data done");
 
     HttpServer::new(move || {
-        let cors = Cors::default()
-            .allow_any_origin()
-            .allow_any_method()
-            .allow_any_header();
+        #[cfg(debug_assertions)]
+        let cors = Cors::permissive();
+        #[cfg(not(debug_assertions))]
+        let cors = Cors::default();
 
         App::new()
             .wrap(cors)
