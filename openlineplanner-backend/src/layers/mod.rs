@@ -113,17 +113,6 @@ impl PopulatedCentroid {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct LayersContainer(HashMap<Uuid, Layers>);
-impl LayersContainer {
-    pub fn get(&self, user_id: &Uuid) -> Option<&Layers> {
-        self.0.get(user_id)
-    }
-
-    pub fn insert(&mut self, user_id: Uuid, layers: Layers) {
-        self.0.insert(user_id, layers);
-    }
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Layers(HashMap<Uuid, Layer>);
