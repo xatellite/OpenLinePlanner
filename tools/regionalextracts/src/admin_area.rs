@@ -97,6 +97,7 @@ pub fn render_ovp_query_template(admin_level: u16, area_id: u64) -> Result<Strin
     let mut tt = TinyTemplate::new();
     tt.add_template("query", OVP_QUERY_TEMPLATE)?;
 
+    // see http://osmlab.github.io/learnoverpass/en/docs/filters/element-id/ for why this is needed
     let area_id = area_id + 3600000000;
 
     let context = Context {

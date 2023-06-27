@@ -18,6 +18,8 @@ mod admin_area;
 mod overpass;
 mod processing;
 
+/// This program can be used to split .pbf files along administrative boundaries
+/// and preprocess the resulting files for use with OpenLinePlanner
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
@@ -27,11 +29,16 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Split a file or all files in the current directory along the
+    /// administrative boundaries of one or multiple admin_levels
     Split {
         levels: Option<Vec<u16>>,
+        #[clap(last(true))]
         file: Option<PathBuf>,
     },
+    /// Remove all files with the same name as the directory above
     Deduplicate,
+    /// Preprocess all files in the current directory for use with OpenLinePlanner
     Preprocess,
 }
 
