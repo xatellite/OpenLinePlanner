@@ -2,8 +2,9 @@ use geo::{
     CoordFloat, HaversineDistance, HaversineLength, Line, LineInterpolatePoint, LineString, Point,
 };
 use std::collections::HashMap;
+use datatypes::Streets;
 
-use crate::{layers::streetgraph::Streets, layers::PopulatedCentroid};
+use crate::layers::PopulatedCentroid;
 use osmpbfreader::NodeId;
 use petgraph::algo::dijkstra;
 
@@ -55,7 +56,7 @@ where
 }
 
 pub trait DistanceCalculator {
-    type FixedPoint: DistanceFromPoint;
+    type FixedPoint: DistanceFromPoint + Sync;
     fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64;
     fn fix_point(&self, point: &Point) -> Self::FixedPoint;
 }

@@ -9,13 +9,14 @@ use geojson::ser::serialize_geometry;
 use geojson::ser::to_feature_collection_string;
 use serde::Deserialize;
 use serde::Serialize;
+use rayon::prelude::*;
+use datatypes::Streets;
 
 use crate::error::OLPError;
 use crate::geometry::DistanceCalculator;
 use crate::geometry::DistanceFromPoint;
 use crate::geometry::HaversineDistanceCalculator;
 use crate::geometry::OsmDistanceCalculator;
-use crate::layers::streetgraph::Streets;
 use crate::layers::Layers;
 use crate::layers::PopulatedCentroid;
 use crate::Station;
@@ -72,7 +73,7 @@ pub enum Method {
 }
 
 /// Gets all houses which are in the coverage area of a station and which are not closer to another station
-pub fn get_houses_in_coverage<'a, D: DistanceCalculator>(
+pub fn get_houses_in_coverage<'a, D: DistanceCalculator + Sync>(
     origin: &Point,
     coverage: f64,
     houses: &'a [PopulatedCentroid],
@@ -81,7 +82,7 @@ pub fn get_houses_in_coverage<'a, D: DistanceCalculator>(
 ) -> Vec<PopulatedCentroidInfo<'a>> {
     let distance_from_origin = distance_calculator.fix_point(origin);
     houses
-        .iter()
+        .par_iter()
         .filter_map(|house| {
             let distance = distance_from_origin.distance(house);
             if distance < coverage {
@@ -194,7 +195,6 @@ pub async fn coverage_info(
     stations: web::Json<Vec<Station>>,
     routing: web::Path<Routing>,
     layers: web::Data<RwLock<Layers>>,
-    streets: web::Data<Streets>,
 ) -> Result<PopulatedCentroidCoverageLayer, OLPError> {
     let layer = layers.read().map_err(OLPError::from_error)?.all_merged();
     let coverage_info = houses_for_stations(
@@ -202,7 +202,7 @@ pub async fn coverage_info(
         layer.get_centroids(),
         &Method::Absolute,
         &routing,
-        &streets,
+        layer.get_streets(),
     );
     Ok(PopulatedCentroidCoverageLayer::from(coverage_info))
 }

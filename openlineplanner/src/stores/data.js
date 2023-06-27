@@ -67,7 +67,7 @@ export const useDataStore = () => {
       },
       removeMapBoundsById(id) {
         this.mapBounds = this.mapBounds.filter(
-          (area) => area.properties.id != id
+          (area) => area.id != id
         );
       },
       removeMapBoundsByType(ref) {

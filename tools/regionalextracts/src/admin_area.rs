@@ -1,18 +1,13 @@
-use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
-use geo::{Point, Polygon};
-use geojson::{
-    feature::Id,
-    ser::{serialize_geometry, to_feature_collection_string},
-    Feature, GeoJson,
-};
+use geo::{MultiPolygon, Polygon};
+use geojson::{feature::Id, ser::serialize_geometry, Feature, GeoJson};
 use serde::Serialize;
 use tinytemplate::TinyTemplate;
 
-use crate::error::OLPError;
+use anyhow::{anyhow, Error, Result};
 
 use super::overpass::query_overpass;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct AdminArea {
     pub name: String,
     pub id: u64,
@@ -21,11 +16,11 @@ pub struct AdminArea {
         serialize_with = "serialize_geometry",
         deserialize_with = "deserialize_geometry"
     )]
-    pub geometry: Polygon,
+    pub geometry: MultiPolygon,
 }
 
 impl TryFrom<Feature> for AdminArea {
-    type Error = OLPError;
+    type Error = Error;
 
     fn try_from(value: Feature) -> Result<Self, Self::Error> {
         let properties = value.properties.unwrap_or_default();
@@ -34,10 +29,14 @@ impl TryFrom<Feature> for AdminArea {
             Id::Number(id) => id.as_u64().unwrap(),
         };
         let Some(geometry) = value.geometry.and_then(|geometry|
-            TryInto::<Polygon>::try_into(geometry.value).ok()
+            if let Some(multipoly) = TryInto::<MultiPolygon>::try_into(geometry.value.clone()).ok() {
+                Some(multipoly)
+            } else {
+                TryInto::<Polygon>::try_into(geometry.value).ok().and_then(|polygon| Some(MultiPolygon::from(polygon)))
+            }
         ) else {
-            log::info!("Area dropped due to wrong geometry: {:?}", properties);
-            return Err(OLPError::GeometryError)
+            println!("Area dropped due to wrong geometry: {}", id);
+            return Err(anyhow!("failed to parse geometry"))
         };
         Ok(AdminArea {
             name: format!(
@@ -63,10 +62,9 @@ impl TryFrom<Feature> for AdminArea {
 }
 
 static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
-is_in({lat}, {lon}) -> .a;
+area({area_id});
 (
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"9\"](pivot.a);
+  relation[\"boundary\" = \"administrative\"][\"admin_level\"={admin_level}](area);
 );
 
 out geom;";
@@ -74,7 +72,7 @@ out geom;";
 pub struct AdminAreas(Vec<AdminArea>);
 
 impl TryFrom<GeoJson> for AdminAreas {
-    type Error = OLPError;
+    type Error = Error;
 
     fn try_from(value: GeoJson) -> Result<Self, Self::Error> {
         match value {
@@ -84,50 +82,36 @@ impl TryFrom<GeoJson> for AdminAreas {
                     .filter_map(|feature| feature.try_into().ok())
                     .collect(),
             )),
-            _ => Err(OLPError::GeometryError),
-        }
-    }
-}
-
-impl Responder for AdminAreas {
-    type Body = BoxBody;
-
-    fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
-        match to_feature_collection_string(&self.0) {
-            Ok(body) => HttpResponse::Ok()
-                .content_type(ContentType::json())
-                .body(body),
-            Err(error) => HttpResponse::InternalServerError()
-                .body(format!("failed to convert to geojson: {}", error)),
+            _ => Err(anyhow!("wrong geometry")),
         }
     }
 }
 
 #[derive(Serialize)]
 struct Context {
-    lat: f64,
-    lon: f64,
+    admin_level: u16,
+    area_id: u64,
 }
 
-pub fn render_ovp_query_template(point: Point) -> Result<String, OLPError> {
+pub fn render_ovp_query_template(admin_level: u16, area_id: u64) -> Result<String, Error> {
     let mut tt = TinyTemplate::new();
-    tt.add_template("query", OVP_QUERY_TEMPLATE)
-        .map_err(OLPError::from_error)?;
+    tt.add_template("query", OVP_QUERY_TEMPLATE)?;
+
+    // see http://osmlab.github.io/learnoverpass/en/docs/filters/element-id/ for why this is needed
+    let area_id = area_id + 3600000000;
 
     let context = Context {
-        lon: point.x(),
-        lat: point.y(),
+        admin_level,
+        area_id,
     };
 
-    Ok(tt.render("query", &context).map_err(OLPError::from_error)?)
+    Ok(tt.render("query", &context)?)
 }
 
-pub async fn find_admin_boundaries_for_point(point: Point) -> Result<AdminAreas, OLPError> {
-    let ovp_query = render_ovp_query_template(point)?;
+pub fn find_admin_boundaries(admin_level: u16, area_id: u64) -> Result<Vec<AdminArea>, Error> {
+    let ovp_query = render_ovp_query_template(admin_level, area_id)?;
 
-    let ovp_response = query_overpass(ovp_query)
-        .await
-        .map_err(OLPError::from_error)?;
+    let ovp_response = query_overpass(ovp_query)?;
 
-    Ok(ovp_response.try_into().map_err(OLPError::from_error)?)
+    Ok(TryInto::<AdminAreas>::try_into(ovp_response)?.0)
 }

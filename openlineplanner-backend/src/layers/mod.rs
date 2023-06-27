@@ -1,4 +1,10 @@
-use std::{collections::HashMap, fmt::Display, fs, path::PathBuf, sync::RwLock, thread};
+use std::{
+    collections::HashMap,
+    fmt::Display,
+    fs,
+    path::PathBuf,
+    sync::RwLock,
+};
 
 use actix_web::{
     body::BoxBody,
@@ -9,8 +15,7 @@ use actix_web::{
 
 use config::Config;
 use geo::{
-    point, BooleanOps, Centroid, Contains, HaversineDistance, LineString, MultiPolygon, Point,
-    Polygon,
+    point, BooleanOps, Centroid, HaversineDistance, LineString, MultiPolygon, Point, Polygon,
 };
 use geojson::{
     de::deserialize_geometry,
@@ -18,19 +23,23 @@ use geojson::{
     Feature,
 };
 use osmpbfreader::NodeId;
+use petgraph::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use datatypes::Streets;
 
 mod loading;
 mod merge;
-pub mod streetgraph;
 pub use loading::osm;
 pub use merge::*;
 use uuid::Uuid;
 
-use self::{loading::AdminArea, streetgraph::Streets};
-use crate::{error::OLPError, persistence::save_layers};
-use openhousepopulator::{Building, Buildings, GenericGeometry};
+use self::{loading::AdminArea};
+use crate::{
+    error::OLPError,
+    persistence::{self, save_layers},
+};
+use openhousepopulator::{Building, GenericGeometry};
 
 pub fn layers() -> Scope {
     web::scope("/layer")
@@ -61,7 +70,6 @@ pub async fn find_center(layers: web::Data<RwLock<Layers>>) -> Result<Json<Point
 pub async fn summarize_layers(
     layers: web::Data<RwLock<Layers>>,
 ) -> Result<Json<Vec<Value>>, OLPError> {
-    log::info!("getting layer summary {:?}", thread::current().id());
     let layer_summary = layers
         .read()
         .map_err(OLPError::from_error)?
@@ -105,12 +113,27 @@ impl PopulatedCentroid {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Layers(HashMap<Uuid, Layer>);
 
 impl Layers {
     pub fn by_type(&self, layer_type: LayerType) -> Layer {
-        let centroids: Vec<PopulatedCentroid> = self
+        let streetgraph = UnGraphMap::from_edges(
+            self.0
+                .iter()
+                .filter(|(_, layer)| layer.layer_type == layer_type)
+                .flat_map(|(_, layer)| layer.streets.streetgraph.all_edges()),
+        );
+        let nodes = self
+            .0
+            .iter()
+            .filter(|(_, layer)| layer.layer_type == layer_type)
+            .flat_map(|(_, layer)| layer.streets.nodes.clone())
+            .collect();
+        let streets = Streets { nodes, streetgraph };
+
+        let centroids = self
             .0
             .iter()
             .filter(|(_, layer)| layer.layer_type == layer_type)
@@ -130,6 +153,7 @@ impl Layers {
             id: Uuid::nil(),
             bbox,
             centroids,
+            streets,
             layer_type,
             layer_name: layer_type.to_string(),
         }
@@ -143,6 +167,8 @@ impl Layers {
                 .and_modify(|elem| {
                     elem.centroids.append(&mut layer.centroids.clone());
                     elem.bbox.union(&layer.bbox);
+                    elem.streets.streetgraph.extend(layer.streets.streetgraph.all_edges());
+                    elem.streets.nodes.extend(layer.streets.nodes.iter());
                 })
                 .or_insert(layer.clone());
         }
@@ -156,11 +182,23 @@ impl Layers {
                 id: Uuid::nil(),
                 bbox: MultiPolygon::new(vec![]),
                 centroids: Vec::new(),
+                streets: Streets::new(),
                 layer_type: LayerType::Residential,
                 layer_name: "Residential".to_string(),
             };
         }
-        let centroids: Vec<PopulatedCentroid> = self
+        let streetgraph = UnGraphMap::from_edges(
+            self.0
+                .iter()
+                .flat_map(|(_, layer)| layer.streets.streetgraph.all_edges()),
+        );
+        let nodes = self
+            .0
+            .iter()
+            .flat_map(|(_, layer)| layer.streets.nodes.clone())
+            .collect();
+        let streets = Streets { nodes, streetgraph };
+        let centroids = self
             .0
             .iter()
             .flat_map(|(_, layer)| layer.centroids.clone())
@@ -176,6 +214,7 @@ impl Layers {
             id: Uuid::nil(),
             bbox,
             centroids,
+            streets,
             layer_type: LayerType::Residential,
             layer_name: "Residential".to_string(),
         }
@@ -194,11 +233,12 @@ impl Layers {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Layer {
     id: Uuid,
     bbox: MultiPolygon,
     centroids: Vec<PopulatedCentroid>,
+    streets: Streets,
     layer_type: LayerType,
     layer_name: String,
 }
@@ -209,6 +249,10 @@ impl Layer {
     }
     pub fn get_type(&self) -> &LayerType {
         &self.layer_type
+    }
+
+    pub fn get_streets(&self) -> &Streets {
+        &self.streets
     }
 
     pub fn serialize_info(&self) -> Value {
@@ -286,7 +330,6 @@ struct CalculateLayerRequest {
     name: String,
     area: Feature,
     layer_type: LayerType,
-    method: String,
     answers: Vec<Answer>,
 }
 
@@ -299,21 +342,15 @@ impl CalculateLayerRequest {
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
     layers: web::Data<RwLock<Layers>>,
-    buildings: web::Data<Buildings>,
-    streets: web::Data<Streets>,
     config: web::Data<Config>,
 ) -> Result<Json<Uuid>, OLPError> {
     let request = request.into_inner();
     let admin_area = request.admin_area()?;
     let layer_type = request.layer_type;
-    let method = request.method;
     let answers = request.answers;
     let layer_name = request.name;
 
-    let new_layer_id = uuid::Uuid::new_v5(
-        &uuid::Uuid::NAMESPACE_URL,
-        format!("{}{}{}{:?}", admin_area.id, layer_type, method, answers).as_bytes(),
-    );
+    let new_layer_id = uuid::Uuid::new_v5(&uuid::Uuid::NAMESPACE_URL, &admin_area.id.to_le_bytes());
 
     if layers
         .read()
@@ -324,31 +361,33 @@ async fn calculate_new_layer(
         return Ok(Json(new_layer_id));
     }
 
-    let mut filtered_buildings: Buildings = buildings
-        .iter()
-        .filter(|building| match &building.geometry {
-            GenericGeometry::GenericPoint(point) => admin_area.geometry.contains(point),
-            GenericGeometry::GenericPolygon(polygon) => admin_area.geometry.contains(polygon),
-        })
-        .cloned()
-        .collect();
+    let data_path_str = config
+        .get_string("data.dir")
+        .map_err(OLPError::from_error)?;
+    let mut data_path = PathBuf::new();
+    data_path.push(data_path_str);
+    data_path.push(&admin_area.id.to_string());
+    data_path.set_extension("map");
+    log::info!("loading data from {:?}", data_path);
+    let mut data = persistence::load_preprocessed_data(&data_path)?;
 
     if let Some(answer) = answers.get(0).map(|ans| ans.value) {
-        filtered_buildings
+        data.buildings
             .distribute_population(answer, &openhousepopulator::Config::builder().build());
     } else {
-        filtered_buildings.estimate_population();
+        data.buildings.estimate_population();
     }
 
-    let mut centroids: Vec<PopulatedCentroid> = filtered_buildings
+    let mut centroids: Vec<PopulatedCentroid> = data
+        .buildings
         .into_iter()
         .filter_map(|building| building.try_into().ok())
         .collect();
 
-    let nodes = &streets.nodes;
-
     for centroid in &mut centroids {
-        let closest_street_node = nodes
+        let closest_street_node = data
+            .streets
+            .nodes
             .iter()
             .min_by_key(|(_, node)| node.haversine_distance(&centroid.geometry) as u32)
             .map(|(id, _)| id)
@@ -360,6 +399,7 @@ async fn calculate_new_layer(
     layers.write().map_err(OLPError::from_error)?.push(Layer {
         id: new_layer_id.clone(),
         bbox: MultiPolygon::new(vec![admin_area.geometry]),
+        streets: data.streets,
         centroids,
         layer_type,
         layer_name,

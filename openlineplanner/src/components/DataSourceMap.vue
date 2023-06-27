@@ -115,9 +115,9 @@ export default {
 
       bounds.forEach((bound) => {
         console.log("bounds");
-        const boundId = bound.properties.id;
+        const boundId = bound.id;
         console.log(boundId);
-        this.map.addSource(boundId, {
+        this.map.addSource(`${boundId}`, {
           type: "geojson",
           data: bound,
         });
@@ -126,7 +126,7 @@ export default {
           this.map.addLayer({
             id: `area-${boundId}`,
             type: "fill",
-            source: boundId,
+            source: `${boundId}`,
             paint: {
               "fill-color": bound.properties.color,
               "fill-opacity": 0.2,
@@ -135,7 +135,7 @@ export default {
           this.map.addLayer({
             id: `stroke-${boundId}`,
             type: "line",
-            source: boundId,
+            source: `${boundId}`,
             paint: {
               "line-color": bound.properties.color,
               "line-opacity": 0.3,
@@ -147,7 +147,7 @@ export default {
           this.map.addLayer({
             id: `points-${boundId}`,
             type: "circle",
-            source: boundId,
+            source: `${boundId}`,
             paint: {
               "circle-radius": 6,
               "circle-color": bound.properties.color,
@@ -166,7 +166,7 @@ export default {
         }
       });
       if (highlight) {
-        const boundId = highlight.properties.id;
+        const boundId = highlight.id;
         if (this.map.getLayer(`area-${boundId}`)) {
           this.map.setPaintProperty(`area-${boundId}`, "fill-opacity", 0.5);
           this.map.setPaintProperty(`stroke-${boundId}`, "line-opacity", 0.8);

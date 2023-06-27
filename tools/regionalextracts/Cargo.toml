@@ -1,0 +1,22 @@
+[package]
+name = "regionalextracts"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.71"
+geo = { version = "0.25.0", features = ["serde"] }
+geojson = "0.24.1"
+log = "0.4.19"
+osmpbfreader = "0.16.0"
+petgraph = "0.6.3"
+reqwest = { version = "0.11.18", features = ["rustls", "blocking"], default-features = false }
+serde = { version = "1.0.164", features = ["derive"] }
+serde_json = "1.0.97"
+tinytemplate = "1.2.1"
+openhousepopulator = { rev = "0.2.5", git ="https://github.com/xatellite/OpenHousePopulator" }
+postcard = { version = "1.0.4", features = ["alloc"] }
+datatypes = { path = "../../datatypes" }
+clap = { version = "4.3.5", features = ["derive"] }
