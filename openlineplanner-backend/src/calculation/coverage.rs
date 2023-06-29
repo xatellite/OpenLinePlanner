@@ -80,15 +80,20 @@ pub fn get_houses_in_coverage<'a, D: DistanceCalculator + Sync>(
         .filter_map(|house| {
             let distance = distance_from_origin.distance(house);
             if distance < coverage {
-                Some(PopulatedCentroidInfo{centroid: house, distance})
+                Some(PopulatedCentroidInfo {
+                    centroid: house,
+                    distance,
+                })
             } else {
                 None
             }
         }) // PopulatedCentroid is in the radius of our station
         .filter(|hi| {
             possible_collision_stations.iter().all(|other| {
-                distance_calculator.distance(hi.centroid, &other.location) > other.coverage() // PopulatedCentroid is not in the coverage area of the other station or
-                    || distance_calculator.distance(hi.centroid, &origin) < distance_calculator.distance(hi.centroid, &other.location)
+                // PopulatedCentroid is not in the coverage area of the other station or
+                distance_calculator.distance(hi.centroid, &other.location) > other.coverage()
+                    || distance_calculator.distance(hi.centroid, &origin)
+                        < distance_calculator.distance(hi.centroid, &other.location)
                 // PopulatedCentroid is closer to the current station
             })
         })
