@@ -1,13 +1,12 @@
+use std::collections::HashMap;
+
 use actix_web::body::BoxBody;
 use actix_web::http::header::ContentType;
-use actix_web::HttpResponse;
-use actix_web::Responder;
+use actix_web::{HttpResponse, Responder};
 use serde::Serialize;
 
-use crate::coverage::CoverageMap;
+use super::coverage::CoverageMap;
 use crate::layers::LayerType;
-
-use std::collections::HashMap;
 
 #[derive(Serialize)]
 pub struct InhabitantsInfo {

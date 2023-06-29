@@ -1,6 +1,8 @@
-use std::{error::Error, fmt::Display};
+use std::error::Error;
+use std::fmt::Display;
 
-use actix_web::{body::BoxBody, HttpResponse, Responder, ResponseError};
+use actix_web::body::BoxBody;
+use actix_web::{HttpResponse, Responder, ResponseError};
 
 #[derive(Debug)]
 pub enum OLPError {

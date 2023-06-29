@@ -1,18 +1,14 @@
-use serde::{Deserialize, Serialize};
-use std::{
-    fs::File,
-    io::{Read, Write},
-    path::Path,
-};
-use datatypes::Streets;
-
-use crate::{
-    error::OLPError,
-    layers::Layers,
-};
-use openhousepopulator::Buildings;
+use std::fs::File;
+use std::io::{Read, Write};
+use std::path::Path;
 
 use anyhow::Result;
+use datatypes::Streets;
+use openhousepopulator::Buildings;
+use serde::{Deserialize, Serialize};
+
+use crate::error::OLPError;
+use crate::layers::Layers;
 
 #[derive(Serialize, Deserialize)]
 pub(crate) struct PreProcessingData {
@@ -36,11 +32,4 @@ pub(crate) fn save_layers(layers: &Layers, path: &Path) -> Result<(), OLPError> 
             .as_slice(),
     )
     .map_err(OLPError::from_error)
-}
-
-pub(crate) fn load_layers(path: &Path) -> Result<Layers, OLPError> {
-    let mut file = File::open(path).map_err(OLPError::from_error)?;
-    let mut data: Vec<u8> = Vec::new();
-    file.read_to_end(&mut data).map_err(OLPError::from_error)?;
-    serde_json::from_slice(&data).map_err(OLPError::from_error)
 }

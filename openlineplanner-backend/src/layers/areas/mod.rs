@@ -4,11 +4,9 @@ mod overpass;
 use actix_web::{web, Responder, Scope};
 use geo::Point;
 
-use crate::error::OLPError;
-
 use self::admin_area::find_admin_boundaries_for_point;
-
 pub use self::admin_area::AdminArea;
+use crate::error::OLPError;
 
 /// Defining /osm endpoint for arcix-web router
 pub fn osm() -> Scope {

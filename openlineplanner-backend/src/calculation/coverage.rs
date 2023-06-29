@@ -1,28 +1,20 @@
+use std::collections::HashMap;
+
 use actix_web::body::BoxBody;
 use actix_web::http::header::ContentType;
-use actix_web::web;
-use actix_web::HttpResponse;
-use actix_web::Responder;
+use actix_web::{HttpResponse, Responder};
+use datatypes::Streets;
 use geo::Point;
 use geojson::de::deserialize_geometry;
-use geojson::ser::serialize_geometry;
-use geojson::ser::to_feature_collection_string;
-use serde::Deserialize;
-use serde::Serialize;
+use geojson::ser::{serialize_geometry, to_feature_collection_string};
 use rayon::prelude::*;
-use datatypes::Streets;
+use serde::{Deserialize, Serialize};
 
-use crate::error::OLPError;
-use crate::geometry::DistanceCalculator;
-use crate::geometry::DistanceFromPoint;
-use crate::geometry::HaversineDistanceCalculator;
-use crate::geometry::OsmDistanceCalculator;
-use crate::layers::Layers;
+use super::geometry::{
+    DistanceCalculator, DistanceFromPoint, HaversineDistanceCalculator, OsmDistanceCalculator,
+};
+use super::Station;
 use crate::layers::PopulatedCentroid;
-use crate::Station;
-
-use std::collections::HashMap;
-use std::sync::RwLock;
 
 #[derive(Serialize)]
 pub struct CoverageMap<'a, 'b>(pub HashMap<&'a str, StationCoverageInfo<'b>>);
@@ -80,7 +72,9 @@ pub fn get_houses_in_coverage<'a, D: DistanceCalculator + Sync>(
     distance_calculator: D,
     possible_collision_stations: &[&Station],
 ) -> Vec<PopulatedCentroidInfo<'a>> {
-    let distance_from_origin = distance_calculator.fix_point(origin);
+    let Some(distance_from_origin) = distance_calculator.fix_point(origin) else {
+        return Vec::new()
+    };
     houses
         .par_iter()
         .filter_map(|house| {
@@ -189,20 +183,4 @@ pub struct PopulatedCentroidCoverage {
     data_layer: String,
     distance: f64,
     closest_station: String,
-}
-
-pub async fn coverage_info(
-    stations: web::Json<Vec<Station>>,
-    routing: web::Path<Routing>,
-    layers: web::Data<RwLock<Layers>>,
-) -> Result<PopulatedCentroidCoverageLayer, OLPError> {
-    let layer = layers.read().map_err(OLPError::from_error)?.all_merged();
-    let coverage_info = houses_for_stations(
-        &stations,
-        layer.get_centroids(),
-        &Method::Absolute,
-        &routing,
-        layer.get_streets(),
-    );
-    Ok(PopulatedCentroidCoverageLayer::from(coverage_info))
 }

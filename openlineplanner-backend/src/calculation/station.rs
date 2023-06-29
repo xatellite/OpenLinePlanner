@@ -1,16 +1,17 @@
 use std::borrow::Borrow;
 
-use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
+use actix_web::body::BoxBody;
+use actix_web::http::header::ContentType;
+use actix_web::{HttpResponse, Responder};
+use datatypes::Streets;
 use geo::{HaversineDistance, LineString, Point};
 use serde::{Deserialize, Serialize};
-use datatypes::Streets;
 
-use crate::{
-    coverage::StationCoverageInfo,
-    coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
-    geometry::{DensifyHaversine, OsmDistanceCalculator},
-    layers::PopulatedCentroid,
+use super::coverage::{
+    get_houses_in_coverage, houses_for_stations, Method, Routing, StationCoverageInfo,
 };
+use super::geometry::{DensifyHaversine, OsmDistanceCalculator};
+use crate::layers::PopulatedCentroid;
 
 static DEFAULT_COVERAGE: f64 = 300f64;
 
