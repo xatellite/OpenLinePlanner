@@ -15,7 +15,7 @@ pub fn users(jwk_key: web::Data<Jwk>) -> Scope {
 async fn get_anonymous_user_token(jwk_key: web::Data<Jwk>) -> Result<String, OLPError> {
     let mut token = HeaderAndClaims::new_dynamic();
     token
-        .set_exp_from_now(Duration::from_secs(3600))
+        .set_exp_from_now(Duration::from_secs(86400))
         .set_iss("openlineplanner")
         .set_sub(Uuid::new_v4().to_string())
         .set_kid(jwk_key.kid.as_ref().cloned().unwrap_or_default())
