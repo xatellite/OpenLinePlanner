@@ -26,7 +26,7 @@
   <p align="center">
     Fast and Easy public transport network prototyping
     <br />
-    <a href="https://openlineplanner.xatellite.space/"><strong>Check out the Demo »</strong></a>
+    <a href="https://openlineplanner.com/"><strong>Check out the Demo »</strong></a>
     <br />
     <br />
     <a href="https://github.com/TheNewCivilian/OpenLinePlanner/issues">Report Bug</a>
@@ -223,9 +223,9 @@ Distributed under the GNU GPL V3 License. See `LICENSE.txt` for more information
 
 ## Contact
 
-Email: [openlineplanner@xatellite.space](mailto:hi@xatellite.space)
+Email: [hi@xatellite.space](mailto:hi@xatellite.space)
 
-Project Link: [https://github.com/TheNewCivilian/OpenLinePlanner](https://github.com/TheNewCivilian/OpenLinePlanner)
+Project Link: [https://github.com/xatellite/OpenLinePlanner](https://github.com/xatellite/OpenLinePlanner)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
