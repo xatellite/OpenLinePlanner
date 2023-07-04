@@ -1,12 +1,13 @@
+use std::collections::HashMap;
+
+use datatypes::Streets;
 use geo::{
     CoordFloat, HaversineDistance, HaversineLength, Line, LineInterpolatePoint, LineString, Point,
 };
-use std::collections::HashMap;
-use datatypes::Streets;
-
-use crate::layers::PopulatedCentroid;
 use osmpbfreader::NodeId;
 use petgraph::algo::dijkstra;
+
+use crate::layers::PopulatedCentroid;
 
 pub trait DensifyHaversine<F: CoordFloat> {
     type Output;
@@ -58,7 +59,7 @@ where
 pub trait DistanceCalculator {
     type FixedPoint: DistanceFromPoint + Sync;
     fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64;
-    fn fix_point(&self, point: &Point) -> Self::FixedPoint;
+    fn fix_point(&self, point: &Point) -> Option<Self::FixedPoint>;
 }
 
 pub trait DistanceFromPoint {
@@ -83,10 +84,10 @@ impl DistanceCalculator for HaversineDistanceCalculator {
     fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64 {
         a.haversine_distance(b)
     }
-    fn fix_point(&self, point: &Point) -> Self::FixedPoint {
-        HaversineFixedPoint {
+    fn fix_point(&self, point: &Point) -> Option<Self::FixedPoint> {
+        Some(HaversineFixedPoint {
             point: point.clone(),
-        }
+        })
     }
 }
 
@@ -118,20 +119,24 @@ impl<'a> DistanceCalculator for OsmDistanceCalculator<'a> {
     type FixedPoint = OsmFixedPoint;
 
     fn distance(&self, a: &PopulatedCentroid, b: &Point) -> f64 {
-        let (origin_node, diff_distance) = self.find_closest_node_to_point(b);
+        let Some((origin_node, diff_distance)) = self.find_closest_node_to_point(b) else {
+            return f64::MAX
+        };
         let osm_distance_matrix = dijkstra(&self.streets.streetgraph, origin_node, None, |e| *e.2);
         osm_distance_matrix
             .get(&a.street_graph_id.unwrap())
             .unwrap_or(&f64::MAX)
             + diff_distance
     }
-    fn fix_point(&self, point: &Point) -> Self::FixedPoint {
-        let (origin_node, diff_distance) = self.find_closest_node_to_point(point);
+    fn fix_point(&self, point: &Point) -> Option<Self::FixedPoint> {
+        let Some((origin_node, diff_distance)) = self.find_closest_node_to_point(point) else {
+            return None
+        };
         let distance_matrix = dijkstra(&self.streets.streetgraph, origin_node, None, |e| *e.2);
-        OsmFixedPoint {
+        Some(OsmFixedPoint {
             diff_distance,
             distance_matrix,
-        }
+        })
     }
 }
 
@@ -140,12 +145,11 @@ impl<'a> OsmDistanceCalculator<'a> {
         Self { streets }
     }
 
-    fn find_closest_node_to_point(&self, origin: &Point) -> (NodeId, f64) {
+    fn find_closest_node_to_point(&self, origin: &Point) -> Option<(NodeId, f64)> {
         self.streets
             .nodes
             .iter()
             .min_by_key(|(_, node)| node.haversine_distance(&origin) as u32)
             .map(|(id, node)| (id.clone(), node.haversine_distance(&origin)))
-            .unwrap()
     }
 }

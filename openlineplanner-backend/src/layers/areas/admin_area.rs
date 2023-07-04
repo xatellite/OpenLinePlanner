@@ -1,16 +1,15 @@
-use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
+use actix_web::body::BoxBody;
+use actix_web::http::header::ContentType;
+use actix_web::{HttpResponse, Responder};
 use geo::{Point, Polygon};
-use geojson::{
-    feature::Id,
-    ser::{serialize_geometry, to_feature_collection_string},
-    Feature, GeoJson,
-};
+use geojson::feature::Id;
+use geojson::ser::{serialize_geometry, to_feature_collection_string};
+use geojson::{Feature, GeoJson};
 use serde::Serialize;
 use tinytemplate::TinyTemplate;
 
-use crate::error::OLPError;
-
 use super::overpass::query_overpass;
+use crate::error::OLPError;
 
 #[derive(Serialize)]
 pub struct AdminArea {

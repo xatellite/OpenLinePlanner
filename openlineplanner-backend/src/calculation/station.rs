@@ -1,16 +1,18 @@
 use std::borrow::Borrow;
 
-use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
+use actix_web::body::BoxBody;
+use actix_web::http::header::ContentType;
+use actix_web::{HttpResponse, Responder};
+use datatypes::Streets;
 use geo::{HaversineDistance, LineString, Point};
 use serde::{Deserialize, Serialize};
-use datatypes::Streets;
+use rayon::prelude::*;
 
-use crate::{
-    coverage::StationCoverageInfo,
-    coverage::{get_houses_in_coverage, houses_for_stations, Method, Routing},
-    geometry::{DensifyHaversine, OsmDistanceCalculator},
-    layers::PopulatedCentroid,
+use super::coverage::{
+    get_houses_in_coverage, houses_for_stations, Method, Routing, StationCoverageInfo,
 };
+use super::geometry::{DensifyHaversine, OsmDistanceCalculator};
+use crate::layers::PopulatedCentroid;
 
 static DEFAULT_COVERAGE: f64 = 300f64;
 
@@ -45,18 +47,18 @@ pub fn find_optimal_station(
     let original_coverage: Vec<&PopulatedCentroid> =
         houses_for_stations(other_stations, houses, method, routing, streets)
             .0
-            .values()
-            .into_iter()
-            .flat_map(|elem| elem.houses.clone())
+            .into_par_iter()
+            .flat_map(|(_,elem)| elem.houses.clone())
             .map(|elem| elem.centroid)
             .collect();
     let leftover_houses: Vec<PopulatedCentroid> = houses
-        .iter()
+        .par_iter()
         .filter(|house| !original_coverage.contains(house))
         .cloned()
         .collect();
     let location = linestring
         .points()
+        .par_bridge()
         .max_by_key(|point| {
             StationCoverageInfo::from_houses_with_method(
                 get_houses_in_coverage(

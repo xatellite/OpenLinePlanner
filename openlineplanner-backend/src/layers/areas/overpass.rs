@@ -1,7 +1,5 @@
-use std::{
-    io::Write,
-    process::{Command, Stdio},
-};
+use std::io::Write;
+use std::process::{Command, Stdio};
 
 use anyhow::Result;
 use geojson::GeoJson;

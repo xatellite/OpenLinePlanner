@@ -1,45 +1,38 @@
-use std::{
-    collections::HashMap,
-    fmt::Display,
-    fs,
-    path::PathBuf,
-    sync::RwLock,
-};
+use std::collections::HashMap;
+use std::fmt::Display;
+use std::fs;
+use std::path::PathBuf;
+use std::sync::{Arc, RwLock};
 
-use actix_web::{
-    body::BoxBody,
-    http::header::ContentType,
-    web::{self, Data, Json},
-    HttpResponse, Responder, Scope,
-};
-
+use actix_web::body::BoxBody;
+use actix_web::http::header::ContentType;
+use actix_web::web::{self, Data, Json};
+use actix_web::{HttpRequest, HttpResponse, Responder, Scope};
 use config::Config;
+use datatypes::Streets;
 use geo::{
     point, BooleanOps, Centroid, HaversineDistance, LineString, MultiPolygon, Point, Polygon,
 };
-use geojson::{
-    de::deserialize_geometry,
-    ser::{serialize_geometry, to_feature_collection_string},
-    Feature,
-};
+use geojson::de::deserialize_geometry;
+use geojson::ser::{serialize_geometry, to_feature_collection_string};
+use geojson::Feature;
+use jwtk::jwk::JwkSetVerifier;
 use osmpbfreader::NodeId;
 use petgraph::prelude::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use datatypes::Streets;
 
-mod loading;
+mod areas;
 mod merge;
-pub use loading::osm;
+pub use areas::osm;
 pub use merge::*;
+use openhousepopulator::{Building, GenericGeometry};
 use uuid::Uuid;
 
-use self::{loading::AdminArea};
-use crate::{
-    error::OLPError,
-    persistence::{self, save_layers},
-};
-use openhousepopulator::{Building, GenericGeometry};
+use self::areas::AdminArea;
+use crate::error::OLPError;
+use crate::middleware::auth::Claims;
+use crate::persistence::{self, save_layers};
 
 pub fn layers() -> Scope {
     web::scope("/layer")
@@ -53,10 +46,13 @@ pub fn layers() -> Scope {
         )
         .route("/{layer_id}", web::get().to(get_layer))
         .route("/{layer_id}", web::delete().to(delete_layer))
+        .route("/transfer", web::post().to(transfer_layers))
         .route("", web::get().to(summarize_layers))
 }
 
-pub async fn find_center(layers: web::Data<RwLock<Layers>>) -> Result<Json<Point<f64>>, OLPError> {
+pub async fn find_center(
+    layers: web::ReqData<Arc<RwLock<Layers>>>,
+) -> Result<Json<Point<f64>>, OLPError> {
     let point = layers
         .read()
         .map_err(OLPError::from_error)?
@@ -68,7 +64,7 @@ pub async fn find_center(layers: web::Data<RwLock<Layers>>) -> Result<Json<Point
 }
 
 pub async fn summarize_layers(
-    layers: web::Data<RwLock<Layers>>,
+    layers: web::ReqData<Arc<RwLock<Layers>>>,
 ) -> Result<Json<Vec<Value>>, OLPError> {
     let layer_summary = layers
         .read()
@@ -113,6 +109,33 @@ impl PopulatedCentroid {
     }
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct LayersContainer(Arc<RwLock<HashMap<Uuid, Arc<RwLock<Layers>>>>>);
+
+impl LayersContainer {
+    pub fn new() -> Self {
+        Self(Arc::new(RwLock::new(HashMap::new())))
+    }
+
+    pub fn get_or_empty(&self, user_id: &Uuid) -> Arc<RwLock<Layers>> {
+        self.0
+            .write()
+            .unwrap()
+            .entry(user_id.clone())
+            .or_insert(Arc::new(RwLock::new(Layers::new())))
+            .clone()
+    }
+
+    // Todo: Currently overwrites a user session if one already exists
+    pub fn transfer_layers(&self, from_user_id: Uuid, to_user_id: Uuid) -> Result<(), OLPError> {
+        let mut map = self.0.write().map_err(OLPError::from_error)?;
+        let entry = map
+            .remove(&from_user_id)
+            .ok_or(OLPError::GenericError("session does not exist".to_string()))?;
+        map.insert(to_user_id.clone(), entry);
+        Ok(())
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Layers(HashMap<Uuid, Layer>);
@@ -167,7 +190,9 @@ impl Layers {
                 .and_modify(|elem| {
                     elem.centroids.append(&mut layer.centroids.clone());
                     elem.bbox.union(&layer.bbox);
-                    elem.streets.streetgraph.extend(layer.streets.streetgraph.all_edges());
+                    elem.streets
+                        .streetgraph
+                        .extend(layer.streets.streetgraph.all_edges());
                     elem.streets.nodes.extend(layer.streets.nodes.iter());
                 })
                 .or_insert(layer.clone());
@@ -341,7 +366,7 @@ impl CalculateLayerRequest {
 
 async fn calculate_new_layer(
     request: web::Json<CalculateLayerRequest>,
-    layers: web::Data<RwLock<Layers>>,
+    layers: web::ReqData<Arc<RwLock<Layers>>>,
     config: web::Data<Config>,
 ) -> Result<Json<Uuid>, OLPError> {
     let request = request.into_inner();
@@ -352,11 +377,9 @@ async fn calculate_new_layer(
 
     let new_layer_id = uuid::Uuid::new_v5(&uuid::Uuid::NAMESPACE_URL, &admin_area.id.to_le_bytes());
 
-    if layers
-        .read()
-        .map_err(OLPError::from_error)?
-        .contains_key(&new_layer_id)
-    {
+    let mut layers = layers.write().map_err(OLPError::from_error)?;
+
+    if layers.contains_key(&new_layer_id) {
         log::info!("layer {} is already calculated, reusing", new_layer_id);
         return Ok(Json(new_layer_id));
     }
@@ -396,7 +419,7 @@ async fn calculate_new_layer(
         centroid.street_graph_id = closest_street_node;
     }
 
-    layers.write().map_err(OLPError::from_error)?.push(Layer {
+    layers.push(Layer {
         id: new_layer_id.clone(),
         bbox: MultiPolygon::new(vec![admin_area.geometry]),
         streets: data.streets,
@@ -409,9 +432,7 @@ async fn calculate_new_layer(
     match fs::create_dir_all(&path) {
         Ok(_) => {
             path.push("layers");
-            if let Err(e) =
-                save_layers(layers.read().as_ref().map_err(OLPError::from_error)?, &path)
-            {
+            if let Err(e) = save_layers(&layers, &path) {
                 log::error!("failed to save layers to cache: {}", e)
             }
         }
@@ -423,7 +444,7 @@ async fn calculate_new_layer(
 
 async fn get_layer(
     id: web::Path<Uuid>,
-    layers: web::Data<RwLock<Layers>>,
+    layers: web::ReqData<Arc<RwLock<Layers>>>,
 ) -> Result<Option<Layer>, OLPError> {
     Ok(layers
         .read()
@@ -435,10 +456,39 @@ async fn get_layer(
 
 async fn delete_layer(
     id: web::Path<Uuid>,
-    layers: web::Data<RwLock<Layers>>,
+    layers: web::ReqData<Arc<RwLock<Layers>>>,
 ) -> Result<HttpResponse, OLPError> {
     match layers.write().map_err(OLPError::from_error)?.0.remove(&id) {
         Some(_) => Ok(HttpResponse::Ok().finish()),
         None => Ok(HttpResponse::NotFound().finish()),
+    }
+}
+
+async fn transfer_layers(
+    token: String,
+    req: HttpRequest,
+    auth: web::ReqData<Claims>,
+    jwks: web::Data<JwkSetVerifier>,
+) -> Result<HttpResponse, OLPError> {
+    let verified_token: jwtk::Result<jwtk::HeaderAndClaims<()>> = jwks.verify(&token);
+    match verified_token {
+        Ok(token) => {
+            let Some(sub) = token.claims().sub.as_ref().and_then(|sub| Uuid::parse_str(sub).ok()) else {
+                return Err(OLPError::GenericError(
+                    "failed to validate original token".to_string(),
+                ))
+            };
+            let layers_container = req
+                .app_data::<LayersContainer>()
+                .ok_or(OLPError::GenericError("failed to get app data".to_string()))?;
+            layers_container.transfer_layers(sub, auth.sub)?;
+            Ok(HttpResponse::Ok().finish())
+        }
+        Err(e) => {
+            log::error!("Failed to validate token: {}", e);
+            Err(OLPError::GenericError(
+                "failed to validate original token".to_string(),
+            ))
+        }
     }
 }
