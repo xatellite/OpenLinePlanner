@@ -1,10 +1,12 @@
 <template>
+  <WelcomeOverlay />
   <PageHeader />
   <RouterView />
   <PageFooter />
 </template>
 
 <script>
+import WelcomeOverlay from "./components/WelcomeOverlay.vue";
 import { RouterView } from "vue-router";
 import PageHeader from "@/components/PageHeader.vue";
 import PageFooter from "@/components/PageFooter.vue";
@@ -17,6 +19,7 @@ export default {
     RouterView,
     PageHeader,
     PageFooter,
+    WelcomeOverlay,
   },
   data() {
     return {

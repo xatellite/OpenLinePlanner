@@ -1,10 +1,6 @@
 <template>
   <div class="page-header" id="page-header">
-    <div class="page-header__box">
-      <img v-if="uiStore.mode == 'light'" class="page-header__logo" src="@/assets/logo.svg" />
-      <img v-else class="page-header__logo" src="@/assets/logo-dark.svg" />
-      <h1 class="page-header__title">OpenLinePlanner</h1>
-    </div>
+    <OLPLogo :reduceOnMobile="true" />
     <button class="mobile-nav" @click="menuActive = !menuActive">
       {{ $route.name }} <MenuDownIcon />
     </button>
@@ -23,7 +19,7 @@
       >
       <GithubCorner />
     </nav>
-    <button @click="uiStore.toggleMode" class="page-header__mode-toggle">
+    <button @click="uiStore.toggleMode" class="page-header__mode-toggle button--transparent">
       <WhiteBalanceSunnyIcon v-if="uiStore.mode == 'light'"/>
       <WeatherNightIcon v-else/>
     </button>
@@ -35,12 +31,13 @@ import GithubCorner from "@/components/GithubCorner.vue";
 import MenuDownIcon from "vue-material-design-icons/MenuDown.vue";
 import WhiteBalanceSunnyIcon from "vue-material-design-icons/WhiteBalanceSunny.vue";
 import WeatherNightIcon from "vue-material-design-icons/WeatherNight.vue";
+import OLPLogo from "./OLPLogo.vue";
 
 import { RouterLink } from "vue-router";
 import { useUIStore } from '../stores/ui';
 
 export default {
-  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon},
+  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon, OLPLogo },
   data() {
     return {
       menuActive: false,
@@ -85,31 +82,6 @@ export default {
     width: 100%;
   }
 
-  &__box {
-    display: flex;
-    align-items: center;
-    margin: $space-sm $space-ssm;
-    padding: 6px 26px 4px;
-  }
-
-  &__title {
-    color: var(--c-accent-one);
-    font-family: "Poppins";
-    font-weight: 700;
-    font-size: 28px;
-    margin: 0;
-
-    @media (max-width: 700px), (max-height: 600px) {
-      display: none;
-    }
-  }
-
-  &__logo {
-    height: 36px;
-    vertical-align: middle;
-    padding-right: 10px;
-  }
-
   .router-link-active {
     border-bottom: 5px solid var(--c-accent-three);
   }
@@ -132,6 +104,7 @@ export default {
     gap: $space-md;
     margin-left: $space-lg;
     font-weight: bold;
+    padding: $space-md;
 
     @media (max-width: 700px), (max-height: 600px) {
       display: none;
