@@ -8,21 +8,26 @@
       <router-link to="/" class="page-header__navigation__item"
         >Data</router-link
       >
-      <router-link to="/planning" class="page-header__navigation__item"
+      <router-link to="/planning" id="nav-planning" class="page-header__navigation__item"
         >Planning</router-link
       >
-      <router-link to="/timetable" class="page-header__navigation__item"
+      <router-link to="/timetable" id="nav-timetable" class="page-header__navigation__item"
         >Timetable</router-link
       >
-      <router-link to="/project" class="page-header__navigation__item"
+      <router-link to="/project" id="nav-project" class="page-header__navigation__item"
         >Project</router-link
       >
       <GithubCorner />
     </nav>
-    <button @click="uiStore.toggleMode" class="page-header__mode-toggle button--transparent">
-      <WhiteBalanceSunnyIcon v-if="uiStore.mode == 'light'"/>
-      <WeatherNightIcon v-else/>
-    </button>
+    <div class="page-header__settings">
+      <button @click="uiStore.toggleMode" class=" button--transparent">
+        <WhiteBalanceSunnyIcon v-if="uiStore.mode == 'light'"/>
+        <WeatherNightIcon v-else/>
+      </button>
+      <button @click="handleInfo" class="button--transparent">
+        <InformationOutlineIcon />
+      </button>
+    </div>
   </div>
 </template>
 
@@ -31,13 +36,14 @@ import GithubCorner from "@/components/GithubCorner.vue";
 import MenuDownIcon from "vue-material-design-icons/MenuDown.vue";
 import WhiteBalanceSunnyIcon from "vue-material-design-icons/WhiteBalanceSunny.vue";
 import WeatherNightIcon from "vue-material-design-icons/WeatherNight.vue";
+import InformationOutlineIcon from "vue-material-design-icons/InformationOutline.vue";
 import OLPLogo from "./OLPLogo.vue";
 
 import { RouterLink } from "vue-router";
 import { useUIStore } from '../stores/ui';
 
 export default {
-  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon, OLPLogo },
+  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon, OLPLogo, InformationOutlineIcon },
   data() {
     return {
       menuActive: false,
@@ -64,6 +70,9 @@ export default {
       }
       this.menuActive = false;
     },
+    handleInfo() {
+      window.dispatchEvent(new Event("showWelcome"));
+    }
   },
   beforeUnmount() {
     window.removeEventListener("click", this.handleClickOutside);
@@ -137,8 +146,10 @@ export default {
     }
   }
 
-  &__mode-toggle {
+  &__settings {
     margin: 0  $space-sm 4px auto;
+    display: flex;
+    gap: $space-sm;
   }
 }
 </style>

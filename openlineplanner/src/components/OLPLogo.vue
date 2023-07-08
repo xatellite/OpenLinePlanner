@@ -40,7 +40,7 @@ export default {
     margin: 0;
 
     &--reduce-m {
-      @media (max-width: 700px), (max-height: 600px) {
+      @media (max-width: 900px), (max-height: 600px) {
         display: none;
       }
     }

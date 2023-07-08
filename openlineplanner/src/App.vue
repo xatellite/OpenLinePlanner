@@ -1,11 +1,13 @@
 <template>
   <WelcomeOverlay />
+  <WelcomeTour />
   <PageHeader />
   <RouterView />
   <PageFooter />
 </template>
 
 <script>
+import WelcomeTour from "./components/WelcomeTour.vue";
 import WelcomeOverlay from "./components/WelcomeOverlay.vue";
 import { RouterView } from "vue-router";
 import PageHeader from "@/components/PageHeader.vue";
@@ -20,7 +22,8 @@ export default {
     PageHeader,
     PageFooter,
     WelcomeOverlay,
-  },
+    WelcomeTour
+},
   data() {
     return {
       uiStore: useUIStore(),

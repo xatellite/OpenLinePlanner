@@ -17,6 +17,7 @@
     "pinia": "^2.0.13",
     "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
+    "v-onboarding": "^2.5.1",
     "vue": "^3.2.33",
     "vue-color-kit": "^1.0.5",
     "vue-material-design-icons": "^5.0.0",

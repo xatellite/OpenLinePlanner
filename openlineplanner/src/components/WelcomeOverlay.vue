@@ -11,7 +11,9 @@
         <p class="welcome__content__desc">
           This tool allows you to shape the public transport system around you.
           <br><br>
-          Prototype public transport lines and compare them based on  usage data.
+          Prototype public transport lines and compare them based on usage data.
+          <br><br>
+          Happy planning!
         </p>
         <div class="welcome__content__actions">
           <button class="button--fit" @click="skipTour">Skip Tour</button>
@@ -37,6 +39,11 @@ export default {
       isShown: true, //!(localStorage.getItem("welcomeOverlayShown") === `true-${overlayVersion}`)
     };
   },
+  mounted() {
+    window.addEventListener("showWelcome", () => {
+      this.isShown = true;
+    });
+  },
   methods: {
     skipTour() {
       localStorage.setItem("welcomeOverlayShown", `true-${overlayVersion}`);
@@ -45,9 +52,7 @@ export default {
     takeTour() {
       localStorage.setItem("welcomeOverlayShown", `true-${overlayVersion}`);
       this.isShown = false;
-      console.log("START TOUR");
       window.dispatchEvent(new Event("startTour"));
-      console.log(this.isShown);
     }
   }
 }
@@ -98,6 +103,7 @@ export default {
     }
 
     &__desc {
+      text-align: center;
       margin: $space-sm $space-lg;
       width: 300px;
     }
