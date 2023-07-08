@@ -1,13 +1,15 @@
 <template>
   <div class="footer">
-    <span>OpenLinePlanner is a product for all!</span>
+    <span class="footer__left">OpenLinePlanner is a product for all! <GithubCorner /></span>
     <span class="footer__center">V0.7-00</span>
     <span class="footer__right">Launched by @xatellite, Supported by FH St. Pölten</span>
   </div>
 </template>
 
 <script>
-export default {};
+import GithubCorner from './GithubCorner.vue';
+export default {
+  components: { GithubCorner },};
 </script>
 
 <style lang="scss" scoped>
@@ -25,6 +27,12 @@ export default {};
     font-weight: 700;
     text-align: center;
     margin: 0 $space-lg;
+  }
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $space-sm;
   }
 
   &__right {

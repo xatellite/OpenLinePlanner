@@ -28,6 +28,7 @@
         </div>
       </div>
       <SavesList />
+      <a href="mailto:hi@xatellite.space?subject=%5BOpenLinePlanner%5D%20Feedback" class="button project__feedback button--accent">Problems? Ideas? Send Feedback!</a>
     </div>
     <InteractiveMap />
   </main>
@@ -94,6 +95,10 @@ export default {
     gap: $space-sm;
     margin: $space-sm 0;
     align-items: center;
+  }
+  &__feedback {
+    width: 100%;
+    margin-top: $space-ssm;
   }
 }
 </style>
