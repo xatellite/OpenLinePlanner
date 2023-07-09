@@ -133,6 +133,7 @@ export default {
         text-align: center;
         padding: $space-sm;
         border-bottom: 1px solid var(--c-button-border);
+        width: 100%;
       }
 
       .router-link-active {
