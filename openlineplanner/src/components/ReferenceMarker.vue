@@ -80,8 +80,8 @@ export default {
   &__distance {
     position: absolute;
     font-weight: 700;
-    left: -$space-md;
-    top: $space-sm;
+    left: -5px;
+    bottom: 0;
     background: var(--c-box);
     border-radius: $br-md;
     padding: 0 $space-ssm;
@@ -90,8 +90,8 @@ export default {
   &__speed {
     position: absolute;
     font-weight: 700;
-    left: -$space-md;
-    top: -($space-sm + $space-sm);
+    left: -5px;
+    top: 0;
     background: var(--c-box);
     border-radius: $br-md;
     padding: 0 $space-ssm;
