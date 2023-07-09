@@ -1,5 +1,6 @@
 <template>
   <div @click="handlePopupOpen" class="line-reference-point">
+    <div class="line-reference-point__marker" :style="{backgroundColor: line.color}"></div>
     <span
       class="line-reference-point__distance"
       v-if="overlayStore.showDistanceTags"
@@ -35,6 +36,7 @@ export default {
     pointOne: Object,
     pointTwo: Object,
     lngLat: Object,
+    line: Object,
   },
   data: function () {
     return {
@@ -62,9 +64,18 @@ export default {
   position: relative;
   border: 12px solid transparent;
   border-radius: 100%;
-  width: 10px;
+  box-sizing: content-box;
+  padding: 20px;
   height: 10px;
-  cursor: pointer;
+  width: 10px;
+  //height: 10px;
+
+  &:hover {
+    // background-color: aliceblue;
+    .line-reference-point__marker {
+      display: block;
+    }
+  }
 
   &__distance {
     position: absolute;
@@ -93,13 +104,15 @@ export default {
     left: 0;
   }
 
-  &::before {
-    display: block;
-    content: "";
+  &__marker {
+    display: none;
+    position: absolute;
     height: 8px;
     width: 8px;
     border-radius: 100%;
-    background-color: rgba(var(--c-box), 0.5);
+    pointer-events: auto;
+    border: 2px solid var(--c-box);
+    cursor: pointer;
   }
 }
 </style>
