@@ -113,7 +113,6 @@ export default {
     gap: $space-md;
     margin-left: $space-lg;
     font-weight: bold;
-    padding: $space-md;
 
     @media (max-width: 700px), (max-height: 600px) {
       display: none;
