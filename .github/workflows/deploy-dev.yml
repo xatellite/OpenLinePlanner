@@ -1,0 +1,64 @@
+name: Deploy to development
+
+on:
+  workflow_dispatch
+
+jobs:
+
+  set-version:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set version
+      run: |
+        sed -i "s/VITE_VERSION=.*/VITE_VERSION=\"${GITHUB_SHA:0:8}\"/" openlineplanner/.env.development
+    - name: Commit version
+      run: |
+        git config --global user.name 'CI'
+        git config --global user.email 'ci@xatellite.space'
+        git commit -am "bump version"
+        git push
+  
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Log in to the Container registry
+      uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+    - name: Build and push frontend
+      uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      with:
+        context: openlineplanner
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+    - name: Build and push backend
+      uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      with:
+        context: openlineplanner
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Trigger pipeline
+      run: |
+        curl --request POST \
+        --form token=${} \
+        --form ref=main \
+        --form "variables[test]=true" \
+        --form "variables[version]=${GITHUB_SHA:0:8}" \
+        "https://gitlab.example.com/api/v4/projects/123456/trigger/pipeline"
