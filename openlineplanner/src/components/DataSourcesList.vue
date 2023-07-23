@@ -38,6 +38,7 @@ export default {
   height: 100%;
   width: 30%;
   min-width: 320px;
+  min-height: 400px;
   @media (max-width: 700px), (max-height: 600px) {
     width: 100%;
   }

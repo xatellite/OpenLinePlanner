@@ -63,7 +63,6 @@ export default {
 
     this.uiStore.$onAction(({ name, after, value }) => {
       if (name === "setMapCenter") {
-        console.log("check");
         after(() => {
           this.map.flyTo({
             center: this.uiStore.mapPosition,
@@ -114,9 +113,7 @@ export default {
       this.removeAllBoundLayers();
 
       bounds.forEach((bound) => {
-        console.log("bounds");
         const boundId = bound.id;
-        console.log(boundId);
         this.map.addSource(`${boundId}`, {
           type: "geojson",
           data: bound,
@@ -143,7 +140,6 @@ export default {
             },
           });
         } else if (bound.properties.type == "points") {
-          console.log("points");
           this.map.addLayer({
             id: `points-${boundId}`,
             type: "circle",
@@ -175,7 +171,6 @@ export default {
     },
     removeAllBoundLayers() {
       this.displayedBounds.forEach((boundId) => {
-        console.log("Remove", boundId);
         if (this.map.getLayer(`area-${boundId}`)) {
           this.map.removeLayer(`area-${boundId}`);
           this.map.removeLayer(`stroke-${boundId}`);

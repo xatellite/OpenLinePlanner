@@ -20,7 +20,7 @@
           </TooltipButton>
           <span>Export to Excel</span>
         </div> -->
-        <div class="project__item">
+        <div id="save-project-row" class="project__item">
           <TooltipButton :handler="save" toolTip="Save configuration">
             <TrayArrowDownIcon />
           </TooltipButton>

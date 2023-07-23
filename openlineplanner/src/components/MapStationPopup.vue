@@ -116,7 +116,6 @@ export default {
       this.paxStore
         .getPaxForStation(this.point.id, this.linesStore)
         .then((stationData) => {
-          console.log(stationData);
           // ToDo: Merge series build with chart series build
           this.chartSeries = [
             {

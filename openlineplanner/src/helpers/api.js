@@ -25,7 +25,6 @@ export const getAdminBounds = async (point) => {
 };
 
 export const postCalculate = async (method, area) => {
-  console.log(method, area);
   const response = await fetch(
     import.meta.env.VITE_API_ENDPOINT + "/layer/calculate",
     {
@@ -58,7 +57,6 @@ export const getMethods = async () => {
 };
 
 export const deleteLayer = async (layer) => {
-  console.log("Deleting layer: " + layer.id);
   await fetch(import.meta.env.VITE_API_ENDPOINT + `/layer/${layer.id}`, {
     method: "DELETE",
   });

@@ -192,7 +192,6 @@ export default {
 
     this.uiStore.$onAction(({ name, after, value }) => {
       if (name === "setMapCenter") {
-        console.log("check");
         after(() => {
           this.map.flyTo({
             center: this.uiStore.mapPosition,
