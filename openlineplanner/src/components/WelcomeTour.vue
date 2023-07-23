@@ -71,33 +71,33 @@ export default defineComponent ({
       ],}};
 
     const steps = [
-      { attachTo: { element: isMobile ? '.mobile-nav' : '.page-header__navigation' }, content: { title: "Prozess flow", description: "Here at the top you will find all steps needed to finish your planning."}, options, on: {
+      { attachTo: { element: isMobile ? '.mobile-nav' : '.page-header__navigation' }, content: { title: "Navigation", description: "In the top navigation bar you can switch between the different views for all the steps in your planning."}, options, on: {
         beforeStep: () => {
           app.appContext.config.globalProperties.$router.push({ name: 'Data' });
         },} },
-      { attachTo: { element: '.data-list' }, content: { title: "Checking datasources", description: "All data you use to back up your planning will be later found here. Let's add your first data set!" }, options },
-      { attachTo: { element: '#map' }, content: { title: "Adding dataset", description: "To add a new dataset select the region you want to start planning in by clicking on the map.\n\n Follow the steps on the bottom right of this map to finalize your first datasource." }, options:mapMenuOptions },
-      { attachTo: { element: '.data-list' }, content: { title: "Checking datasource", description: "Now you can check your data by selecting one entry. \n\n Let's start planning next!" }, options: optionsMenu },
-      { attachTo: { element: isMobile ? '.page-header' : '#nav-planning'}, content: { title: "Changing View", description: "Click \"Planning\" to navigate to start drawing lines." }, options, on: {
+      { attachTo: { element: '.data-list' }, content: { title: "Datasources", description: "To calculate the coverage of your planned lines, you need to load residential data for your planning area. You can view the currently loaded areas in the list on the left." }, options },
+      { attachTo: { element: '#map' }, content: { title: "Add a new dataset", description: "Currently, no areas are loaded. \n To start loading your first dataset, klick on the map to select a municipality or district. \n Follow the popup on the bottom left to add the area to your planning dataset. \n By clicking on the map again, you can add as many areas as you need." }, options:mapMenuOptions },
+      { attachTo: { element: '.data-list' }, content: { title: "Review your planning dataset", description: "You can now find all the areas you loaded over here. \n By clicking on one of them, you can visualize the loaded data in that area on the map. \n Let's continue to the planning view next." }, options: optionsMenu },
+      { attachTo: { element: isMobile ? '.page-header' : '#nav-planning'}, content: { title: "Change the current view", description: "To begin drawing your lines, click \"Planning\" to change to the planning view." }, options, on: {
         afterStep: () => {
           app.appContext.config.globalProperties.$router.push({ name: 'Planning' });
         },} },
-      { attachTo: { element: '.line-list' }, content: { title: "Starting a new Line", description: "Add a new line here" }, options: optionsMenu},
-      { attachTo: { element: '#map' }, content: { title: "Draw line", description: "Start drawing your line.\n\n  Stop adding points by hitting the \"enter\" key and drag previously placed points to the correct position." }, options:mapMenuOptions },
-      { attachTo: { element: '#map' }, content: { title: "Add stations", description: "Add a new stations by clicking on one of one point of your line. Press the station icon appearing in the popup.\n\n You might also want to extend your line. To do so select the last or first point of your line and press the \"+\" icon." }, options:mapMenuOptions },
-      { attachTo: { element: '#view-settings' }, content: { title: "Analyse your planning", description: "Here you can find different setting, to calculate and visualize analytics.\n\n Come back and tinker with these settings after this tour." }, options },
-      { attachTo: { element: isMobile ? '.page-header' : '#nav-timetable'}, content: { title: "Check Timetable", description: "Click \"Timetable\" to check the travel time on your line." }, options, on: {
+      { attachTo: { element: '.line-list' }, content: { title: "Create a new Line", description: "Click on \"Add new Line\" to create a new Line with the default configuration." }, options: optionsMenu},
+      { attachTo: { element: '#map' }, content: { title: "Start drawing!", description: "Draw a line by clicking on the map to add points to your line. \n Once you are satisfied, hit \"enter\" to finish drawing. \n You can always click on a point of your line and drag it around to a new position, or click on the bin icon in the popup to delete it. \n You can also extend your line by clicking the pencil icon." }, options:mapMenuOptions },
+      { attachTo: { element: '#map' }, content: { title: "Add stations", description: "The most important part of the planning is the placement of the stations. \n By clicking on a point on the line, and then clicking the station icon, you can create a new station. \n When you place a station, the station info popup opens automatically. \n This popup shows you informations about the coverage area, that is how many people live in the vicinity of this station. \n You can always get the popup back by clicking on the station again." }, options:mapMenuOptions },
+      { attachTo: { element: '#view-settings' }, content: { title: "Analyse your planning", description: "In the setting view, you can enable various overlays to visualize the coverage and population in your planning area. Try it out by selecting \"distance\" for the coverage overlay, which shows you the households that are covered by your stations, and how far they are from the next one." }, options },
+      { attachTo: { element: isMobile ? '.page-header' : '#nav-timetable'}, content: { title: "Check Timetable", description: "In the timetable view, you can review the travel times and stops along your line. \n Click on the timetable icon to open it." }, options, on: {
         afterStep: () => {
           app.appContext.config.globalProperties.$router.push({ name: 'Timetable' });
         },}  },
-      { attachTo: { element: '.line-analysis' }, content: { title: "Travel time overview", description: "Here you can review you lines total travel duration and distance as well as information on both stats between your station." }, options: options},
-      { attachTo: { element: isMobile ? '.page-header' : '#nav-project'}, content: { title: "Save Project", description: "To finish the planning let's save our progress." }, options, on: {
+      { attachTo: { element: '.line-analysis' }, content: { title: "Travel time overview", description: "Here you can review you lines travel duration and distance, both in total and between the individual stops." }, options: options},
+      { attachTo: { element: isMobile ? '.page-header' : '#nav-project'}, content: { title: "Save Project", description: "To finish the planning, let's go ahead and save our project so we can come back to it later." }, options, on: {
         afterStep: () => {
           app.appContext.config.globalProperties.$router.push({ name: 'Project' });
         },}  },
-      { attachTo: { element: '.text-input' }, content: { title: "Name your project", description: "Give you project a name." }, options: options},
-      { attachTo: { element: '#save-project-row' }, content: { title: "Save your project", description: "Finally lets save your project for later." }, options: options},
-      { attachTo: { element: '#map' }, content: { title: "First Project 🎉", description: "Congratulations, you planned your first line using OpenLinePlanner!\n\nFeel free to start exploring what else you can achieve with this tool.\n\n Lets improve public transport together!" }, options:mapMenuOptions },
+      { attachTo: { element: '.text-input' }, content: { title: "Name your project", description: "Give you project a name, so you can remember what you planned here." }, options: options},
+      { attachTo: { element: '#save-project-row' }, content: { title: "Save your project", description: "Finally, click the save button to download the project file." }, options: options},
+      { attachTo: { element: '#map' }, content: { title: "First Project 🎉", description: "Congratulations, you planned your first line using OpenLinePlanner!\n\nFeel free to start exploring the tool further and plan a few additional lines.\n\n Lets improve public transport together!" }, options:mapMenuOptions },
     ];
 
     window.addEventListener('startTour', (e) => {

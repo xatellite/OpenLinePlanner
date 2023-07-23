@@ -1,5 +1,5 @@
 <template>
-  <div class="box station-popup">
+  <div class="box station-popup" @mousedown="handleMouseDown">
     <div class="station-popup__title-container">
       <input
         type="text"

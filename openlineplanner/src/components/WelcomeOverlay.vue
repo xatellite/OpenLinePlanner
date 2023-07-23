@@ -11,9 +11,10 @@
         <p class="welcome__content__desc">
           This tool allows you to shape the public transport system around you.
           <br><br>
-          Prototype public transport lines and compare them based on usage data.
+          OpenLinePlanner is a tool for prototyping public transport lines. 
+          For this, it uses OpenStreetMap Data to estimate the population in a planning area, thus enabling you to create a data-driven planning based on the coverage area that a public transit line may have.
           <br><br>
-          Happy planning!
+          Let's take the tour to learn how it works, or dive right in if you are already familiar with the tool.
         </p>
         <div class="welcome__content__actions">
           <button class="button--fit" @click="skipTour">Skip Tour</button>

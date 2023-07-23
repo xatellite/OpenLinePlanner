@@ -1,7 +1,7 @@
 <template>
   <div class="footer">
     <span class="footer__left">OpenLinePlanner is a product for all! <GithubCorner /></span>
-    <span class="footer__center">V0.7-00</span>
+    <span class="footer__center">{{version}} - {{ majorName }}</span>
     <span class="footer__right">Launched by @xatellite, Supported by FH St. Pölten</span>
   </div>
 </template>
@@ -9,7 +9,14 @@
 <script>
 import GithubCorner from './GithubCorner.vue';
 export default {
-  components: { GithubCorner },};
+  components: { GithubCorner },
+  setup() {
+    return {
+      version: import.meta.env.VITE_VERSION,
+      majorName: import.meta.env.VITE_MAJORNAME,
+    };
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -18,15 +25,21 @@ export default {
   color: var(--c-text-inverted--alt);
   font-size: $space-sm;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr $space-lg 1fr;
+  display: flex;
+  justify-content: space-between;
+  grid-template-columns: 1fr 0.1fr 1fr;
   padding: 4px $space-sm;
   box-sizing: border-box;
+
+  & > * {
+    flex-grow: 1;
+    width: 0;
+  }
+
 
   &__center {
     font-weight: 700;
     text-align: center;
-    margin: 0 $space-lg;
   }
 
   &__left {
