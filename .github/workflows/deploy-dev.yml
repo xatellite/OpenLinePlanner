@@ -24,6 +24,7 @@ jobs:
     needs: set-version
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v3
     - name: Set version
       run: |
         echo "VERSION=${GITHUB_SHA:0:8}" >> "$GITHUB_ENV"
@@ -36,13 +37,13 @@ jobs:
     - name: Build and push frontend
       uses: docker/build-push-action@v4
       with:
-        context: "{{defaultContext}}:openlineplanner"
+        context: openlineplanner
         push: true
         tags: ghcr.io/xatellite/openlineplanner/olp-frontend:${{ env.VERSION }}
     - name: Build and push backend
       uses: docker/build-push-action@v4
       with:
-        context: "{{defaultContext}}:openlineplanner-backend"
+        context: openlineplanner-backend
         push: true
         tags: ghcr.io/xatellite/openlineplanner/olp-backend:${{ env.VERSION }}
   deploy:
