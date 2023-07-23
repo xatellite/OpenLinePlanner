@@ -51,7 +51,7 @@ jobs:
       run: |
         curl -vvv -X POST \
         --fail \
-        -F token=${GITLAB_TOKEN} \
+        -F token=${{ secrets.GITLAB_TOKEN }} \
         -F "ref=main" \
         -F "variables[TEST]=true" \
         -F "variables[VERSION]=${VERSION}" \
