@@ -1,0 +1,56 @@
+name: Deploy to development
+
+on:
+  workflow_dispatch
+
+jobs:
+
+  set-version:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set version
+      run: |
+        sed -i "s/VITE_VERSION=.*/VITE_VERSION=\"${GITHUB_SHA:0:8}\"/" openlineplanner/.env.development
+    - name: Commit version
+      run: |
+        git config --global user.name 'CI'
+        git config --global user.email 'ci@xatellite.space'
+        git commit -am "bump version"
+        git push
+  
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and push frontend
+      uses: docker/build-push-action@v4
+      with:
+        context: "{{defaultContext}}:openlineplanner"
+        push: true
+        tags: ghcr.io/xatellite/openlineplanner/olp-frontend:${GITHUB_SHA:0:8}
+    - name: Build and push backend
+      uses: docker/build-push-action@v4
+      with:
+        context: "{{defaultContext}}:openlineplanner-backend"
+        push: true
+        tags: ghcr.io/xatellite/openlineplanner/olp-backend:${GITHUB_SHA:0:8}
+        
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Trigger pipeline
+      run: |
+        curl --request POST \
+        --form token=${GITLAB_TOKEN} \
+        --form ref=main \
+        --form "variables[TEST]=true" \
+        --form "variables[VERSION]=${GITHUB_SHA:0:8}" \
+        "https://gitlab.com/api/v4/projects/46252495/trigger/pipeline"
