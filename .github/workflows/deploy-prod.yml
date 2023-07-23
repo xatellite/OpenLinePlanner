@@ -45,6 +45,6 @@ jobs:
         --fail \
         -F token=${{ secrets.GITLAB_TOKEN }} \
         -F "ref=main" \
-        -F "variables[TEST]=true" \
+        -F "variables[TEST]=false" \
         -F "variables[VERSION]=${VERSION}" \
         https://gitlab.com/api/v4/projects/46252495/trigger/pipeline
