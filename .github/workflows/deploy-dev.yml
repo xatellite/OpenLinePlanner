@@ -4,8 +4,9 @@ on:
   workflow_dispatch
 
 jobs:
-
   set-version:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -16,9 +17,10 @@ jobs:
       with:
         author_name: Github Actions
         author_email: hi@xatellite.space
-        message: 'Set current version in env file'
-  
+        message: 'Set current version in env file'  
   build:
+    permissions:
+      packages: write
     needs: set-version
     runs-on: ubuntu-latest
     steps:
@@ -39,8 +41,7 @@ jobs:
       with:
         context: "{{defaultContext}}:openlineplanner-backend"
         push: true
-        tags: ghcr.io/xatellite/openlineplanner/olp-backend:${GITHUB_SHA:0:8}
-        
+        tags: ghcr.io/xatellite/openlineplanner/olp-backend:${GITHUB_SHA:0:8}        
   deploy:
     needs: build
     runs-on: ubuntu-latest
