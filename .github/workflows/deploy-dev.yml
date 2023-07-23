@@ -12,6 +12,7 @@ jobs:
     - uses: actions/checkout@v3
     - name: Set version
       run: |
+        echo "VERSION=${GITHUB_SHA:0:8}" >> "$GITHUB_ENV"
         sed -i "s/VITE_VERSION=.*/VITE_VERSION=\"${GITHUB_SHA:0:8}\"/" openlineplanner/.env.development
     - uses: EndBug/add-and-commit@v9
       with:
@@ -35,13 +36,13 @@ jobs:
       with:
         context: "{{defaultContext}}:openlineplanner"
         push: true
-        tags: ghcr.io/xatellite/openlineplanner/olp-frontend:${GITHUB_SHA:0:8}
+        tags: ghcr.io/xatellite/openlineplanner/olp-frontend:${{ env.VERSION }}
     - name: Build and push backend
       uses: docker/build-push-action@v4
       with:
         context: "{{defaultContext}}:openlineplanner-backend"
         push: true
-        tags: ghcr.io/xatellite/openlineplanner/olp-backend:${GITHUB_SHA:0:8}        
+        tags: ghcr.io/xatellite/openlineplanner/olp-backend:${{ env.VERSION }}
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -52,5 +53,5 @@ jobs:
         --form token=${GITLAB_TOKEN} \
         --form ref=main \
         --form "variables[TEST]=true" \
-        --form "variables[VERSION]=${GITHUB_SHA:0:8}" \
+        --form "variables[VERSION]=${VERSION}" \
         "https://gitlab.com/api/v4/projects/46252495/trigger/pipeline"
