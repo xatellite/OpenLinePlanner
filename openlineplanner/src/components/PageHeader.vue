@@ -17,7 +17,6 @@
       <router-link to="/project" id="nav-project" class="page-header__navigation__item"
         >Project</router-link
       >
-      <GithubCorner />
     </nav>
     <div class="page-header__settings">
       <button @click="uiStore.toggleMode" class=" button--transparent">
@@ -92,7 +91,19 @@ export default {
   }
 
   .router-link-active {
-    border-bottom: 5px solid var(--c-accent-three);
+    position: relative;
+    // border-bottom: 5px solid var(--c-accent-three);
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      border-radius: 5px;
+      background-color: var(--c-accent-three);
+    }
   }
 
   .mobile-nav {
@@ -110,9 +121,10 @@ export default {
 
   &__navigation {
     display: flex;
+    align-items: center;
     gap: $space-md;
     margin-left: $space-lg;
-    font-weight: bold;
+    font-weight: 600;
 
     @media (max-width: 700px), (max-height: 600px) {
       display: none;
@@ -121,11 +133,18 @@ export default {
         text-align: center;
         padding: $space-sm;
         border-bottom: 1px solid var(--c-button-border);
+        width: 100%;
       }
 
       .router-link-active {
         display: none;
       }
+    }
+
+    &__button {
+      width: auto;
+      height: auto;
+      padding: 4px $space-sm;
     }
   }
 
