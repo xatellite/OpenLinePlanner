@@ -20,7 +20,6 @@ export const useUIStore = defineStore({
       document.documentElement.setAttribute("data-theme", this.mode);
     },
     async getMapCenter() {
-      console.log("INIT");
       const mapCenter = await getMapCenter();
       this.setMapCenter([mapCenter.x, mapCenter.y]);
     },

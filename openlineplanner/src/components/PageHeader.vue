@@ -1,10 +1,6 @@
 <template>
   <div class="page-header" id="page-header">
-    <div class="page-header__box">
-      <img v-if="uiStore.mode == 'light'" class="page-header__logo" src="@/assets/logo.svg" />
-      <img v-else class="page-header__logo" src="@/assets/logo-dark.svg" />
-      <h1 class="page-header__title">OpenLinePlanner</h1>
-    </div>
+    <OLPLogo :reduceOnMobile="true" />
     <button class="mobile-nav" @click="menuActive = !menuActive">
       {{ $route.name }} <MenuDownIcon />
     </button>
@@ -12,21 +8,25 @@
       <router-link to="/" class="page-header__navigation__item"
         >Data</router-link
       >
-      <router-link to="/planning" class="page-header__navigation__item"
+      <router-link to="/planning" id="nav-planning" class="page-header__navigation__item"
         >Planning</router-link
       >
-      <router-link to="/timetable" class="page-header__navigation__item"
+      <router-link to="/timetable" id="nav-timetable" class="page-header__navigation__item"
         >Timetable</router-link
       >
-      <router-link to="/project" class="page-header__navigation__item"
+      <router-link to="/project" id="nav-project" class="page-header__navigation__item"
         >Project</router-link
       >
-      <GithubCorner />
     </nav>
-    <button @click="uiStore.toggleMode" class="page-header__mode-toggle">
-      <WhiteBalanceSunnyIcon v-if="uiStore.mode == 'light'"/>
-      <WeatherNightIcon v-else/>
-    </button>
+    <div class="page-header__settings">
+      <button @click="uiStore.toggleMode" class=" button--transparent">
+        <WhiteBalanceSunnyIcon v-if="uiStore.mode == 'light'"/>
+        <WeatherNightIcon v-else/>
+      </button>
+      <button @click="handleInfo" class="button--transparent">
+        <InformationOutlineIcon />
+      </button>
+    </div>
   </div>
 </template>
 
@@ -35,12 +35,14 @@ import GithubCorner from "@/components/GithubCorner.vue";
 import MenuDownIcon from "vue-material-design-icons/MenuDown.vue";
 import WhiteBalanceSunnyIcon from "vue-material-design-icons/WhiteBalanceSunny.vue";
 import WeatherNightIcon from "vue-material-design-icons/WeatherNight.vue";
+import InformationOutlineIcon from "vue-material-design-icons/InformationOutline.vue";
+import OLPLogo from "./OLPLogo.vue";
 
 import { RouterLink } from "vue-router";
 import { useUIStore } from '../stores/ui';
 
 export default {
-  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon},
+  components: { GithubCorner, RouterLink, MenuDownIcon, WhiteBalanceSunnyIcon, WeatherNightIcon, OLPLogo, InformationOutlineIcon },
   data() {
     return {
       menuActive: false,
@@ -67,6 +69,9 @@ export default {
       }
       this.menuActive = false;
     },
+    handleInfo() {
+      window.dispatchEvent(new Event("showWelcome"));
+    }
   },
   beforeUnmount() {
     window.removeEventListener("click", this.handleClickOutside);
@@ -85,33 +90,20 @@ export default {
     width: 100%;
   }
 
-  &__box {
-    display: flex;
-    align-items: center;
-    margin: $space-sm $space-ssm;
-    padding: 6px 26px 4px;
-  }
-
-  &__title {
-    color: var(--c-accent-one);
-    font-family: "Poppins";
-    font-weight: 700;
-    font-size: 28px;
-    margin: 0;
-
-    @media (max-width: 700px), (max-height: 600px) {
-      display: none;
-    }
-  }
-
-  &__logo {
-    height: 36px;
-    vertical-align: middle;
-    padding-right: 10px;
-  }
-
   .router-link-active {
-    border-bottom: 5px solid var(--c-accent-three);
+    position: relative;
+    // border-bottom: 5px solid var(--c-accent-three);
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      border-radius: 5px;
+      background-color: var(--c-accent-three);
+    }
   }
 
   .mobile-nav {
@@ -129,9 +121,10 @@ export default {
 
   &__navigation {
     display: flex;
+    align-items: center;
     gap: $space-md;
     margin-left: $space-lg;
-    font-weight: bold;
+    font-weight: 600;
 
     @media (max-width: 700px), (max-height: 600px) {
       display: none;
@@ -140,11 +133,18 @@ export default {
         text-align: center;
         padding: $space-sm;
         border-bottom: 1px solid var(--c-button-border);
+        width: 100%;
       }
 
       .router-link-active {
         display: none;
       }
+    }
+
+    &__button {
+      width: auto;
+      height: auto;
+      padding: 4px $space-sm;
     }
   }
 
@@ -164,8 +164,10 @@ export default {
     }
   }
 
-  &__mode-toggle {
+  &__settings {
     margin: 0  $space-sm 4px auto;
+    display: flex;
+    gap: $space-sm;
   }
 }
 </style>

@@ -59,7 +59,6 @@ export const useDataStore = () => {
         this.addPoint = null;
       },
       addMapBound(area, type, ref, color) {
-        console.log(area);
         area.properties.type = type;
         area.properties.color = color;
         area.properties.ref = ref;
@@ -109,7 +108,6 @@ export const useDataStore = () => {
           });
       },
       async removeLayer(layer) {
-        console.log(layer);
         this.removeMapBoundsById(layer.id);
         await deleteLayer(layer);
         this.loadLayers();

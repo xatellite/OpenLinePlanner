@@ -29,9 +29,18 @@
         id="path6"
       />
     </svg>
+    Check on Github
   </a>
 </template>
 <style lang="scss" scoped>
+
+.github-corner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--c-text-inverted--alt);
+}
+
 .corner {
   fill: #ffffff;
   margin-top: 2px;

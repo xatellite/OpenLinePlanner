@@ -1,5 +1,5 @@
 <template>
-  <div class="box station-popup">
+  <div class="box station-popup" @mousedown="handleMouseDown">
     <div class="station-popup__title-container">
       <input
         type="text"
@@ -116,7 +116,6 @@ export default {
       this.paxStore
         .getPaxForStation(this.point.id, this.linesStore)
         .then((stationData) => {
-          console.log(stationData);
           // ToDo: Merge series build with chart series build
           this.chartSeries = [
             {

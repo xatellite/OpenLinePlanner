@@ -8,7 +8,7 @@
       >
         <LineElement :line="line" />
       </div>
-      <div class="line-list__item line-list__item__row">
+      <div id="add-line-entry" class="line-list__item line-list__item__row">
         <button @click="addLine"><PlusIcon /></button>
         <span class="grow">Add new Line</span>
         <div />

@@ -192,7 +192,6 @@ export default {
 
     this.uiStore.$onAction(({ name, after, value }) => {
       if (name === "setMapCenter") {
-        console.log("check");
         after(() => {
           this.map.flyTo({
             center: this.uiStore.mapPosition,
@@ -396,7 +395,7 @@ export default {
 
     addReferencePoint(pointOne, pointTwo, refIndex) {
       const lngLat = calculateMidPoint(pointOne, pointTwo);
-      const mapPoint = createApp(ReferenceMarker, { pointOne, pointTwo, lngLat });
+      const mapPoint = createApp(ReferenceMarker, { pointOne, pointTwo, lngLat, line: this.editStore.isEditing });
       mapPoint.use(this.store);
       mapPoint.use(router);
       const domContainer = document.createElement("div");

@@ -9,7 +9,7 @@ export const calculateMidPoint = (latLngA, latLngB) => {
   }
 
   function toDegrees(radians) {
-    return (radians * (180 / Math.PI)).toFixed(4);
+    return (radians * (180 / Math.PI)).toFixed(6);
   }
 
   const lngDiff = toRadians(latLngB.lng - latLngA.lng);

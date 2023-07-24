@@ -20,7 +20,6 @@ export const useSavesStore = defineStore({
     },
     load(index) {
       useEditStore().stopAllInputs();
-      console.log(this.saves[index]);
       useLinesStore().loadState(this.saves[index]);
     },
     download(index) {

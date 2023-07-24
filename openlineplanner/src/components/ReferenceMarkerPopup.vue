@@ -2,12 +2,10 @@
   <div
     id="ref-marker-popup"
     class="box ref-marker-popup"
+    @mousedown="handleMouseDown"
   >
-    <div class="ref-marker-popup__title">
-      <span>Section max Speed: </span
-      >
-    </div>
     <div class="ref-marker-popup__input">
+      <span class="ref-marker-popup__input__title">Section max Speed:</span>
       <input
         type="number"
         :value="
@@ -97,21 +95,45 @@ export default {
 
 <style lang="scss" scoped>
 .ref-marker-popup {
-  width: 240px;
+  width: fit-content;
   padding: $space-sm $space-sm $space-sm $space-sm;
   cursor: default;
 
-  &__title {
-    font-size: $font-md;
-    margin-bottom: $space-ssm;
-  }
   &__input {
+    position: relative;
+    background-color: var(--c-box);
+    padding: $space-ssm $space-sm;
+    border: 1px solid var(--c-button-border);
+    border-radius: $br-md;
+    margin-top: $space-ssm;
+
     display: flex;
     align-items: center;
     justify-content: flex-start;
 
+    &:focus-within {
+      outline: 1px solid var(--c-accent-two);
+
+      .text-input__title {
+        color: var(--c-accent-two);
+      }
+    }
+
+    &__title {
+      position: absolute;
+      top: -0.8em;
+      color: var(--c-primary-light);
+      background-color: var(--c-box);
+      left: $space-sm;
+      padding: 0 $space-ssm;
+    }
+
     & > * {
       margin-right: $space-sm;
+
+      &:focus {
+        outline: none;
+      }
     }
 
     &__element {

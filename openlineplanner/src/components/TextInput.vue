@@ -36,7 +36,6 @@ export default {
 .text-input {
   position: relative;
   background-color: var(--c-box);
-  display: block;
   padding: $space-ssm $space-md;
   border: 1px solid var(--c-button-border);
   border-radius: $br-md;

@@ -21,6 +21,29 @@ button, .button {
     background-color: var(--c-button-background--darkened-strong);
   }
 
+  &--fit {
+    width: fit-content;
+    padding: $space-ssm $space-sm;
+    font-weight: 500;
+    font-size: $font-md;
+    height: auto;
+  }
+
+  &--transparent {
+    background-color: transparent;
+    border: none;
+  }
+
+  &--accent {
+    background-color: var(--c-accent-two);
+    color: var(--c-text-inverted);
+    border-color: var(--c-accent-two-dark);
+
+    &:hover {
+      background-color: var(--c-accent-two-dark);
+    }
+  }
+
   &:disabled {
     color: var(--c-button-border);
     cursor: default;
@@ -59,6 +82,7 @@ input[type="number"] {
   width: 100px;
   text-align: center;
   font-size: $font-md;
+  border: none;
 }
 
 select {
