@@ -110,7 +110,11 @@ async fn main() -> std::io::Result<()> {
         #[cfg(debug_assertions)]
         let cors = Cors::permissive();
         #[cfg(not(debug_assertions))]
-        let cors = Cors::default();
+        let cors = Cors::default()
+            .allowed_origin("https://openlineplanner.com")
+            .allowed_origin("https://test.openlineplanner.com")
+            .allowed_methods(vec!["GET", "POST", "DELETE", "PUT"])
+            .max_age(3600);
 
         App::new()
             .wrap(cors)
