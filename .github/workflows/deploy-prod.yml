@@ -10,41 +10,43 @@ jobs:
       packages: write
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Set version
-      run: |
-        echo "VERSION=$(grep -oP 'VITE_VERSION="\K\d+\.\d+\.\d+' openlineplanner/.env.production)" >> "$GITHUB_ENV"
-    - name: Log in to the Container registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build and push frontend
-      uses: docker/build-push-action@v4
-      with:
-        context: openlineplanner
-        push: true
-        tags: ghcr.io/xatellite/openlineplanner/olp-frontend:${{ env.VERSION }}
-    - name: Build and push backend
-      uses: docker/build-push-action@v4
-      with:
-        context: openlineplanner-backend
-        push: true
-        tags: ghcr.io/xatellite/openlineplanner/olp-backend:${{ env.VERSION }}
+      - uses: actions/checkout@v3
+      - name: Set version
+        run: |
+          echo "VERSION=$(grep -oP 'VITE_VERSION="\K\d+\.\d+\.\d+' openlineplanner/.env.production)" >> "$GITHUB_ENV"
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push frontend
+        uses: docker/build-push-action@v4
+        with:
+          context: openlineplanner
+          push: true
+          platforms: linux/arm64
+          tags: ghcr.io/xatellite/openlineplanner/olp-frontend:${{ env.VERSION }}
+      - name: Build and push backend
+        uses: docker/build-push-action@v4
+        with:
+          context: openlineplanner-backend
+          push: true
+          platforms: linux/arm64
+          tags: ghcr.io/xatellite/openlineplanner/olp-backend:${{ env.VERSION }}
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: Set version
-      run: |
-        echo "VERSION=$(grep -oP 'VITE_VERSION="\K\d+\.\d+\.\d+' openlineplanner/.env.production)" >> "$GITHUB_ENV"
-    - name: Trigger pipeline
-      run: |
-        curl -vvv -X POST \
-        --fail \
-        -F token=${{ secrets.GITLAB_TOKEN }} \
-        -F "ref=main" \
-        -F "variables[TEST]=false" \
-        -F "variables[VERSION]=${VERSION}" \
-        https://gitlab.com/api/v4/projects/46252495/trigger/pipeline
+      - name: Set version
+        run: |
+          echo "VERSION=$(grep -oP 'VITE_VERSION="\K\d+\.\d+\.\d+' openlineplanner/.env.production)" >> "$GITHUB_ENV"
+      - name: Trigger pipeline
+        run: |
+          curl -vvv -X POST \
+          --fail \
+          -F token=${{ secrets.GITLAB_TOKEN }} \
+          -F "ref=main" \
+          -F "variables[TEST]=false" \
+          -F "variables[VERSION]=${VERSION}" \
+          https://gitlab.com/api/v4/projects/46252495/trigger/pipeline
