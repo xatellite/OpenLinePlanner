@@ -57,7 +57,7 @@ impl TryFrom<Feature> for AdminArea {
                 .and_then(|id| id.as_str())
                 .and_then(|id| id.parse().ok())
                 .unwrap_or_default(),
-            geometry: geometry,
+            geometry,
         })
     }
 }

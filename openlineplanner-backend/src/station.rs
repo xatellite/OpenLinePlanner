@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
 use geo::{HaversineDistance, LineString, Point};
 use serde::{Deserialize, Serialize};
@@ -41,7 +39,7 @@ pub fn find_optimal_station(
     streets: &Streets,
 ) -> OptimalStationResult {
     let linestring = Into::<LineString>::into(line.clone()).densify_haversine(10.0);
-    let others: Vec<&Station> = other_stations.iter().map(|x| x.borrow()).collect();
+    let others: Vec<&Station> = other_stations.iter().map(|x| x).collect();
     let original_coverage: Vec<&PopulatedCentroid> =
         houses_for_stations(other_stations, houses, method, routing, streets)
             .0

@@ -319,12 +319,6 @@ struct Answer {
     value: u64,
 }
 
-#[derive(Serialize, Deserialize, Copy, Clone)]
-enum AnswerValue {
-    IntAnswer(u64),
-    BoolAnswer(bool),
-}
-
 #[derive(Deserialize)]
 struct CalculateLayerRequest {
     name: String,
