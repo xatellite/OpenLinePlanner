@@ -94,7 +94,7 @@ pub fn get_houses_in_coverage<'a, D: DistanceCalculator + Sync>(
         .filter(|hi| {
             possible_collision_stations.iter().all(|other| {
                 distance_calculator.distance(hi.centroid, &other.location) > other.coverage() // PopulatedCentroid is not in the coverage area of the other station or
-                    || distance_calculator.distance(hi.centroid, &origin) < distance_calculator.distance(hi.centroid, &other.location)
+                    || distance_calculator.distance(hi.centroid, origin) < distance_calculator.distance(hi.centroid, &other.location)
                 // PopulatedCentroid is closer to the current station
             })
         })

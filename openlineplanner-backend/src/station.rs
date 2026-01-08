@@ -39,12 +39,11 @@ pub fn find_optimal_station(
     streets: &Streets,
 ) -> OptimalStationResult {
     let linestring = Into::<LineString>::into(line.clone()).densify_haversine(10.0);
-    let others: Vec<&Station> = other_stations.iter().map(|x| x).collect();
+    let others: Vec<&Station> = other_stations.iter().collect();
     let original_coverage: Vec<&PopulatedCentroid> =
         houses_for_stations(other_stations, houses, method, routing, streets)
             .0
             .values()
-            .into_iter()
             .flat_map(|elem| elem.houses.clone())
             .map(|elem| elem.centroid)
             .collect();
@@ -58,7 +57,7 @@ pub fn find_optimal_station(
         .max_by_key(|point| {
             StationCoverageInfo::from_houses_with_method(
                 get_houses_in_coverage(
-                    &point,
+                    point,
                     coverage,
                     &leftover_houses,
                     OsmDistanceCalculator::new(streets),

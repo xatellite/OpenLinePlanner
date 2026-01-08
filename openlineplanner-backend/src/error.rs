@@ -20,7 +20,7 @@ impl Display for OLPError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             OLPError::GeometryError => write!(f, "an error occurred when converting geometries"),
-            OLPError::GenericError(err) => write!(f, "{}", err.to_string()),
+            OLPError::GenericError(err) => write!(f, "{}", err),
         }
     }
 }

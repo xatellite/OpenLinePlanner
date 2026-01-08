@@ -85,7 +85,7 @@ impl DistanceCalculator for HaversineDistanceCalculator {
     }
     fn fix_point(&self, point: &Point) -> Self::FixedPoint {
         HaversineFixedPoint {
-            point: point.clone(),
+            point: *point,
         }
     }
 }
@@ -144,8 +144,8 @@ impl<'a> OsmDistanceCalculator<'a> {
         self.streets
             .nodes
             .iter()
-            .min_by_key(|(_, node)| node.haversine_distance(&origin) as u32)
-            .map(|(id, node)| (id.clone(), node.haversine_distance(&origin)))
+            .min_by_key(|(_, node)| node.haversine_distance(origin) as u32)
+            .map(|(id, node)| (*id, node.haversine_distance(origin)))
             .unwrap()
     }
 }

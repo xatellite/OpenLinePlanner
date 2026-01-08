@@ -26,7 +26,7 @@ impl From<&[(LayerType, CoverageMap<'_, '_>)]> for InhabitantsMap {
                 map.entry(station.to_string())
                     .or_default()
                     .push(InhabitantsInfo {
-                        layer_type: layer_type.clone(),
+                        layer_type: *layer_type,
                         value: coverage.inhabitants,
                     });
             }

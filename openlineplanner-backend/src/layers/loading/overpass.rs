@@ -24,10 +24,14 @@ pub async fn query_overpass(query: String) -> Result<GeoJson> {
         .spawn()
         .expect("Failed to spawn child process");
 
-    let mut stdin = child
-        .stdin
-        .take()
-        .ok_or(OLPError::GenericError("failed to take pipe".to_owned()))?;
+    let mut stdin = match child.stdin.take() {
+        Some(s) => s,
+        None => {
+            let _ = child.wait();
+            return Err(OLPError::GenericError("failed to take pipe".to_owned()).into());
+        }
+    };
+
     std::thread::spawn(move || {
         stdin
             .write_all(response.as_bytes())

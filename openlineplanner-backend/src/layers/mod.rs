@@ -73,9 +73,7 @@ pub async fn summarize_layers(
     let layer_summary = layers
         .read()
         .map_err(OLPError::from_error)?
-        .0
-        .iter()
-        .map(|(_, layer)| layer.serialize_info())
+        .0.values().map(|layer| layer.serialize_info())
         .collect::<Vec<_>>();
     Ok(Json(layer_summary))
 }
@@ -103,7 +101,7 @@ impl TryFrom<Building> for PopulatedCentroid {
                 street_graph_id: None,
             });
         }
-        return Err(OLPError::GeometryError);
+        Err(OLPError::GeometryError)
     }
 }
 
@@ -161,9 +159,9 @@ impl Layers {
 
     pub fn all_merged_by_type(&self) -> Vec<Layer> {
         let mut layers_map: HashMap<LayerType, Layer> = HashMap::new();
-        for (_, layer) in &self.0 {
+        for layer in self.0.values() {
             layers_map
-                .entry(layer.layer_type.clone())
+                .entry(layer.layer_type)
                 .and_modify(|elem| {
                     elem.centroids.append(&mut layer.centroids.clone());
                     elem.bbox.union(&layer.bbox);
@@ -172,7 +170,7 @@ impl Layers {
                 })
                 .or_insert(layer.clone());
         }
-        layers_map.into_iter().map(|(_, elem)| elem).collect()
+        layers_map.into_values().collect()
     }
 
     pub fn all_merged(&self) -> Layer {
@@ -204,9 +202,7 @@ impl Layers {
             .flat_map(|(_, layer)| layer.centroids.clone())
             .collect();
         let bbox = self
-            .0
-            .iter()
-            .map(|(_, layer)| layer.bbox.clone())
+            .0.values().map(|layer| layer.bbox.clone())
             .reduce(|acc, bbox| acc.union(&bbox))
             .unwrap();
 
@@ -360,12 +356,12 @@ async fn calculate_new_layer(
         .map_err(OLPError::from_error)?;
     let mut data_path = PathBuf::new();
     data_path.push(data_path_str);
-    data_path.push(&admin_area.id.to_string());
+    data_path.push(admin_area.id.to_string());
     data_path.set_extension("map");
     log::info!("loading data from {:?}", data_path);
     let mut data = persistence::load_preprocessed_data(&data_path)?;
 
-    if let Some(answer) = answers.get(0).map(|ans| ans.value) {
+    if let Some(answer) = answers.first().map(|ans| ans.value) {
         data.buildings
             .distribute_population(answer, &openhousepopulator::Config::builder().build());
     } else {
@@ -391,7 +387,7 @@ async fn calculate_new_layer(
     }
 
     layers.write().map_err(OLPError::from_error)?.push(Layer {
-        id: new_layer_id.clone(),
+        id: new_layer_id,
         bbox: MultiPolygon::new(vec![admin_area.geometry]),
         streets: data.streets,
         centroids,

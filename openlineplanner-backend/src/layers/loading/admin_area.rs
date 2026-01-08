@@ -30,7 +30,7 @@ impl TryFrom<Feature> for AdminArea {
     fn try_from(value: Feature) -> Result<Self, Self::Error> {
         let properties = value.properties.unwrap_or_default();
         let id: u64 = match value.id.unwrap() {
-            Id::String(id) => id.split('/').skip(1).next().unwrap().parse().unwrap(),
+            Id::String(id) => id.split('/').nth(1).unwrap().parse().unwrap(),
             Id::Number(id) => id.as_u64().unwrap(),
         };
         let Some(geometry) = value.geometry.and_then(|geometry|
@@ -62,7 +62,7 @@ impl TryFrom<Feature> for AdminArea {
     }
 }
 
-static OVP_QUERY_TEMPLATE: &'static str = "[out:json][timeout:25];
+static OVP_QUERY_TEMPLATE: &str = "[out:json][timeout:25];
 is_in({lat}, {lon}) -> .a;
 (
   relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
@@ -119,7 +119,7 @@ pub fn render_ovp_query_template(point: Point) -> Result<String, OLPError> {
         lat: point.y(),
     };
 
-    Ok(tt.render("query", &context).map_err(OLPError::from_error)?)
+    tt.render("query", &context).map_err(OLPError::from_error)
 }
 
 pub async fn find_admin_boundaries_for_point(point: Point) -> Result<AdminAreas, OLPError> {
@@ -129,5 +129,5 @@ pub async fn find_admin_boundaries_for_point(point: Point) -> Result<AdminAreas,
         .await
         .map_err(OLPError::from_error)?;
 
-    Ok(ovp_response.try_into().map_err(OLPError::from_error)?)
+    ovp_response.try_into().map_err(OLPError::from_error)
 }

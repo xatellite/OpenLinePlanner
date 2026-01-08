@@ -52,12 +52,12 @@ async fn station_info(
         .map(|layer| {
             log::debug!("calculating for layer type: {}", layer.get_type());
             (
-                layer.get_type().clone(),
+                *layer.get_type(),
                 coverage::houses_for_stations(
                     &request.stations,
                     layer.get_centroids(),
-                    &request.method.as_ref().unwrap_or(&Method::Relative),
-                    &request.routing.as_ref().unwrap_or(&Routing::Osm),
+                    request.method.as_ref().unwrap_or(&Method::Relative),
+                    request.routing.as_ref().unwrap_or(&Routing::Osm),
                     layer.get_streets(),
                 ),
             )
@@ -77,8 +77,8 @@ async fn find_station(
         300f64,
         layer.get_centroids(),
         &request.stations,
-        &request.method.as_ref().unwrap_or(&Method::Relative),
-        &request.routing.as_ref().unwrap_or(&Routing::Osm),
+        request.method.as_ref().unwrap_or(&Method::Relative),
+        request.routing.as_ref().unwrap_or(&Routing::Osm),
         layer.get_streets(),
     ))
 }
