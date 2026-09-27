@@ -1,5 +1,6 @@
 mod admin_area;
-mod overpass;
+mod http;
+mod nominatim;
 
 use actix_web::{web, Responder, Scope};
 use geo::Point;

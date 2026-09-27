@@ -1,16 +1,15 @@
 use actix_web::{body::BoxBody, http::header::ContentType, HttpResponse, Responder};
-use geo::{Point, Polygon};
+use geo::{MultiPolygon, Point, Polygon};
 use geojson::{
     feature::Id,
     ser::{serialize_geometry, to_feature_collection_string},
-    Feature, GeoJson,
+    Feature,
 };
 use serde::Serialize;
-use tinytemplate::TinyTemplate;
 
 use crate::error::OLPError;
 
-use super::overpass::query_overpass;
+use super::nominatim;
 
 #[derive(Serialize)]
 pub struct AdminArea {
@@ -21,7 +20,10 @@ pub struct AdminArea {
         serialize_with = "serialize_geometry",
         deserialize_with = "deserialize_geometry"
     )]
-    pub geometry: Polygon,
+    /// A MultiPolygon rather than a Polygon: OSM boundary relations regularly
+    /// convert to multiple rings (exclaves, islands), and those were previously
+    /// dropped outright.
+    pub geometry: MultiPolygon,
 }
 
 impl TryFrom<Feature> for AdminArea {
@@ -33,13 +35,21 @@ impl TryFrom<Feature> for AdminArea {
             Id::String(id) => id.split('/').nth(1).unwrap().parse().unwrap(),
             Id::Number(id) => id.as_u64().unwrap(),
         };
-        let Some(geometry) = value.geometry.and_then(|geometry|
-            TryInto::<Polygon>::try_into(geometry.value).ok()
-        ) else {
+        let Some(geometry) = value.geometry.and_then(|geometry| match geometry.value {
+            value @ geojson::Value::MultiPolygon(_) => {
+                TryInto::<MultiPolygon>::try_into(value).ok()
+            }
+            value @ geojson::Value::Polygon(_) => TryInto::<Polygon>::try_into(value)
+                .ok()
+                .map(|polygon| MultiPolygon::new(vec![polygon])),
+            _ => None,
+        }) else {
             log::info!("Area dropped due to wrong geometry: {:?}", properties);
             return Err(OLPError::GeometryError)
         };
         Ok(AdminArea {
+            // Trimmed because most areas carry no name:prefix, and the empty
+            // prefix would otherwise leave a leading space in the UI label.
             name: format!(
                 "{} {}",
                 properties
@@ -50,7 +60,9 @@ impl TryFrom<Feature> for AdminArea {
                     .get("name")
                     .and_then(|name| name.as_str())
                     .unwrap_or_default()
-            ),
+            )
+            .trim()
+            .to_owned(),
             id,
             admin_level: properties
                 .get("admin_level")
@@ -62,32 +74,7 @@ impl TryFrom<Feature> for AdminArea {
     }
 }
 
-static OVP_QUERY_TEMPLATE: &str = "[out:json][timeout:25];
-is_in({lat}, {lon}) -> .a;
-(
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"8\"](pivot.a);
-  relation[\"boundary\" = \"administrative\"][\"admin_level\"=\"9\"](pivot.a);
-);
-
-out geom;";
-
 pub struct AdminAreas(Vec<AdminArea>);
-
-impl TryFrom<GeoJson> for AdminAreas {
-    type Error = OLPError;
-
-    fn try_from(value: GeoJson) -> Result<Self, Self::Error> {
-        match value {
-            GeoJson::FeatureCollection(feature_collection) => Ok(AdminAreas(
-                feature_collection
-                    .into_iter()
-                    .filter_map(|feature| feature.try_into().ok())
-                    .collect(),
-            )),
-            _ => Err(OLPError::GeometryError),
-        }
-    }
-}
 
 impl Responder for AdminAreas {
     type Body = BoxBody;
@@ -103,31 +90,14 @@ impl Responder for AdminAreas {
     }
 }
 
-#[derive(Serialize)]
-struct Context {
-    lat: f64,
-    lon: f64,
-}
-
-pub fn render_ovp_query_template(point: Point) -> Result<String, OLPError> {
-    let mut tt = TinyTemplate::new();
-    tt.add_template("query", OVP_QUERY_TEMPLATE)
-        .map_err(OLPError::from_error)?;
-
-    let context = Context {
-        lon: point.x(),
-        lat: point.y(),
-    };
-
-    tt.render("query", &context).map_err(OLPError::from_error)
-}
-
+/// Administrative areas containing `point`, smallest first.
 pub async fn find_admin_boundaries_for_point(point: Point) -> Result<AdminAreas, OLPError> {
-    let ovp_query = render_ovp_query_template(point)?;
+    let features = nominatim::admin_areas_for_point(point).await?;
 
-    let ovp_response = query_overpass(ovp_query)
-        .await
-        .map_err(OLPError::from_error)?;
-
-    ovp_response.try_into().map_err(OLPError::from_error)
+    Ok(AdminAreas(
+        features
+            .into_iter()
+            .filter_map(|feature| feature.try_into().ok())
+            .collect(),
+    ))
 }

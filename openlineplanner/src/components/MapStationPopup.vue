@@ -59,6 +59,7 @@ import TrashCanOutlineIcon from "vue-material-design-icons/TrashCanOutline.vue";
 import TransitConnectionHorizontalIcon from "vue-material-design-icons/TransitConnectionHorizontal.vue";
 import { useEditStore } from "../stores/editing";
 import TooltipButton from "./TooltipButton.vue";
+import { trackEvent } from "../helpers/analytics";
 
 export default {
   props: {
@@ -102,10 +103,7 @@ export default {
     },
     toggleMerge(e) {
       e.stopPropagation();
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "toggleMerge");
-      }
+      trackEvent("toggle_merge");
       if (this.editStore.isMerging) {
         this.editStore.isMerging = null;
         return;
@@ -146,10 +144,7 @@ export default {
     },
     extendLine(e) {
       e.stopPropagation();
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "extendLine");
-      }
+      trackEvent("extend_line");
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;
@@ -169,10 +164,7 @@ export default {
       return lineEndPointRef;
     },
     removePoint() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "removePoint");
-      }
+      trackEvent("remove_point");
       this.linesStore.removePoint(this.point.id);
     },
   },

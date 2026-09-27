@@ -20,6 +20,27 @@ pub(crate) struct PreProcessingData {
     pub streets: Streets,
 }
 
+/// Counterpart to [`load_preprocessed_data`].
+///
+/// Deliberately mirrors `datatypes::persistence::save_preprocessed_data` rather
+/// than calling it: `datatypes` pins a different openhousepopulator revision, so
+/// its `Buildings` is a distinct type from ours. Writing through our own
+/// `PreProcessingData` keeps save and load symmetric.
+pub(crate) fn save_preprocessed_data(
+    buildings: Buildings,
+    streets: Streets,
+    path: &Path,
+) -> Result<(), OLPError> {
+    let data = PreProcessingData { buildings, streets };
+    let mut file = File::create(path).map_err(OLPError::from_error)?;
+    file.write_all(
+        postcard::to_allocvec(&data)
+            .map_err(OLPError::from_error)?
+            .as_slice(),
+    )
+    .map_err(OLPError::from_error)
+}
+
 pub(crate) fn load_preprocessed_data(path: &Path) -> Result<PreProcessingData, OLPError> {
     let mut file = File::open(path).map_err(OLPError::from_error)?;
     let mut data: Vec<u8> = Vec::new();

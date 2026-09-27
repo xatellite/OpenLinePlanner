@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { useOverlayStore } from "./overlay";
+import { trackEvent } from "../helpers/analytics";
 
 export const usePaxStore = defineStore({
   id: "pax",
@@ -58,10 +59,8 @@ export const usePaxStore = defineStore({
 
       this.currentRequestController = new AbortController();
       const abortSignal = this.currentRequestController.signal;
-      // Send api parameters to Matomo
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "station-info", stations);
-      }
+      // Only the count: the station list holds user-drawn coordinates.
+      trackEvent("station_info", { stations: stations.length });
       const response = await fetch(
         import.meta.env.VITE_API_ENDPOINT + "/station-info",
         {

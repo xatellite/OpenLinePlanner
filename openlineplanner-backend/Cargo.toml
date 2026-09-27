@@ -21,8 +21,8 @@ osmgraphing = "1.1.1"
 osmpbfreader = "0.16.0"
 petgraph = "0.6.3"
 rand = "0.8.5"
-tinytemplate = "1.2.1"
-reqwest = { version = "0.11.16", features = ["json", "cookies", "rustls-tls"], default-features = false }
+reqwest = { version = "0.13.1", features = ["json", "cookies", "rustls", "webpki-roots", "http2", "stream"], default-features = false }
+ring="0.17.14"
 bytes = "1.4.0"
 openhousepopulator = { rev = "v0.2.4", git ="https://github.com/xatellite/OpenHousePopulator" }
 json = "0.12.4"

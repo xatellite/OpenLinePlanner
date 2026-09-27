@@ -1,6 +1,7 @@
 <template>
   <WelcomeOverlay />
   <WelcomeTour />
+  <RegionSetupModal />
   <PageHeader />
   <RouterView />
   <PageFooter />
@@ -9,6 +10,7 @@
 <script>
 import WelcomeTour from "./components/WelcomeTour.vue";
 import WelcomeOverlay from "./components/WelcomeOverlay.vue";
+import RegionSetupModal from "./components/RegionSetupModal.vue";
 import { RouterView } from "vue-router";
 import PageHeader from "@/components/PageHeader.vue";
 import PageFooter from "@/components/PageFooter.vue";
@@ -25,7 +27,8 @@ export default {
     PageHeader,
     PageFooter,
     WelcomeOverlay,
-    WelcomeTour
+    WelcomeTour,
+    RegionSetupModal
 },
   data() {
     return {

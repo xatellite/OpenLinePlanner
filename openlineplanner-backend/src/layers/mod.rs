@@ -34,7 +34,7 @@ pub use loading::osm;
 pub use merge::*;
 use uuid::Uuid;
 
-use self::{loading::AdminArea};
+pub use self::loading::AdminArea;
 use crate::{
     error::OLPError,
     persistence::{self, save_layers},
@@ -388,7 +388,7 @@ async fn calculate_new_layer(
 
     layers.write().map_err(OLPError::from_error)?.push(Layer {
         id: new_layer_id,
-        bbox: MultiPolygon::new(vec![admin_area.geometry]),
+        bbox: admin_area.geometry,
         streets: data.streets,
         centroids,
         layer_type,

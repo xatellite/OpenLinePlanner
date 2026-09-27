@@ -5,6 +5,14 @@ services:
     build: .
     container_name: "openlineplanner_xat_io_api"
     restart: always
+    environment:
+      # Must list the host the frontend is served from. Loopback is always
+      # allowed and needs no entry.
+      - "CORS_ALLOWED_ORIGINS=https://openlineplanner.xatellite.space"
+      # Nominatim instance used for admin boundary lookups.
+      - "NOMINATIM_API_URL=https://nominatim.openstreetmap.org"
+      # The public instance allows one request per second.
+      - "NOMINATIM_MIN_INTERVAL_MS=1100"
     volumes:
       - "/srv/volumes/openlineplanner/cache:/cache"
       - "/srv/volumes/openlineplanner/pbf:/pbf"

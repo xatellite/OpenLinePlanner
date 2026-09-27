@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 use std::sync::RwLock;
 
-use actix_cors::Cors;
 use actix_web::{web, App, HttpServer};
 use anyhow::Result;
 use config::Config;
@@ -11,7 +10,9 @@ use log::info;
 use population::InhabitantsMap;
 use serde::Deserialize;
 
+mod cors;
 mod coverage;
+mod dataimport;
 mod error;
 mod geometry;
 mod layers;
@@ -103,23 +104,20 @@ async fn main() -> std::io::Result<()> {
 
     let layers = load_layers(&config);
     let config = web::Data::new(config);
+    let import_jobs = dataimport::new_job_registry();
+    let region_catalog = web::Data::new(dataimport::CatalogStore::new());
 
     log::info!("loading data done");
 
     HttpServer::new(move || {
-        #[cfg(debug_assertions)]
-        let cors = Cors::permissive();
-        #[cfg(not(debug_assertions))]
-        let cors = Cors::default()
-            .allowed_origin("https://openlineplanner.com")
-            .allowed_origin("https://test.openlineplanner.com")
-            .allowed_methods(vec!["GET", "POST", "DELETE", "PUT"])
-            .max_age(3600);
+        let cors = cors::build();
 
         App::new()
             .wrap(cors)
             .app_data(layers.clone())
             .app_data(config.clone())
+            .app_data(import_jobs.clone())
+            .app_data(region_catalog.clone())
             .route("/station-info", web::post().to(station_info))
             .route(
                 "/coverage-info/{router}",
@@ -129,6 +127,7 @@ async fn main() -> std::io::Result<()> {
             .route("/health", web::get().to(health))
             .service(layers::layers())
             .service(layers::osm())
+            .service(dataimport::data())
     })
     .bind(("0.0.0.0", 8080))?
     .run()

@@ -11,11 +11,25 @@
       <div class="data-list__item data-list__item__row">
         click map to add data layer
       </div>
+      <div class="data-list__setup">
+        <button
+          id="load-region-data"
+          class="button--fit button--accent"
+          @click="openRegionSetup"
+        >
+          <DownloadIcon />
+          Load region data
+        </button>
+        <span class="data-list__setup__hint">
+          Missing your area? Download OpenStreetMap data for a new region.
+        </span>
+      </div>
     </ListContainer>
   </div>
 </template>
 
 <script>
+import DownloadIcon from "vue-material-design-icons/Download.vue";
 import ListContainer from "./ListContainer.vue";
 import DataSourcesListEntry from "./DataSourcesListEntry.vue";
 import { useDataStore } from '../stores/data';
@@ -23,12 +37,18 @@ import { useDataStore } from '../stores/data';
 export default {
   components: {
     ListContainer,
-    DataSourcesListEntry
+    DataSourcesListEntry,
+    DownloadIcon
   },
   data() {
     return {
       dataStore: useDataStore(),
     };
+  },
+  methods: {
+    openRegionSetup() {
+      window.dispatchEvent(new Event("showRegionSetup"));
+    },
   },
 };
 </script>
@@ -41,6 +61,29 @@ export default {
   min-height: 400px;
   @media (max-width: 700px), (max-height: 600px) {
     width: 100%;
+  }
+
+  &__setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-ssm;
+    margin: $space-sm;
+    padding-top: $space-sm;
+    border-top: 1px solid var(--c-button-border);
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: $space-ssm;
+      width: auto;
+      padding: $space-ssm $space-sm;
+    }
+
+    &__hint {
+      font-size: $font-sm;
+      text-align: center;
+    }
   }
 
   &__center-box {

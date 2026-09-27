@@ -17,6 +17,7 @@ import { useLinesStore } from "@/stores/lines";
 import { usePaxStore } from "@/stores/pax";
 import { useEditStore } from "@/stores/editing";
 import { getStreetAddressName } from "@/helpers/api";
+import { trackEvent } from "../helpers/analytics";
 
 export default {
   props: {
@@ -51,18 +52,12 @@ export default {
         });
     },
     removePoint() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "removePoint");
-      }
+      trackEvent("remove_point");
       this.linesStore.removePoint(this.point.id);
     },
     extendLine(e) {
       e.stopPropagation();
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "extendLine");
-      }
+      trackEvent("extend_line");
       this.editStore.isEditing = this.linesStore.getLineById(this.isLast());
       this.editStore.isExtending = this.lineExtendIndex;
       this.editStore.pointSelected = null;

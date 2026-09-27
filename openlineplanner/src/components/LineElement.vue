@@ -88,6 +88,7 @@ import { usePaxStore } from "../stores/pax";
 import TypePicker from "./TypePicker.vue";
 import TypeIcon from "./TypeIcon.vue";
 import { getStreetAddressName } from "@/helpers/api";
+import { trackEvent } from "../helpers/analytics";
 
 export default {
   props: {
@@ -132,17 +133,11 @@ export default {
       this.linesStore.getLineById(this.line.id).name = e.srcElement.value;
     },
     updateColor(color) {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "updateColor", color);
-      }
+      trackEvent("update_color", { color });
       this.linesStore.updateLineValues(this.line.id, { color });
     },
     toggleEditing() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "toggleEditing");
-      }
+      trackEvent("toggle_editing");
       this.editStore.isEditing = this.line;
       if (this.line.pointIds.length === 0) {
         this.editStore.isExtending = -1;
@@ -155,10 +150,7 @@ export default {
         this.selectColor = false;
       }
       this.toggleEditing();
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "toggleColorPick");
-      }
+      trackEvent("toggle_color_pick");
       if (e) {
         e.stopPropagation();
       }
@@ -170,10 +162,7 @@ export default {
         this.selectType = false;
       }
       this.toggleEditing();
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "toggleTypePick");
-      }
+      trackEvent("toggle_type_pick");
       if (e) {
         e.stopPropagation();
       }
@@ -181,19 +170,13 @@ export default {
       this.selectType = !this.selectType;
     },
     removeLine() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "removeLine");
-      }
+      trackEvent("remove_line");
       this.editStore.isEditing = null;
       this.editStore.isExtending = null;
       this.linesStore.removeLine(this.line);
     },
     findStation() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "findStation");
-      }
+      trackEvent("find_station");
       if (!this.findStationLoading) {
         this.findStationLoading = true;
         const route = [];

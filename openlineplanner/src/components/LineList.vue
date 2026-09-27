@@ -24,6 +24,7 @@ import { useLinesStore } from "../stores/lines";
 import { useEditStore } from "../stores/editing";
 import LineElement from "./LineElement.vue";
 import ListContainer from "./ListContainer.vue";
+import { trackEvent } from "../helpers/analytics";
 
 export default {
   components: {
@@ -39,10 +40,7 @@ export default {
   },
   methods: {
     addLine() {
-      // Matomo Tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "addLine");
-      }
+      trackEvent("add_line");
       const line = this.linesStore.addLine();
       this.editStore.isEditing = line;
       this.editStore.isExtending = -1;

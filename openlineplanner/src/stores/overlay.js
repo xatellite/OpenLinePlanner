@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useLinesStore } from "./lines";
 import { randomColor } from "../helpers/random";
 import { usePaxStore } from "./pax";
+import { trackEvent } from "../helpers/analytics";
 
 export const useOverlayStore = defineStore({
   id: "overlay",
@@ -20,10 +21,7 @@ export const useOverlayStore = defineStore({
     selectOverlay(type) {
       this.overlay = type;
       this.overlayData = {};
-      // Send api parameters to Matomo
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "overlay_select", type);
-      }
+      trackEvent("overlay_select", { type });
       if (type != "none") {
         fetch(import.meta.env.VITE_API_ENDPOINT + "/layer/by_type/" + type, {
           method: "GET",
@@ -75,14 +73,8 @@ export const useOverlayStore = defineStore({
       }
       this.currentRequestController = new AbortController();
       const abortSignal = this.currentRequestController.signal;
-      // Send api parameters to Matomo
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent(
-          "editing",
-          "coverage-info",
-          stations
-        );
-      }
+      // Only the count: the station list holds user-drawn coordinates.
+      trackEvent("coverage_info", { stations: stations.length });
       fetch(
         import.meta.env.VITE_API_ENDPOINT +
           "/coverage-info/" +

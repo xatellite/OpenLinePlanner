@@ -41,6 +41,7 @@ import { selectFile, readJSONFile } from "../helpers/file";
 import { useEditStore } from "@/stores/editing";
 import { useLinesStore } from "@/stores/lines";
 import { useSavesStore } from "@/stores/saves";
+import { trackEvent } from "../helpers/analytics";
 
 export default {
   components: {
@@ -64,16 +65,13 @@ export default {
         readJSONFile(file, (json) => {
           this.editStore.stopAllInputs();
           this.linesStore.loadState(json.linesStore);
-          // Matomo tracking
-          if (window && window.Piwik) {
-            window.Piwik.getTracker().trackEvent("editing", "load-local", {
-              lines: Object.keys(this.linesStore.lines).length,
-              points: Object.keys(this.linesStore.points).length,
-              stations: Object.values(this.linesStore.points)
-                .map((point) => point.type === "station")
-                .reduce((a, b) => a + b),
-            });
-          }
+          trackEvent("load_local", {
+            lines: Object.keys(this.linesStore.lines).length,
+            points: Object.keys(this.linesStore.points).length,
+            stations: Object.values(this.linesStore.points)
+              .map((point) => point.type === "station")
+              .reduce((a, b) => a + b, 0),
+          });
         });
       });
     },

@@ -40,8 +40,8 @@ impl Responder for OLPError {
 }
 
 impl ResponseError for OLPError {
-    fn status_code(&self) -> reqwest::StatusCode {
-        reqwest::StatusCode::INTERNAL_SERVER_ERROR
+    fn status_code(&self) -> actix_web::http::StatusCode {
+        actix_web::http::StatusCode::INTERNAL_SERVER_ERROR
     }
 
     fn error_response(&self) -> HttpResponse<BoxBody> {

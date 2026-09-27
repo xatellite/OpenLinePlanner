@@ -44,6 +44,7 @@ import TextInput from "@/components/TextInput.vue";
 import TooltipButton from "@/components/TooltipButton.vue";
 import { useLinesStore } from "@/stores/lines";
 import { useSavesStore } from "@/stores/saves";
+import { trackEvent } from "../helpers/analytics";
 
 export default {
   components: {
@@ -63,16 +64,13 @@ export default {
   },
   methods: {
     save() {
-      // Matomo tracking
-      if (window && window.Piwik) {
-        window.Piwik.getTracker().trackEvent("editing", "save", {
-          lines: Object.keys(this.linesStore.lines).length,
-          points: Object.keys(this.linesStore.points).length,
-          stations: Object.values(this.linesStore.points)
-            .map((point) => point.type === "station")
-            .reduce((a, b) => a + b),
-        });
-      }
+      trackEvent("save", {
+        lines: Object.keys(this.linesStore.lines).length,
+        points: Object.keys(this.linesStore.points).length,
+        stations: Object.values(this.linesStore.points)
+          .map((point) => point.type === "station")
+          .reduce((a, b) => a + b, 0),
+      });
       const d = new Date();
       const date = d.toLocaleDateString();
       const linesStore = {...this.linesStore.$state, date};

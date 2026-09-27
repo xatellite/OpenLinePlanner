@@ -5,6 +5,8 @@ services:
     build: .
     container_name: "openlineplanner_xat_io"
     restart: always
+    ports:
+    - 80:80
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.openlineplanner_xat_io.rule=Host(`openlineplanner.xatellite.space`)"

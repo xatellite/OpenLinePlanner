@@ -71,6 +71,71 @@ export const getMapCenter = async () => {
   return mapCenter;
 };
 
+// Region data import
+// These back the setup modal, which lets a user load OSM data for a new area
+// instead of preparing it by hand on the server.
+
+export const getRegionCatalog = async () => {
+  const response = await fetch(
+    import.meta.env.VITE_API_ENDPOINT + "/data/catalog"
+  );
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+};
+
+export const getImportedRegions = async () => {
+  const response = await fetch(
+    import.meta.env.VITE_API_ENDPOINT + "/data/regions"
+  );
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+};
+
+// Previews which extract would be downloaded, so the user sees the size before
+// committing to a download that can run into hundreds of megabytes.
+export const postResolveExtract = async (area, catalogId) => {
+  const response = await fetch(
+    import.meta.env.VITE_API_ENDPOINT + "/data/resolve",
+    {
+      method: "POST",
+      body: JSON.stringify({ area, catalog_id: catalogId ?? null }),
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+};
+
+export const postDataImport = async (area, catalogId) => {
+  const response = await fetch(
+    import.meta.env.VITE_API_ENDPOINT + "/data/import",
+    {
+      method: "POST",
+      body: JSON.stringify({ area, catalog_id: catalogId ?? null }),
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+};
+
+export const getImportJob = async (jobId) => {
+  const response = await fetch(
+    import.meta.env.VITE_API_ENDPOINT + `/data/import/${jobId}`
+  );
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+};
+
+export const searchPlace = async (query) => {
+  const response = await fetch(
+    "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=5&q=" +
+      encodeURIComponent(query)
+  );
+  if (!response.ok) throw new Error(await response.text());
+  return await response.json();
+};
+
 export const getStreetAddressName = async (point) => {
   const data = await fetch(
     "https://nominatim.openstreetmap.org/reverse.php?lat=" +

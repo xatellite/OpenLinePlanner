@@ -1,15 +1,36 @@
 use std::{
     io::Write,
     process::{Command, Stdio},
+    sync::LazyLock,
 };
 
 use anyhow::{anyhow, Result};
 use geojson::GeoJson;
 
+/// Public Overpass instances go down or start rate-limiting regularly, so the
+/// one we query is overridable without a rebuild.
+const DEFAULT_OVERPASS_URL: &str = "https://overpass-api.de/api/interpreter";
+const OVERPASS_URL_ENV: &str = "OVERPASS_API_URL";
+
+/// Falls back to the default when the variable is unset or blank, so an empty
+/// `OVERPASS_API_URL=` in the environment does not produce an unusable URL.
+fn resolve_overpass_url(configured: Option<String>) -> String {
+    configured
+        .filter(|url| !url.trim().is_empty())
+        .map(|url| url.trim().to_owned())
+        .unwrap_or_else(|| DEFAULT_OVERPASS_URL.to_owned())
+}
+
+static OVERPASS_URL: LazyLock<String> = LazyLock::new(|| {
+    let url = resolve_overpass_url(std::env::var(OVERPASS_URL_ENV).ok());
+    log::info!("querying overpass at {}", url);
+    url
+});
+
 pub fn query_overpass(query: String) -> Result<GeoJson> {
     let client = reqwest::blocking::Client::new();
     let response = client
-        .post("https://overpass-api.de/api/interpreter")
+        .post(OVERPASS_URL.as_str())
         .body(query)
         .send()?
         .text()?;

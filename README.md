@@ -102,6 +102,7 @@ And deployed with:
 
 OpenLinePlanner allows you to
 
+... **load OpenStreetMap data** for any region on demand <br>
 ... draw **schematic transportation** lines on map <br>
 ... name lines and stations <br>
 ... give a custom color to each line <br>
@@ -151,7 +152,11 @@ This is a short guide to setup your own development environment of OpenLinePlann
 
 ### Backend Setup
 
-The backend can be build running
+The backend needs [`osmtogeojson`](https://github.com/tyrasd/osmtogeojson) on the `PATH`, which it uses to convert Overpass responses:
+
+```sh
+$ npm install -g osmtogeojson
+```
 
 2. Build backend
 
@@ -160,24 +165,75 @@ The backend can be build running
    $ cargo build --release
    ```
 
-3. Gather data files from [OpenPopulationEstimator](https://github.com/TheNewCivilian/OpenPopulationEstimator) (inhabitants geojson) and e.g. [Protomaps](https://app.protomaps.com/downloads/osm) (pbf file of region)
-
-4. Add ./settings/Settings.toml e.g.
+3. Optionally add a `Config.toml` next to the working directory to override the defaults:
 
    ```toml
+    [cache]
+    # persisted layers and the cached region catalog
+    dir = "./cache/"
+
     [data]
-    residence = "./data/residence.geojson"
-    osm = "./data/Wien_Donaustadt.osm.pbf"
+    # preprocessed `<osm_area_id>.map` files
+    dir = "./data/"
+    # scratch space for downloads, cleaned up after each import
+    download_dir = "./data/tmp/"
+    # keep the downloaded .pbf instead of deleting it
+    keep_downloads = false
+
+    [catalog]
+    # where the list of downloadable regions comes from
+    url = "https://download.geofabrik.de/index-v1.json"
    ```
 
-5. Install backend binaries
+   Environment variables:
+
+   | Variable | Default | Description |
+   | --- | --- | --- |
+   | `CORS_ALLOWED_ORIGINS` | `https://openlineplanner.com,https://test.openlineplanner.com` | Comma-separated browser origins allowed to call the API. Must list the host the frontend is actually served from. |
+   | `NOMINATIM_API_URL` | `https://nominatim.openstreetmap.org` | Base URL of the Nominatim instance used to look up administrative boundaries. |
+   | `NOMINATIM_MIN_INTERVAL_MS` | `1100` | Minimum spacing between Nominatim requests. Set to `0` for a self-hosted or commercial endpoint. |
+
+   **CORS.** `CORS_ALLOWED_ORIGINS` must name the origin the frontend is served
+   from -- scheme included, no trailing slash -- or the browser blocks every
+   call. Loopback origins are always allowed on any port, and debug builds are
+   permissive entirely.
+
+   **Boundary lookup.** Administrative boundaries come from Nominatim reverse
+   geocoding, at zoom 12 (municipality or city district, OSM `admin_level` 8 or
+   9) and zoom 10 (the enclosing city), deduplicated and returned smallest
+   first. Requests retry transient failures twice with a 1s/2s backoff.
+
+   > `nominatim.openstreetmap.org` is a free community service capped at one
+   > request per second. `NOMINATIM_MIN_INTERVAL_MS` enforces that spacing
+   > process-wide; only lower it for an instance you run or pay for.
+
+   A replacement instance must carry global data. Regional mirrors answer `200`
+   with an empty result set outside their coverage, which shows up as a
+   misleading "No administrative areas found here" rather than an error.
+
+4. Install backend binaries
    ```sh
    $ cargo install --path .
    ```
-6. Startup Backend (Takes some minutes on first startup)
+5. Startup Backend
    ```sh
    $ openlineplanner-backend
    ```
+
+**No data files need to be prepared by hand.** On first start the data directory is empty; load a region from the frontend as described below.
+
+#### Loading data for a region
+
+Open the frontend and use **Load region data** in the data view (it is also offered on the welcome screen when nothing is loaded yet). Search for a place, pick an administrative area, and confirm the download.
+
+The backend then downloads the smallest OpenStreetMap extract that covers your area, derives residences from it with [OpenHousePopulator](https://github.com/xatellite/OpenHousePopulator), trims everything outside the area, and stores the result as `<osm_area_id>.map` in `data.dir`. That file is what the planning views read from afterwards, so each area only has to be imported once.
+
+Two things worth knowing:
+
+- The download can be large. An extract always covers more than your area — a district in Vienna pulls the whole Austria extract (~800 MB) — and the confirmation step shows the size before anything starts. Parsing it needs a few GB of memory.
+- An area that straddles two extracts resolves to the larger parent extract that contains both, which can mean a much bigger download. Picking an area that sits inside a single country keeps this small.
+
+For seeding many areas at once (for example when hosting an instance), `tools/regionalextracts` still does the same work offline for a whole `.pbf`, splitting it along administrative boundaries with `osmium`. Its output belongs in the same `data.dir`.
 
 ### Frontend Setup
 

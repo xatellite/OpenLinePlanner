@@ -20,6 +20,12 @@
           <button class="button--fit" @click="skipTour">Skip Tour</button>
           <button class="button--fit button--accent" @click="takeTour">Take Tour</button>
         </div>
+        <!-- Without data the tool cannot do anything, so offer the setup
+             directly instead of leaving a new install on an empty data view. -->
+        <div v-if="needsData" class="welcome__content__setup">
+          <span>No planning data is loaded yet.</span>
+          <button class="button--fit button--accent" @click="setupRegion">Set up region data</button>
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +34,7 @@
 <script>
 import CloseIcon from "vue-material-design-icons/Close.vue";
 import { useUIStore } from "../stores/ui";
+import { getLayers } from "../helpers/api";
 import OLPLogo from "./OLPLogo.vue";
 const overlayVersion = "0.7"
 
@@ -37,13 +44,29 @@ export default {
     return {
       version: import.meta.env.VITE_VERSION ? import.meta.env.VITE_VERSION : "0.0.dev",
       uiStore: useUIStore(),
+      // Assume data exists until proven otherwise, so the setup prompt does not
+      // flash on every load. Queried directly rather than through useDataStore,
+      // which re-fires two requests on every call and would run on every view.
+      hasLayers: true,
       isShown: true, //!(localStorage.getItem("welcomeOverlayShown") === `true-${overlayVersion}`)
     };
   },
-  mounted() {
+  computed: {
+    needsData() {
+      return !this.hasLayers;
+    },
+  },
+  async mounted() {
     window.addEventListener("showWelcome", () => {
       this.isShown = true;
     });
+    try {
+      this.hasLayers = (await getLayers()).length > 0;
+    } catch (error) {
+      // If the backend is unreachable we cannot tell; stay quiet rather than
+      // pushing the user into a setup flow that would fail anyway.
+      this.hasLayers = true;
+    }
   },
   methods: {
     skipTour() {
@@ -54,6 +77,11 @@ export default {
       localStorage.setItem("welcomeOverlayShown", `true-${overlayVersion}`);
       this.isShown = false;
       window.dispatchEvent(new Event("startTour"));
+    },
+    setupRegion() {
+      localStorage.setItem("welcomeOverlayShown", `true-${overlayVersion}`);
+      this.isShown = false;
+      window.dispatchEvent(new Event("showRegionSetup"));
     }
   }
 }
@@ -115,6 +143,21 @@ export default {
       padding: $space-md $space-sm;
       box-sizing: border-box;
       width: 100%;
+    }
+
+    &__setup {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $space-sm;
+      padding: 0 $space-sm $space-sm;
+      margin-top: -$space-sm;
+      text-align: center;
+
+      button {
+        width: auto;
+        padding: $space-ssm $space-sm;
+      }
     }
   }
 }

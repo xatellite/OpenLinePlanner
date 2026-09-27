@@ -108,6 +108,11 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
+"@plausible-analytics/tracker@^0.4.6":
+  version "0.4.6"
+  resolved "https://registry.yarnpkg.com/@plausible-analytics/tracker/-/tracker-0.4.6.tgz#e77a2043fb8dee65508b568de7d6e7cfbcddd7d2"
+  integrity sha512-nbu6xGgSP6jeYuoVklZBzucUnIpo75tVu3Kr+R0EDycVKaMC/jF5Q/YCaM/8gR4fPZ1IDcXt6FdBJFZ1uZwEPA==
+
 "@popperjs/core@^2.11.5":
   version "2.11.8"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
@@ -1655,11 +1660,6 @@ vue-material-design-icons@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/vue-material-design-icons/-/vue-material-design-icons-5.0.0.tgz#146275a05adfbd7508baf7a19b68bad77aea557c"
   integrity sha512-lYSJFW/TyQqmg7MvUbEB8ua1mwWy/v8qve7QJuA/UWUAXC4/yVUdAm4pg/sM9+k5n7VLckBv6ucOROuGBsGPDQ==
-
-vue-matomo@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/vue-matomo/-/vue-matomo-4.1.0.tgz#17b513bc8ac60e168bfa8190ad05b3257a3c441e"
-  integrity sha512-y+tdmhY835Ip3EAGfIAgA33+aBYrvRT7fNnBnA7bSM459XpoWXgqJKdbopVpEUrxCPIq8IkuF7g4KqSLc0Fa3w==
 
 vue-router@^4.0.14:
   version "4.0.15"
